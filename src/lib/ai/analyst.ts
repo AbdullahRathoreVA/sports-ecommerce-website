@@ -113,14 +113,14 @@ export async function analyse(messages: AnalystMessage[], rangeKey: string, incl
   const pack = await buildDataPack(rangeKey, includeDemo);
   const question = messages[messages.length - 1]?.content ?? "";
   const result = await withModel(
-    async (model, signal) => {
+    async (model, call) => {
       const { text } = await generateText({
         model,
         system: `${SYSTEM}\n\nDATA PACK:\n${JSON.stringify(pack)}`,
         messages: messages.slice(-8).map((m) => ({ role: m.role, content: m.content.slice(0, 2000) })),
         temperature: 0.2,
         maxOutputTokens: 700,
-        abortSignal: signal,
+        ...call,
       });
       if (!text.trim()) throw new Error("empty");
       return text.trim();

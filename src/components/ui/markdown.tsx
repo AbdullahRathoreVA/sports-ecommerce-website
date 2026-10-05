@@ -38,7 +38,7 @@ function inline(text: string, keyBase: string, dark: boolean): ReactNode[] {
 }
 
 export function Markdown({ source, className, dark = false, compact = false }: { source: string; className?: string; dark?: boolean; compact?: boolean }) {
-  const lines = source.replace(/\r\n/g, "\n").split("\n");
+  const lines = String(source ?? "").replace(/\r\n/g, "\n").split("\n");
   const blocks: ReactNode[] = [];
   let i = 0;
   let k = 0;

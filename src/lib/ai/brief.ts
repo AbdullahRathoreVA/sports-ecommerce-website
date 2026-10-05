@@ -28,6 +28,22 @@ export const briefSchema = z.object({
 
 export type Brief = z.infer<typeof briefSchema>;
 
+// Strict JSON-schema providers (Groq, Cerebras) require every key; the model
+// returns null for anything not stated, and nulls are dropped below.
+const llmBriefSchema = z.object({
+  productSlug: z.string().nullable().describe("Slug of the closest matching product from the catalogue list, or null."),
+  quantity: z.number().int().positive().max(1_000_000).nullable(),
+  colors: z.string().max(200).nullable(),
+  branding: z.string().max(300).nullable().describe("Logos, names, numbers, sponsors, labels — where and how."),
+  sizes: z.string().max(300).nullable().describe("Size range or breakdown as stated."),
+  material: z.string().max(200).nullable(),
+  targetDate: z.string().max(80).nullable().describe("Deadline exactly as the buyer phrased it."),
+  budget: z.string().max(80).nullable(),
+  country: z.string().max(60).nullable().describe("Delivery country if stated."),
+  company: z.string().max(120).nullable().describe("Club, school or company name if stated."),
+  notes: z.string().max(600).nullable().describe("Anything else relevant, concise."),
+});
+
 const COUNTRIES = ["United Kingdom", "UK", "England", "Scotland", "Ireland", "United States", "USA", "Canada", "Australia", "New Zealand", "Germany", "France", "Netherlands", "Italy", "Spain", "UAE", "Dubai", "Saudi Arabia", "Qatar", "Pakistan", "South Africa", "Sweden", "Norway", "Denmark", "Belgium"];
 const COLOR_WORDS = /\b(black|white|red|blue|navy|royal|sky|green|yellow|gold|orange|pink|purple|maroon|grey|gray|silver|teal|cyan|lime|claret|burgundy|fluo|neon)\b/gi;
 
@@ -64,16 +80,16 @@ export async function parseBrief(text: string): Promise<{ brief: Brief; engine: 
   const keywords = k.products.map((p) => ({ slug: p.slug, keywords: [...p.tags, ...p.name.toLowerCase().split(/\s+/).filter((w) => w.length > 3)] }));
 
   const result = await withModel(
-    async (model, signal) => {
+    async (model, call) => {
       const { output } = await generateText({
         model,
         system:
-          "Extract a sportswear manufacturing enquiry into structured fields. Use ONLY information stated in the text — leave a field out if it is not mentioned. Do not guess quantities, dates or budgets. For productSlug, choose from the catalogue only when the match is clear.",
+          "Extract a sportswear manufacturing enquiry into structured fields. Use ONLY information stated in the text — use null for anything not mentioned. Do not guess quantities, dates or budgets. For productSlug, choose from the catalogue only when the match is clear.",
         prompt: `CATALOGUE: ${JSON.stringify(catalogue)}\n\nBUYER TEXT:\n${text}`,
-        output: Output.object({ schema: briefSchema }),
+        output: Output.object({ schema: llmBriefSchema }),
         temperature: 0,
         maxOutputTokens: 500,
-        abortSignal: signal,
+        ...call,
       });
       return output;
     },
@@ -81,7 +97,7 @@ export async function parseBrief(text: string): Promise<{ brief: Brief; engine: 
   );
 
   if (result) {
-    const brief = { ...result.value };
+    const brief = Object.fromEntries(Object.entries(result.value).filter(([, v]) => v != null && v !== "")) as Brief;
     if (brief.productSlug && !catalogue.some((c) => c.slug === brief.productSlug)) delete brief.productSlug;
     return { brief, engine: result.engine };
   }

@@ -18,6 +18,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@ai-sdk/cerebras": "^3.0.62",
     "@ai-sdk/gateway": "^4.0.103",
     "@ai-sdk/google": "^4.0.87",
     "@ai-sdk/groq": "^4.0.54",

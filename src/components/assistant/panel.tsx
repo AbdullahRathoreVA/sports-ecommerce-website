@@ -54,7 +54,8 @@ export function AssistantPanel({
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem(STORE);
-      if (saved) setTurns(JSON.parse(saved) as Turn[]);
+      // Drop malformed turns (e.g. saved by an older version) instead of crashing on them.
+      if (saved) setTurns((JSON.parse(saved) as Turn[]).filter((t) => t && typeof t.content === "string" && (t.role === "user" || t.role === "assistant")));
     } catch {
       /* ignore */
     }
@@ -106,8 +107,11 @@ export function AssistantPanel({
         });
         if (res.status === 429) throw new Error("You're sending messages quickly — please wait a moment and try again.");
         if (!res.ok) throw new Error("The assistant is unavailable right now. Our team can still help — use the quote form or WhatsApp.");
-        const data = (await res.json()) as Extract<Turn, { role: "assistant" }>;
-        setTurns((prev) => [...prev, { ...data, role: "assistant" }]);
+        // The API answers with `reply`; turns store it as `content`.
+        const data = (await res.json()) as Omit<Extract<Turn, { role: "assistant" }>, "role" | "content"> & { reply?: string };
+        const { reply, ...rest } = data;
+        if (typeof reply !== "string" || !reply.trim()) throw new Error("The assistant is unavailable right now. Our team can still help — use the quote form or WhatsApp.");
+        setTurns((prev) => [...prev, { ...rest, role: "assistant", content: reply }]);
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong.");
       } finally {

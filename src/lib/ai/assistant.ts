@@ -165,7 +165,8 @@ const replySchema = z.object({
   productSlugs: z.array(z.string()).max(4).describe("Slugs from CONTEXT.products the reply refers to, most relevant first. Empty if none."),
   suggestions: z.array(z.string()).max(3).describe("Up to 3 short follow-up questions the user might ask next."),
   wantsQuote: z.boolean().describe("True if the user shows buying intent or asks something only a person can answer."),
-  quantity: z.number().int().positive().optional().describe("Quantity the user mentioned, if any."),
+  // Nullable, not optional: strict JSON-schema providers (Groq, Cerebras) need every key listed as required.
+  quantity: z.number().int().positive().nullable().describe("Quantity the user mentioned, or null."),
 });
 
 function systemPrompt(k: Knowledge) {
@@ -208,7 +209,7 @@ export async function answer(messages: ChatMessage[], productSlug?: string): Pro
   };
 
   const result = await withModel(
-    async (model, signal) => {
+    async (model, call) => {
       const { output } = await generateText({
         model,
         system: systemPrompt(k),
@@ -220,11 +221,11 @@ export async function answer(messages: ChatMessage[], productSlug?: string): Pro
         output: Output.object({ schema: replySchema }),
         temperature: 0.2,
         maxOutputTokens: 700,
-        abortSignal: signal,
+        ...call,
       });
       return output;
     },
-    { label: "assistant", timeoutMs: 14_000 },
+    { label: "assistant", timeoutMs: 8_000 },
   );
 
   if (!result) return groundedAnswer(k, messages, focus);
@@ -272,7 +273,7 @@ export async function summariseEnquiry(input: {
   if (!input.message && !input.transcript?.length) return template();
 
   const result = await withModel(
-    async (model, signal) => {
+    async (model, call) => {
       const { text } = await generateText({
         model,
         system:
@@ -280,7 +281,7 @@ export async function summariseEnquiry(input: {
         prompt: JSON.stringify(input).slice(0, 6000),
         temperature: 0.1,
         maxOutputTokens: 220,
-        abortSignal: signal,
+        ...call,
       });
       return text.trim();
     },
