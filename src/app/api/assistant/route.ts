@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import { answer } from "@/lib/ai/assistant";
 import { hit, clientIp } from "@/lib/rate-limit";
@@ -32,15 +32,18 @@ export async function POST(request: Request) {
   const result = await answer(messages, productSlug);
 
   // Keep transcripts for quality review (no contact details are collected here).
+  // Saved after the response is sent, so the visitor never waits on the database.
   if (sessionId && isValidId(sessionId)) {
     const transcript = [...messages, { role: "assistant" as const, content: result.reply }];
-    try {
-      const existing = await db.aiConversation.findFirst({ where: { kind: "assistant", sessionId }, select: { id: true } });
-      if (existing) await db.aiConversation.update({ where: { id: existing.id }, data: { messages: transcript, engine: result.engine } });
-      else await db.aiConversation.create({ data: { kind: "assistant", sessionId, messages: transcript, engine: result.engine } });
-    } catch (error) {
-      console.error("[assistant] transcript save failed", error);
-    }
+    after(async () => {
+      try {
+        const existing = await db.aiConversation.findFirst({ where: { kind: "assistant", sessionId }, select: { id: true } });
+        if (existing) await db.aiConversation.update({ where: { id: existing.id }, data: { messages: transcript, engine: result.engine } });
+        else await db.aiConversation.create({ data: { kind: "assistant", sessionId, messages: transcript, engine: result.engine } });
+      } catch (error) {
+        console.error("[assistant] transcript save failed", error);
+      }
+    });
   }
 
   return NextResponse.json(result);
