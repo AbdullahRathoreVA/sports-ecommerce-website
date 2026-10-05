@@ -45,10 +45,12 @@ try {
 
 // Replace the working tree with the current HEAD export.
 for (const name of readdirSync(WORK)) if (name !== ".git") rmSync(join(WORK, name), { recursive: true, force: true });
-const tar = join(WORK, "..", "showcase-export.tar");
-git(["archive", "--format=tar", "-o", tar, "HEAD"], ROOT);
-execFileSync("tar", ["-xf", tar, "-C", WORK]);
-rmSync(tar, { force: true });
+// Export committed files via a throwaway index (no tar: it misreads "D:" as a host).
+const index = join(WORK, "..", "showcase.index");
+const env = { ...process.env, GIT_INDEX_FILE: index };
+execFileSync("git", ["read-tree", "HEAD"], { cwd: ROOT, env });
+execFileSync("git", ["checkout-index", "-a", "-f", `--prefix=${WORK.replace(/\\/g, "/")}/`], { cwd: ROOT, env });
+rmSync(index, { force: true });
 
 // Showcase README and screenshots.
 if (existsSync(join(WORK, "showcase/README.md"))) cpSync(join(WORK, "showcase/README.md"), join(WORK, "README.md"));
