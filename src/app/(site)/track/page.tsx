@@ -37,7 +37,7 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
     <div className="container-x max-w-xl pb-28 pt-10 lg:pb-24 lg:pt-14">
       <p className="eyebrow text-accent">Order status</p>
       <h1 className="font-display mt-3 text-[clamp(2.6rem,9vw,4.2rem)]">Track an order</h1>
-      <p className="mt-3 text-muted">Enter the order number from your confirmation email.</p>
+      <p className="mt-3 text-muted">Enter the order number shown when you placed your order.</p>
       <form action={lookup} className="mt-8 space-y-4">
         <Field label="Order number" htmlFor="orderNumber">
           <input id="orderNumber" name="orderNumber" required placeholder="GL-261005-K3P9" autoCapitalize="characters" className={`${inputClass} font-mono uppercase`} />

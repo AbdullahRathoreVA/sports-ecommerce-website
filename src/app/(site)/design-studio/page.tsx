@@ -13,11 +13,11 @@ export default async function DesignStudioPage() {
   const [products, settings] = await Promise.all([getAllProducts(), getSettings()]);
   return (
     <div className="container-x pb-10 pt-0 lg:pb-20 lg:pt-8">
-      <header className="hidden lg:mb-6 lg:block">
-        <p className="eyebrow text-accent">Design Studio</p>
-        <h1 className="font-display mt-2 text-5xl">Design your kit in 3D</h1>
+      {/* One h1: visually hidden on phones (the 3D stage leads), visible on desktop. */}
+      <header className="lg:mb-6">
+        <p className="eyebrow hidden text-accent lg:block">Design Studio</p>
+        <h1 className="font-display sr-only lg:not-sr-only lg:mt-2 lg:block lg:text-5xl">Design your kit in 3D</h1>
       </header>
-      <h1 className="sr-only lg:hidden">Design your kit in 3D</h1>
       <DesignStudio
         products={products.map((p) => ({ slug: p.slug, name: p.name, category: p.category.name, moq: p.moq }))}
         whatsapp={settings.contact.whatsapp}

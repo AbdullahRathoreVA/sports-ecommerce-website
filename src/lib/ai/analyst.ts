@@ -20,9 +20,22 @@ const pct = (x: number) => `${(x * 100).toFixed(x < 0.1 ? 1 : 0)}%`;
 const usd = (c: number) => `$${(c / 100).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 const delta = (c: number, p: number) => (p ? `${c >= p ? "+" : ""}${(((c - p) / p) * 100).toFixed(0)}% vs previous period` : "no previous data");
 
-export async function buildDataPack(rangeKey: string, includeDemo: boolean) {
+const packCache = new Map<string, { at: number; pack: Promise<DataPack> }>();
+
+/** Cached for a minute per period, so follow-up questions answer fast. */
+export function buildDataPack(rangeKey: string, includeDemo: boolean): Promise<DataPack> {
+  const key = `${rangeKey}:${includeDemo}`;
+  const hit = packCache.get(key);
+  if (hit && Date.now() - hit.at < 60_000) return hit.pack;
+  const pack = computeDataPack(rangeKey, includeDemo);
+  packCache.set(key, { at: Date.now(), pack });
+  pack.catch(() => packCache.delete(key));
+  return pack;
+}
+
+async function computeDataPack(rangeKey: string, includeDemo: boolean) {
   const range: DateRange = resolveRange({ range: rangeKey });
-  const [kpis, perf, funnel, devices, channels, countries, interest, leadsByStatus, ordersByStatus, insights] = await Promise.all([
+  const [kpis, perf, funnel, devices, channels, countries, interest, leadsByStatus, ordersByStatus] = await Promise.all([
     getKpis(range, includeDemo),
     getProductPerformance(range, includeDemo),
     getFunnel(range, includeDemo),
@@ -32,9 +45,10 @@ export async function buildDataPack(rangeKey: string, includeDemo: boolean) {
     countryInterest(range, includeDemo),
     db.lead.groupBy({ by: ["status"], _count: true, where: { createdAt: { gte: range.from, lt: range.to }, ...(includeDemo ? {} : { isDemo: false }) } }),
     db.order.groupBy({ by: ["status"], _count: true, _sum: { totalCents: true }, where: { createdAt: { gte: range.from, lt: range.to }, ...(includeDemo ? {} : { isDemo: false }) } }),
-    buildInsights(range, includeDemo),
   ]);
-  const k = (key: keyof Kpis) => ({ current: kpis.current[key], previous: kpis.previous[key] });
+  const insights = await buildInsights(range, includeDemo, perf, { kpis, devices, channels, interest });
+  const r4 = (x: number) => Number(x.toFixed(4));
+  const k = (key: keyof Kpis) => ({ current: r4(kpis.current[key]), previous: r4(kpis.previous[key]) });
   return {
     period: range.label,
     from: range.from.toISOString().slice(0, 10),
@@ -43,18 +57,18 @@ export async function buildDataPack(rangeKey: string, includeDemo: boolean) {
     currency: "USD (amounts in cents)",
     kpis: Object.fromEntries((Object.keys(kpis.current) as (keyof Kpis)[]).map((key) => [key, k(key)])),
     funnel,
-    products: perf.slice(0, 20).map((p) => ({ name: p.name, category: p.category, views: p.views, addToCart: p.addToCart, orders: p.orders, units: p.units, quotes: p.quotes, revenueCents: p.revenueCents, conversion: Number(p.conversion.toFixed(4)), flags: p.flags })),
-    conversionByDevice: devices.map((d) => ({ device: d.label, sessions: d.sessions, converted: d.converted, rate: Number(d.rate.toFixed(4)) })),
-    conversionByChannel: channels.map((d) => ({ channel: d.label, sessions: d.sessions, converted: d.converted, rate: Number(d.rate.toFixed(4)) })),
-    conversionByCountry: countries.slice(0, 12).map((d) => ({ country: countryLabel(d.label), sessions: d.sessions, converted: d.converted, rate: Number(d.rate.toFixed(4)) })),
-    productInterestByCountry: interest.slice(0, 20).map((r) => ({ country: countryLabel(r.country), category: r.category, views: r.views })),
+    products: perf.slice(0, 15).map((p) => ({ name: p.name, category: p.category, views: p.views, addToCart: p.addToCart, orders: p.orders, units: p.units, quotes: p.quotes, revenueCents: p.revenueCents, conversion: r4(p.conversion), flags: p.flags })),
+    conversionByDevice: devices.map((d) => ({ device: d.label, sessions: d.sessions, converted: d.converted, rate: r4(d.rate) })),
+    conversionByChannel: channels.map((d) => ({ channel: d.label, sessions: d.sessions, converted: d.converted, rate: r4(d.rate) })),
+    conversionByCountry: countries.slice(0, 10).map((d) => ({ country: countryLabel(d.label), sessions: d.sessions, converted: d.converted, rate: r4(d.rate) })),
+    productInterestByCountry: interest.slice(0, 12).map((r) => ({ country: countryLabel(r.country), category: r.category, views: r.views })),
     leadsByStatus: Object.fromEntries(leadsByStatus.map((l) => [l.status, l._count])),
     ordersByStatus: Object.fromEntries(ordersByStatus.map((o) => [o.status, { count: o._count, totalCents: o._sum.totalCents ?? 0 }])),
     computedInsights: insights.map((i) => `${i.title} — ${i.detail}`),
   };
 }
 
-export type DataPack = Awaited<ReturnType<typeof buildDataPack>>;
+export type DataPack = Awaited<ReturnType<typeof computeDataPack>>;
 
 const SYSTEM = `You are the business analyst inside the admin panel of a Pakistani sportswear manufacturer and exporter (teamwear, racing suits, leather jackets, gloves).
 Rules:

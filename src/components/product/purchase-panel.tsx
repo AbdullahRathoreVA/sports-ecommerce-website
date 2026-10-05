@@ -40,7 +40,11 @@ export function PurchasePanel({ product, whatsapp }: Props) {
   const bulkMin = Math.max(product.moq, product.priceTiers.find((t) => t.minQty >= product.moq)?.minQty ?? product.moq);
   const [mode, setMode] = useState<"sample" | "bulk">(hasSample ? "sample" : "bulk");
   const [qty, setQty] = useState(bulkMin);
-  const [size, setSize] = useState<string>(product.sizes.find((s) => s !== "Made to measure") ?? "");
+  // Default to a common adult size (M), not the first in the list (often a youth size).
+  const [size, setSize] = useState<string>(() => {
+    const real = product.sizes.filter((s) => s !== "Made to measure");
+    return ["M", "L", "S"].find((x) => real.includes(x)) ?? real[Math.floor(real.length / 2)] ?? "";
+  });
   const [added, setAdded] = useState(false);
 
   const unit = useMemo(() => (mode === "sample" ? product.samplePriceCents : unitPriceFor(product.priceTiers, qty)), [mode, product, qty]);

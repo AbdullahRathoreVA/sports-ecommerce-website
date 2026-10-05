@@ -32,7 +32,10 @@ export default async function OrderPage({ params, searchParams }: Props) {
   if (!verifyOrderToken(orderNumber, t)) notFound();
 
   const [order, settings] = await Promise.all([
-    db.order.findUnique({ where: { orderNumber }, include: { items: true, attachments: { orderBy: { createdAt: "asc" } } } }),
+    db.order.findUnique({
+      where: { orderNumber },
+      include: { items: true, attachments: { orderBy: { createdAt: "asc" } }, emails: { where: { kind: "order_received", status: "sent" }, select: { id: true }, take: 1 } },
+    }),
     getSettings(),
   ]);
   if (!order) notFound();
@@ -49,7 +52,11 @@ export default async function OrderPage({ params, searchParams }: Props) {
           <CheckCircle2 className="h-6 w-6 shrink-0 text-emerald-400" aria-hidden />
           <div>
             <p className="font-semibold">Thank you — your order is in.</p>
-            <p className="mt-1 text-sm">We&apos;ve emailed a confirmation to {order.contactEmail}. Bookmark this page to check progress any time.</p>
+            <p className="mt-1 text-sm">
+              {/* Only claim an email when one actually went out (EmailLog status "sent"). */}
+              {order.emails.length > 0 ? <>We&apos;ve emailed a confirmation to {order.contactEmail}. </> : <>We&apos;ll confirm your order by email at {order.contactEmail}. </>}
+              Bookmark this page to check progress any time.
+            </p>
           </div>
         </div>
       )}

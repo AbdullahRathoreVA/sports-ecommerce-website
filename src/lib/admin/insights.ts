@@ -47,13 +47,21 @@ export const countryName = (code: string) => COUNTRY[code] ?? code;
 export const countryLabel = (code: string) => countryName(code).replace(/^the /, "");
 const catName = (slug: string) => slug.replace(/-/g, " ");
 
-export async function buildInsights(range: DateRange, includeDemo: boolean, perf?: ProductPerf[]): Promise<Insight[]> {
+type Precomputed = {
+  kpis: Awaited<ReturnType<typeof getKpis>>;
+  devices: Awaited<ReturnType<typeof conversionByDimension>>;
+  channels: Awaited<ReturnType<typeof conversionByDimension>>;
+  interest: Awaited<ReturnType<typeof countryInterest>>;
+};
+
+/** Pass `pre` when the caller already computed these, to avoid running the queries twice. */
+export async function buildInsights(range: DateRange, includeDemo: boolean, perf?: ProductPerf[], pre?: Precomputed): Promise<Insight[]> {
   const [kpis, products, devices, channels, interest] = await Promise.all([
-    getKpis(range, includeDemo),
+    pre?.kpis ?? getKpis(range, includeDemo),
     perf ? Promise.resolve(perf) : getProductPerformance(range, includeDemo),
-    conversionByDimension("device", range, includeDemo),
-    conversionByDimension("channel", range, includeDemo),
-    countryInterest(range, includeDemo),
+    pre?.devices ?? conversionByDimension("device", range, includeDemo),
+    pre?.channels ?? conversionByDimension("channel", range, includeDemo),
+    pre?.interest ?? countryInterest(range, includeDemo),
   ]);
   const out: Insight[] = [];
   const { current: c, previous: p } = kpis;
