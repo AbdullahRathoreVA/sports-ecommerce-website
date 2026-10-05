@@ -42,7 +42,7 @@ It also includes a private admin for the factory team: orders, leads, analytics,
 - **Quote assistant.** "Fill the form for me" turns a messy message into a structured quote request.
 - **AI brief for sales.** Each enquiry is summarised for the sales team.
 - **Admin AI analyst.** It answers questions about sales, products, countries and the funnel from computed metrics only. No customer names or contact details are sent to the model.
-- Provider chain: Google Gemini → Groq → Vercel AI Gateway → deterministic grounded engine.
+- Provider chain, fastest first: Cerebras → Groq → Google Gemini Flash-Lite → Vercel AI Gateway → deterministic grounded engine. A provider that hits its free quota is skipped automatically, so replies stay around one second.
 
 **Admin** (`/admin`, role-based: Owner, Admin, Sales, Editor)
 - Overview KPIs with date ranges (today, yesterday, 7/30/90 days, custom), comparison with the previous period, and computed insights.
@@ -66,7 +66,7 @@ First-party, consent-friendly tracking: an anonymous visitor id, and a daily-rot
 - **Framework:** Next.js 16 (App Router, Turbopack, Server Actions), React 19, TypeScript, Tailwind CSS 4
 - **Database:** PostgreSQL (Supabase) via Prisma 7 with the `pg` driver adapter, a dedicated least-privilege role and a private schema
 - **Auth:** JWT in an httpOnly, SameSite=strict cookie (`jose`); bcrypt; lockout stored in the database; token-version revocation; per-role permissions
-- **AI:** Vercel AI SDK with structured output; Gemini / Groq / AI Gateway
+- **AI:** Vercel AI SDK with structured output; Cerebras / Groq / Gemini / AI Gateway
 - **3D:** three.js, React Three Fiber, drei; meshopt-compressed GLB with a custom projection shader
 - **Email:** Resend, with a permanent `EmailLog`
 - **Hosting:** Vercel
