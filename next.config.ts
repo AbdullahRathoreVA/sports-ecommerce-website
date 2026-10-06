@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Fonts read from disk by the link-preview image route.
+  outputFileTracingIncludes: { "/opengraph-image": ["./assets/fonts/**"] },
   images: {
     formats: ["image/avif", "image/webp"],
     deviceSizes: [360, 420, 640, 828, 1080, 1280, 1600, 1920],

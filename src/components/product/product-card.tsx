@@ -51,8 +51,8 @@ export function ProductCard({ product, priority = false, className }: { product:
         )}
         {badges.length > 0 && (
           <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
-            {badges.map((b) => (
-              <span key={b.label} className={cn("label rounded-sm px-2 py-1 text-[0.58rem]", b.tone)}>
+            {badges.map((b, i) => (
+              <span key={b.label} className={cn("label rounded-sm px-2 py-1 text-[0.58rem]", b.tone, i > 0 && "hidden sm:inline")}>
                 {b.label}
               </span>
             ))}
