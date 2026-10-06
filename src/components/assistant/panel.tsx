@@ -351,7 +351,7 @@ function LeadCapture({ turns, prefill }: { turns: Turn[]; prefill: { productSlug
       <button
         type="submit"
         disabled={state === "sending"}
-        className={cn("flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white text-[15px] font-semibold text-ink", state === "sending" && "opacity-70")}
+        className={cn("flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-ink text-[15px] font-semibold text-white", state === "sending" && "opacity-70")}
       >
         {state === "sending" && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />} Send to sales
       </button>

@@ -143,7 +143,7 @@ export default async function OrderPage({ params, searchParams }: Props) {
             </p>
           </div>
           {mail && (
-            <a href={mail} className="flex h-12 items-center justify-center rounded-[var(--radius-control)] bg-white font-semibold text-ink" data-track="email_click" data-track-label="Order page">
+            <a href={mail} className="flex h-12 items-center justify-center rounded-[var(--radius-control)] bg-ink font-semibold text-white" data-track="email_click" data-track-label="Order page">
               Questions? Email us
             </a>
           )}

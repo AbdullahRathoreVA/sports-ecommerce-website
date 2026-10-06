@@ -6,5 +6,6 @@ export const metadata: Metadata = {
 };
 
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
-  return <div className="min-h-svh bg-ink text-fg">{children}</div>;
+  // The admin keeps the dark palette; the public site is light with dark sections.
+  return <div className="tone-dark min-h-svh bg-ink text-fg">{children}</div>;
 }

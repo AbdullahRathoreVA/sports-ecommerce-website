@@ -106,7 +106,7 @@ export const orderInputSchema = z.object({
 export type OrderInput = z.infer<typeof orderInputSchema>;
 
 export const trackInputSchema = z.object({
-  orderNumber: z.string().trim().toUpperCase().regex(/^GL-\d{6}-[A-Z0-9]{3,6}$/, "Check the order number format, e.g. GL-261005-K3P9"),
+  orderNumber: z.string().trim().toUpperCase().regex(/^(AL|GL)-\d{6}-[A-Z0-9]{3,6}$/, "Check the order number format, e.g. AL-261005-K3P9"),
   email: emailSchema,
 });
 

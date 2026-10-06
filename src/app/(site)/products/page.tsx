@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHero } from "@/components/site/page-hero";
 import { Catalog, type CatalogParams } from "@/components/product/catalog";
 import { JsonLd, breadcrumbSchema } from "@/components/seo/json-ld";
 
@@ -14,15 +15,20 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
   return (
     <>
       <JsonLd data={breadcrumbSchema([{ name: "Home", path: "/" }, { name: "Products", path: "/products" }])} />
-      <header className="container-x pb-6 pt-10 lg:pb-8 lg:pt-14">
-        <p className="eyebrow text-accent">Catalogue</p>
-        <h1 className="font-display mt-3 text-[clamp(2.6rem,9vw,5rem)]">All products</h1>
-        <p className="mt-3 max-w-2xl text-muted">
-          Every product is made in our own factory. Buy a sample or a small run online, or request a quote for bulk, custom and private-label
-          orders.
-        </p>
-      </header>
-      <Catalog params={params} />
+      <PageHero
+        eyebrow="The product collection / Alrobel Sportswear"
+        title="Our Products"
+        intro="Every product is made in our own factory in Sialkot. Buy a sample or a small run online, or request a quote for bulk, custom and private-label orders."
+        meta={[
+          { label: "MOQ ready", value: "Bulk supply" },
+          { label: "Custom", value: "Branding & OEM" },
+          { label: "Samples", value: "Before bulk" },
+          { label: "Made in", value: "Sialkot, Pakistan" },
+        ]}
+      />
+      <div className="pt-8 lg:pt-12">
+        <Catalog params={params} />
+      </div>
     </>
   );
 }

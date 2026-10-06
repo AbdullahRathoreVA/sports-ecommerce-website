@@ -65,18 +65,20 @@ export type SiteSettings = {
 
 export const defaultSettings: SiteSettings = {
   brand: {
-    name: "Gridline",
-    shortName: "Gridline",
-    tagline: "Factory-made performance wear",
+    // KNOWN FACT (client, 2026-10-07): trading name is Alrobel Sportswear.
+    name: "Alrobel Sportswear",
+    shortName: "Alrobel",
+    tagline: "Custom sportswear manufacturer",
     description:
-      "Manufacturer and wholesaler of sublimated teamwear, leather racing suits, leather jackets, American-football gloves and sportswear — made in our own factory, under your label or ours.",
+      "Manufacturer and wholesaler of sublimated teamwear, leather racing suits, leather jackets, American-football gloves and sportswear — made in our own factory in Sialkot, Pakistan, under your label or ours.",
     houseLabel: "",
   },
   contact: {
     email: "",
     phone: "",
     whatsapp: "",
-    addressLine: "",
+    // KNOWN FACT (client business card, 2026-10-07).
+    addressLine: "Gohadpur",
     // KNOWN FACT (client, 2026-10-05): the factory is in Sialkot, Pakistan.
     city: "Sialkot",
     country: "Pakistan",
@@ -103,7 +105,8 @@ export const defaultSettings: SiteSettings = {
       "Freight is quoted after confirmation, based on weight, destination and service (air, sea or express courier).",
     sampleNote: "Sample cost is confirmed with your quote.",
   },
-  facts: { founded: "", teamSize: "", monthlyCapacity: "", exportMarkets: "" },
+  // exportMarkets: client's own claim from their business card (2026-10-07).
+  facts: { founded: "", teamSize: "", monthlyCapacity: "", exportMarkets: "20+ countries" },
   demoMode: true,
 };
 
@@ -113,45 +116,49 @@ export type NavItem = { label: string; href: string; description?: string };
 
 export const primaryNav: NavItem[] = [
   { label: "Products", href: "/products" },
+  { label: "Custom Orders", href: "/oem" },
   { label: "Design Studio", href: "/design-studio" },
-  { label: "OEM & Private Label", href: "/oem" },
-  { label: "Factory", href: "/factory" },
-  { label: "Industries", href: "/industries" },
   { label: "Contact", href: "/contact" },
+];
+
+/** "Company" dropdown in the header. */
+export const companyNav: NavItem[] = [
+  { label: "About us", href: "/about", description: "Who we are and how we work" },
+  { label: "Our factory", href: "/factory", description: "Printing, cutting, stitching and QC in Sialkot" },
+  { label: "Industries", href: "/industries", description: "Clubs, brands, racing teams and retailers" },
+  { label: "Buyer guides", href: "/insights", description: "Fabrics, CE ratings and ordering checklists" },
+  { label: "Track an order", href: "/track", description: "Check your order status" },
 ];
 
 export const footerNav: { title: string; links: NavItem[] }[] = [
   {
+    title: "Company",
+    links: [
+      { label: "About us", href: "/about" },
+      { label: "Our factory", href: "/factory" },
+      { label: "Buyer guides", href: "/insights" },
+      { label: "Contact", href: "/contact" },
+    ],
+  },
+  {
     title: "Products",
     links: [
-      { label: "All products", href: "/products" },
       { label: "Sublimation teamwear", href: "/products/c/sublimation-teamwear" },
-      { label: "Motorbike racing suits", href: "/products/c/motorbike-racing-suits" },
-      { label: "Car & kart racing suits", href: "/products/c/car-kart-racing-suits" },
+      { label: "Racing suits", href: "/products/c/motorbike-racing-suits" },
       { label: "Leather jackets", href: "/products/c/leather-jackets" },
       { label: "Gloves", href: "/products/c/gloves" },
       { label: "Sportswear", href: "/products/c/sportswear" },
+      { label: "All products", href: "/products" },
     ],
   },
   {
-    title: "Manufacturing",
+    title: "Services",
     links: [
-      { label: "OEM & private label", href: "/oem" },
+      { label: "Custom orders / OEM", href: "/oem" },
       { label: "Design Studio", href: "/design-studio" },
-      { label: "Inside the factory", href: "/factory" },
-      { label: "Industries we serve", href: "/industries" },
-      { label: "Buyer guides", href: "/insights" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { label: "About", href: "/about" },
       { label: "Request a quote", href: "/quote" },
+      { label: "Industries", href: "/industries" },
       { label: "Track an order", href: "/track" },
-      { label: "Contact", href: "/contact" },
-      { label: "Privacy", href: "/privacy" },
-      { label: "Terms", href: "/terms" },
     ],
   },
 ];

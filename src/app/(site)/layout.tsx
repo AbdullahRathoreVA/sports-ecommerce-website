@@ -1,6 +1,5 @@
 import { Header } from "@/components/site/header";
 import { Footer } from "@/components/site/footer";
-import { MobileActionBar } from "@/components/site/mobile-bar";
 import { DemoBanner } from "@/components/site/demo-banner";
 import { Tracker } from "@/components/analytics/tracker";
 import { RevealObserver } from "@/components/ui/reveal";
@@ -20,8 +19,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
         {children}
       </main>
       <Footer />
-      <MobileActionBar whatsapp={settings.contact.whatsapp} />
-      <AssistantLauncher brandName={settings.brand.name} />
+      {/* Room for the floating quote/chat dock on phones. */}
+      <div className="h-[calc(64px+env(safe-area-inset-bottom))] bg-ink lg:hidden" aria-hidden />
+      <AssistantLauncher brandName={settings.brand.name} whatsapp={settings.contact.whatsapp} email={settings.contact.email} />
       <Tracker />
       <RevealObserver />
     </CartProvider>

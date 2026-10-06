@@ -20,7 +20,7 @@ export function CartView() {
         <p className="mt-4 text-lg font-semibold">Your cart is empty</p>
         <p className="mx-auto mt-1 max-w-md text-muted">Order a sample or a small run online — or request a quote for custom and bulk work.</p>
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link href="/products" className="flex h-12 items-center justify-center rounded-[var(--radius-control)] bg-white px-6 font-semibold text-ink">
+          <Link href="/products" className="flex h-12 items-center justify-center rounded-[var(--radius-control)] bg-ink px-6 font-semibold text-white">
             Browse products
           </Link>
           <Link href="/quote" className="flex h-12 items-center justify-center rounded-[var(--radius-control)] border hairline px-6 font-semibold">
@@ -114,7 +114,7 @@ export function CartView() {
         </dl>
         <Link
           href="/checkout"
-          className="mt-5 flex h-13 items-center justify-center rounded-[var(--radius-control)] bg-white text-[15px] font-semibold text-ink"
+          className="mt-5 flex h-13 items-center justify-center rounded-[var(--radius-control)] bg-ink text-[15px] font-semibold text-white"
           style={{ height: 52 }}
           data-track="checkout_start"
           data-track-label="Cart"

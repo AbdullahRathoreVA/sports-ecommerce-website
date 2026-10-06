@@ -1,25 +1,32 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Brand mark + wordmark. The mark is deliberately name-agnostic — a volt tile
- * crossed by a diagonal stitch line (sewing + speed) — so it survives a
- * rename; the wordmark text comes from site settings.
+ * Alrobel Sportswear logo, redrawn as vector from the client's brand card:
+ * a white "A" peak cut by a red swoosh, "ALROBEL" in a wide heavy face and
+ * "SPORTS WEAR" in red. Replace with the original artwork file when supplied.
  */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" aria-hidden="true" className={cn("h-8 w-8 shrink-0", className)}>
-      <rect x="1" y="1" width="30" height="30" rx="7" fill="#cdf54a" />
-      <path d="M8 23.5 L23.5 8" stroke="#0c0d10" strokeWidth="3.2" strokeLinecap="round" />
-      <path d="M8.5 16.5 L16.5 8.5 M15.5 23.5 L23.5 15.5" stroke="#0c0d10" strokeOpacity="0.55" strokeWidth="1.6" strokeLinecap="round" strokeDasharray="2.2 2.4" />
+    <svg viewBox="0 0 120 96" aria-hidden="true" className={cn("h-9 w-auto shrink-0", className)}>
+      {/* The "A": two heavy legs meeting at a sharp peak, no crossbar. */}
+      <path d="M6 92 L52 4 L98 92 H74 L52 48 L30 92 Z" fill="currentColor" />
+      {/* Red swoosh slicing up through the right leg. */}
+      <path d="M22 78 C46 64 74 44 118 18 C96 40 70 60 40 80 Z" fill="#e11d26" />
     </svg>
   );
 }
 
-export function Logo({ name, className }: { name: string; className?: string; tone?: "light" | "dark" }) {
+export function Logo({ className, tagline = false }: { name?: string; className?: string; tone?: "light" | "dark"; tagline?: boolean }) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5 text-white", className)}>
+    <span className={cn("inline-flex items-center gap-2.5", className)}>
       <LogoMark />
-      <span className="font-display text-[1.45rem] leading-none tracking-[0.02em]">{name}</span>
+      <span className="flex flex-col leading-none">
+        <span className="font-[family-name:var(--font-logo)] text-[1.35rem] font-extrabold tracking-[0.02em]">
+          ALROBEL<sup className="ml-0.5 align-super text-[0.4em] font-bold">®</sup>
+        </span>
+        <span className="mt-[3px] font-[family-name:var(--font-logo)] text-[0.6rem] font-bold italic tracking-[0.42em] text-[#e11d26]">SPORTS WEAR</span>
+        {tagline && <span className="label mt-2 text-[0.55rem] tracking-[0.22em] opacity-60">We make to your wishes</span>}
+      </span>
     </span>
   );
 }

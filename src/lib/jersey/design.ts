@@ -40,9 +40,9 @@ export const PATTERNS: { id: Pattern; label: string }[] = [
 ];
 
 export const PRESETS: { id: string; label: string; design: Omit<JerseyDesign, "crest"> }[] = [
-  { id: "volt", label: "Volt hoops", design: { base: "#121316", accent: "#cdf54a", trim: "#0b0c0e", pattern: "hoops", sponsor: "YOUR SPONSOR", name: "CARTER", number: "9", textColor: "#ffffff", houseMark: true } },
-  { id: "cobalt", label: "Cobalt hoops", design: { base: "#1f3fe0", accent: "#ffffff", trim: "#0b0c0e", pattern: "hoops", sponsor: "YOUR SPONSOR", name: "CARTER", number: "9", textColor: "#ffffff", houseMark: true } },
+  { id: "alrobel", label: "Alrobel black & red", design: { base: "#111214", accent: "#e11d26", trim: "#e11d26", pattern: "sash", sponsor: "YOUR SPONSOR", name: "CARTER", number: "9", textColor: "#ffffff", houseMark: true } },
   { id: "red-stripes", label: "Classic stripes", design: { base: "#c81e1e", accent: "#ffffff", trim: "#111827", pattern: "stripes", sponsor: "YOUR SPONSOR", name: "OKAFOR", number: "7", textColor: "#ffffff", houseMark: true } },
+  { id: "cobalt", label: "Cobalt hoops", design: { base: "#1f3fe0", accent: "#ffffff", trim: "#0b0c0e", pattern: "hoops", sponsor: "YOUR SPONSOR", name: "REYES", number: "9", textColor: "#ffffff", houseMark: true } },
   { id: "gold-marble", label: "Gold marble", design: { base: "#111111", accent: "#e9b949", trim: "#e9b949", pattern: "marble", sponsor: "YOUR SPONSOR", name: "SAINTS", number: "1", textColor: "#e9b949", houseMark: true } },
   { id: "green-camo", label: "Keeper camo", design: { base: "#15803d", accent: "#a3e635", trim: "#052e16", pattern: "camo", sponsor: "YOUR SPONSOR", name: "NOVAK", number: "1", textColor: "#ffffff", houseMark: true } },
   { id: "pink-fade", label: "Pink fade", design: { base: "#ec4899", accent: "#0b0c0e", trim: "#0b0c0e", pattern: "fade", sponsor: "YOUR SPONSOR", name: "LEE", number: "3", textColor: "#0b0c0e", houseMark: true } },

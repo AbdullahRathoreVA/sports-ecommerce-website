@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHero } from "@/components/site/page-hero";
 import { Clock, FileCheck2, ShieldCheck } from "lucide-react";
 import { getAllProducts } from "@/lib/catalog";
 import { getSettings } from "@/lib/settings";
@@ -16,12 +17,21 @@ export default async function QuotePage({ searchParams }: Props) {
   const [params, products, settings] = await Promise.all([searchParams, getAllProducts(), getSettings()]);
   const qty = Number(params.qty);
   return (
-    <div className="container-x grid gap-10 pb-24 pt-10 lg:grid-cols-[1fr_380px] lg:gap-16 lg:pb-28 lg:pt-14">
+    <>
+    <PageHero
+      eyebrow="Custom manufacturing / Request for quotation"
+      title="Request a quote"
+      intro="Two quick steps. The more detail you share, the more accurate your first quote will be."
+      meta={[
+        { label: "Low MOQ", value: "Flexible orders" },
+        { label: "OEM", value: "Full branding" },
+        { label: "Samples", value: "Before bulk" },
+        { label: "Reply", value: "In writing, by email" },
+      ]}
+    />
+    <div className="container-x grid gap-10 pb-24 pt-12 lg:grid-cols-[1fr_380px] lg:gap-16 lg:pb-28 lg:pt-16">
       <div>
-        <p className="eyebrow text-accent">Request a quote</p>
-        <h1 className="font-display mt-3 text-[clamp(2.6rem,9vw,4.6rem)]">Tell us what you need.</h1>
-        <p className="mt-3 max-w-xl text-muted">Two quick steps. The more detail you share, the more accurate your first quote will be.</p>
-        <div className="mt-8">
+        <div>
           <QuoteForm
             products={products.map((p) => ({ slug: p.slug, name: p.name, category: p.category.name, moq: p.moq }))}
             initialProduct={params.product?.slice(0, 80)}
@@ -47,5 +57,6 @@ export default async function QuotePage({ searchParams }: Props) {
         ))}
       </aside>
     </div>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import { PageHero } from "@/components/site/page-hero";
 import { notFound } from "next/navigation";
 import { getCategories } from "@/lib/catalog";
 import { Catalog, type CatalogParams } from "@/components/product/catalog";
@@ -39,18 +39,19 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         ])}
       />
       <CategoryView slug={cat.slug} />
-      <header className="on-dark relative overflow-hidden bg-ink text-white">
-        {cat.image && (
-          <Image src={cat.image} alt="" fill priority sizes="100vw" className="object-cover opacity-35" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r from-ink via-ink/85 to-ink/30" />
-        <div className="container-x relative py-12 lg:py-20">
-          <p className="eyebrow text-accent">{cat.productCount} products</p>
-          <h1 className="font-display mt-3 max-w-3xl text-[clamp(2.6rem,9vw,5.2rem)]">{cat.name}</h1>
-          <p className="mt-4 max-w-2xl text-pretty text-white/75">{cat.description}</p>
-        </div>
-      </header>
-      <div className="pt-6 lg:pt-10">
+      <PageHero
+        eyebrow={`Products / ${cat.productCount} ${cat.productCount === 1 ? "product" : "products"}`}
+        title={cat.name}
+        intro={cat.description}
+        image={cat.image ?? undefined}
+        meta={[
+          { label: "Custom", value: "Your branding" },
+          { label: "Samples", value: "Before bulk" },
+          { label: "Pricing", value: "Quantity breaks" },
+          { label: "Made in", value: "Sialkot, Pakistan" },
+        ]}
+      />
+      <div className="pt-8 lg:pt-12">
         <Catalog params={query} category={cat.slug} />
       </div>
     </>

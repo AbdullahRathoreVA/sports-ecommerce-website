@@ -214,7 +214,7 @@ export function QuoteForm({
     <div ref={topRef} className="scroll-mt-24">
       <ol className="mb-6 grid grid-cols-2 gap-2" aria-label="Progress">
         {["Your requirements", "Your details"].map((label, i) => (
-          <li key={label} className={cn("rounded-full px-4 py-2 text-center text-sm font-semibold", step === i + 1 ? "bg-white text-ink" : step > i + 1 ? "bg-accent/10 text-accent" : "bg-surface-2 text-subtle")} aria-current={step === i + 1 ? "step" : undefined}>
+          <li key={label} className={cn("rounded-full px-4 py-2 text-center text-sm font-semibold", step === i + 1 ? "bg-ink text-white" : step > i + 1 ? "bg-accent/10 text-accent" : "bg-surface-2 text-subtle")} aria-current={step === i + 1 ? "step" : undefined}>
             {i + 1}. {label}
           </li>
         ))}
@@ -322,7 +322,7 @@ export function QuoteForm({
           <button
             type="button"
             onClick={() => validateStep1() && setStep(2)}
-            className="flex h-13 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-white text-[15px] font-semibold text-ink sm:w-auto sm:px-8"
+            className="flex h-13 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-ink text-[15px] font-semibold text-white sm:w-auto sm:px-8"
             style={{ height: 52 }}
           >
             Continue <ArrowRight className="h-4 w-4" aria-hidden />

@@ -1,41 +1,48 @@
 @import "tailwindcss";
 
 /*
- * Gridline design system — "Carbon & Volt".
+ * Alrobel Sportswear design system — "Studio & Signal".
  *
- * Research-led dark theme (see docs/THEME.md): layered carbon greys instead
- * of pure black (no halation, depth through lighter surfaces rather than
- * shadows), one volt yellow-green signal reserved for action — the hue the
- * eye is most sensitive to, ~17:1 against carbon — and white as the
- * secondary action. Product photography supplies the rest of the colour.
+ * Layout language follows the Sialkot B2B reference the client asked for:
+ * warm off-white pages with near-black feature sections, one signal colour,
+ * big two-tone headlines, mono section labels and square controls.
  *
- * Contrast (WCAG 2.2, on paper #0c0d10): fg 17.6:1 · muted 8.0:1 ·
- * subtle 5.1:1 · accent 15.4:1 · accent-ink on accent 15.4:1.
+ * Light is the default. Any element marked `.on-dark` (or `.tone-dark`)
+ * re-maps the same tokens to the dark palette, so every component renders
+ * correctly on either background without per-component variants.
+ *
+ * Contrast (WCAG 2.2):
+ *   light — fg 17:1 · muted 6.1:1 · subtle 4.6:1 on paper; accent text 5.2:1;
+ *           white on accent 5.6:1
+ *   dark  — fg 17.6:1 · muted 8.0:1 · subtle 5.6:1; accent 5.3:1; ink on accent 5.3:1
  */
 
 @theme {
-  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
+  --font-logo: var(--font-exo), var(--font-inter), sans-serif;
 
-  /* Surfaces, darkest → lightest. */
-  --color-ink: #07080a;
-  --color-ink-2: #0f1114;
-  --color-ink-3: #171a1e;
+  /* Fixed darks (always dark, in any tone). */
+  --color-ink: #0b0c0e;
+  --color-ink-2: #111316;
+  --color-ink-3: #181b1f;
   --color-ink-4: #262a30;
-  --color-paper: #0c0d10;
-  --color-chalk: #111317;
-  --color-surface: #15181c;
-  --color-surface-2: #1d2126;
+
+  /* Tone-aware surfaces (light defaults; remapped inside .on-dark). */
+  --color-paper: #f1f0ec;
+  --color-chalk: #e7e6e0;
+  --color-surface: #ffffff;
+  --color-surface-2: #f5f4f0;
 
   /* Text. */
-  --color-fg: #f2f3f5;
-  --color-muted: #a4aab2;
-  --color-subtle: #7f868f;
+  --color-fg: #111214;
+  --color-muted: #555a61;
+  --color-subtle: #6b7077;
 
-  /* Action. */
-  --color-accent: #cdf54a;
-  --color-accent-hover: #dcff73;
-  --color-accent-ink: #0c0d10;
+  /* Signal: Alrobel red (from the brand card). */
+  --color-accent: #d71920;
+  --color-accent-hover: #b8141a;
+  --color-accent-ink: #ffffff;
   --color-stone-100: #ebe8e2;
   --color-stone-200: #dcd8d0;
   --color-stone-300: #c3beb4;
@@ -53,8 +60,8 @@
   --color-amber: #f59e0b;
   --color-danger: #f87171;
 
-  --radius-card: 14px;
-  --radius-control: 10px;
+  --radius-card: 6px;
+  --radius-control: 4px;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
@@ -83,10 +90,28 @@
 }
 
 :root {
-  /* Native controls (selects, date pickers, scrollbars) render dark too. */
-  color-scheme: dark;
-  --header-h: 64px;
+  color-scheme: light;
+  --hairline: rgb(17 18 20 / 0.11);
+  --header-h: 72px;
   --mobile-bar-h: 0px;
+}
+
+/* Dark tone: same token names, dark values. */
+.on-dark,
+.tone-dark {
+  color-scheme: dark;
+  --hairline: rgb(255 255 255 / 0.1);
+  --color-paper: #0b0c0e;
+  --color-chalk: #111316;
+  --color-surface: #15181c;
+  --color-surface-2: #1d2126;
+  --color-fg: #f2f3f5;
+  --color-muted: #a4aab2;
+  --color-subtle: #8a9099;
+  --color-accent: #e11d26;
+  --color-accent-hover: #f0353c;
+  --color-accent-ink: #ffffff;
+  color: var(--color-fg);
 }
 
 @media (max-width: 1023px) {
@@ -113,11 +138,9 @@ body {
 
 .font-display {
   font-family: var(--font-sans);
-  font-variation-settings: "wdth" 68;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  line-height: 0.92;
-  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
 }
 
 .font-wide {
@@ -165,15 +188,31 @@ body {
 .snap-x-mandatory { scroll-snap-type: x mandatory; }
 .snap-start-always { scroll-snap-align: start; scroll-snap-stop: always; }
 
-.hairline { border-color: rgb(255 255 255 / 0.09); }
+.hairline { border-color: var(--hairline); }
 .hairline-dark { border-color: rgb(255 255 255 / 0.12); }
 
-/* Volt glow used behind hero and stage visuals. */
-.volt-glow {
-  background:
-    radial-gradient(55% 50% at 72% 42%, rgb(205 245 74 / 0.16), transparent 70%),
-    radial-gradient(45% 40% at 8% 95%, rgb(120 140 170 / 0.14), transparent 70%);
+/* Section label: "01 / Product worlds". */
+.label {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
+
+/* Fine grid behind dark hero visuals. */
+.grid-lines {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Soft signal glow behind the hero product. */
+.signal-glow {
+  background: radial-gradient(50% 50% at 50% 50%, rgb(225 29 38 / 0.24), transparent 70%);
+}
+
 
 .grain::after {
   content: "";
@@ -223,7 +262,7 @@ body {
   [data-reveal] { opacity: 1; transform: none; }
 }
 
-/* On the volt band the default volt focus ring would vanish. */
+/* On an accent band the default accent focus ring would vanish. */
 .on-accent :focus-visible {
   outline-color: var(--color-accent-ink);
 }

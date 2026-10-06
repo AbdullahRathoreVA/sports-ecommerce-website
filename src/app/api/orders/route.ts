@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Please check the highlighted fields.", fields: fieldErrors(parsed.error) }, { status: 400 });
   }
-  if (parsed.data.website) return NextResponse.json({ ok: true, orderNumber: "GL-000000-OK", token: "x" });
+  if (parsed.data.website) return NextResponse.json({ ok: true, orderNumber: "AL-000000-OK", token: "x" });
 
   try {
     const result = await createOrder(parsed.data);

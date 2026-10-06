@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { FACTORY_VIDEO_ENABLED } from "./config";
 import { Play, X } from "lucide-react";
 import { track } from "@/lib/analytics/client";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ export const SHORT_FILM: Film = {
  * scroll locks, and the 9 MB file is only requested after the click.
  */
 export function FilmButton({ film = FACTORY_FILM, className, variant = "dark" }: { film?: Film; className?: string; variant?: "dark" | "light" }) {
+  if (!FACTORY_VIDEO_ENABLED) return null;
   const [open, setOpen] = useState(false);
   return (
     <>

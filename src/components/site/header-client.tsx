@@ -11,6 +11,62 @@ import type { NavItem } from "@/config/site";
 
 type Cat = { slug: string; name: string; tagline: string | null; image: string | null; count: number };
 
+const navItem =
+  "relative flex h-10 items-center gap-1 rounded-md px-3 text-[14px] font-medium text-white/70 transition-colors hover:text-white aria-[current=page]:text-white after:absolute after:inset-x-3 after:-bottom-px after:h-[2px] after:scale-x-0 after:bg-accent after:transition-transform aria-[current=page]:after:scale-x-100";
+
+function isActive(pathname: string, href: string) {
+  return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function NavLink({ href, children }: { href: string; children: React.ReactNode }) {
+  const pathname = usePathname();
+  return (
+    <Link href={href} aria-current={isActive(pathname, href) ? "page" : undefined} className={navItem} data-track="nav_click">
+      {children}
+    </Link>
+  );
+}
+
+/** Simple hover/click dropdown for the "Company" menu. */
+export function NavDropdown({ label, items }: { label: string; items: NavItem[] }) {
+  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => setOpen(false), [pathname]);
+  const active = items.some((i) => isActive(pathname, i.href));
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => {
+        if (timer.current) clearTimeout(timer.current);
+        setOpen(true);
+      }}
+      onMouseLeave={() => {
+        timer.current = setTimeout(() => setOpen(false), 120);
+      }}
+    >
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-current={active ? "page" : undefined}
+        onClick={() => setOpen((v) => !v)}
+        onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
+        className={navItem}
+      >
+        {label} <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} aria-hidden />
+      </button>
+      <div hidden={!open} className="absolute left-1/2 top-full z-50 mt-3 w-72 -translate-x-1/2 rounded-lg border border-white/10 bg-ink-2 p-2 shadow-2xl shadow-black/40">
+        {items.map((i) => (
+          <Link key={i.href} href={i.href} className="block rounded-md px-3 py-2.5 transition-colors hover:bg-white/[0.06]" data-track="nav_click">
+            <span className="block text-sm font-semibold text-white">{i.label}</span>
+            {i.description && <span className="mt-0.5 block text-xs text-white/55">{i.description}</span>}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function ProductsMenu({ categories }: { categories: Cat[] }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -33,14 +89,15 @@ export function ProductsMenu({ categories }: { categories: Cat[] }) {
         aria-controls="products-menu"
         onClick={() => setOpen((v) => !v)}
         onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
-        className="flex items-center gap-1 rounded-lg px-3 py-2 text-[14px] font-medium text-white/75 transition-colors hover:bg-white/[0.06] hover:text-white aria-expanded:text-white"
+        aria-current={pathname.startsWith("/products") ? "page" : undefined}
+        className={navItem}
       >
         Products <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} aria-hidden />
       </button>
       <div
         id="products-menu"
         hidden={!open}
-        className="absolute left-0 top-full z-50 mt-2 w-[min(880px,calc(100vw-80px))] rounded-2xl border border-white/10 bg-ink-2 p-3 shadow-2xl shadow-black/50"
+        className="absolute left-1/2 top-full z-50 mt-3 w-[min(880px,calc(100vw-80px))] -translate-x-1/2 rounded-lg border border-white/10 bg-ink-2 p-3 shadow-2xl shadow-black/50"
         onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
       >
         <div className="grid grid-cols-3 gap-2">
@@ -80,14 +137,14 @@ export function HeaderActions() {
       <Link
         href="/products?focus=search"
         aria-label="Search products"
-        className="grid h-11 w-11 place-items-center rounded-xl text-white/80 transition-colors hover:bg-white/[0.07] hover:text-white"
+        className="grid h-10 w-10 place-items-center rounded-md text-white/80 transition-colors hover:bg-white/[0.07] hover:text-white"
       >
         <Search className="h-5 w-5" aria-hidden />
       </Link>
       <Link
         href="/cart"
         aria-label={`Cart${ready && count ? `, ${count} items` : ""}`}
-        className="relative grid h-11 w-11 place-items-center rounded-xl text-white/80 transition-colors hover:bg-white/[0.07] hover:text-white"
+        className="relative grid h-10 w-10 place-items-center rounded-md text-white/80 transition-colors hover:bg-white/[0.07] hover:text-white"
       >
         <ShoppingBag className="h-5 w-5" aria-hidden />
         {ready && count > 0 && (
@@ -139,7 +196,7 @@ export function MobileMenu({
         aria-expanded={open}
         aria-controls="mobile-menu"
         onClick={() => setOpen(true)}
-        className="grid h-11 w-11 place-items-center rounded-xl text-white transition-colors hover:bg-white/[0.07] lg:hidden"
+        className="grid h-10 w-10 place-items-center rounded-md text-white transition-colors hover:bg-white/[0.07] lg:hidden"
       >
         <Menu className="h-6 w-6" aria-hidden />
       </button>
@@ -149,10 +206,10 @@ export function MobileMenu({
           role="dialog"
           aria-modal="true"
           aria-label={`${brandName} menu`}
-          className="fixed inset-0 z-[60] flex flex-col bg-ink text-white animate-fade lg:hidden"
+          className="on-dark fixed inset-0 z-[60] flex flex-col bg-ink text-white animate-fade lg:hidden"
         >
           <div className="container-x flex h-[var(--header-h)] items-center justify-between border-b border-white/10">
-            <span className="font-display text-xl">{brandName}</span>
+            <span className="text-lg font-semibold tracking-tight">{brandName}</span>
             <button
               ref={closeRef}
               type="button"
@@ -186,7 +243,7 @@ export function MobileMenu({
 
             <nav aria-label="Mobile" className="mt-8">
               <ul className="divide-y divide-white/10 border-y border-white/10">
-                {nav.slice(1).map((item) => (
+                {nav.filter((item) => item.href !== "/products").map((item) => (
                   <li key={item.href}>
                     <Link href={item.href} className="flex h-14 items-center justify-between text-lg font-semibold" data-track="nav_click">
                       {item.label}
@@ -194,22 +251,12 @@ export function MobileMenu({
                     </Link>
                   </li>
                 ))}
-                <li>
-                  <Link href="/about" className="flex h-14 items-center justify-between text-lg font-semibold" data-track="nav_click">
-                    About <ArrowRight className="h-4 w-4 text-white/40" aria-hidden />
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/insights" className="flex h-14 items-center justify-between text-lg font-semibold" data-track="nav_click">
-                    Buyer guides <ArrowRight className="h-4 w-4 text-white/40" aria-hidden />
-                  </Link>
-                </li>
               </ul>
             </nav>
           </div>
           <div className="container-x grid grid-cols-2 gap-2 border-t border-white/10 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-            <Link href="/quote" className="flex h-12 items-center justify-center rounded-[var(--radius-control)] bg-accent text-[15px] font-semibold" data-track="cta_click" data-track-label="Menu: Get a quote">
-              Get a quote
+            <Link href="/quote" className="flex h-12 items-center justify-center rounded-[var(--radius-control)] bg-accent text-[15px] font-semibold text-accent-ink" data-track="cta_click" data-track-label="Menu: Get a quote">
+              Request Quote
             </Link>
             {whatsapp ? (
               <a

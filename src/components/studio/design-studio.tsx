@@ -139,7 +139,7 @@ export function DesignStudio({
           onPointerUp={() => (drag.current = null)}
           onPointerCancel={() => (drag.current = null)}
         >
-          <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(55% 55% at 50% 45%, rgba(205,245,74,0.14), transparent 70%)" }} />
+          <div className="pointer-events-none absolute inset-0" style={{ background: "radial-gradient(55% 55% at 50% 45%, rgba(225,29,38,0.16), transparent 70%)" }} />
           {use3d && canvas ? (
             <JerseyScene textureA={canvas} rotationRef={rotation} active revision={revision} autoRotate={false} className="!absolute !inset-0" />
           ) : (
@@ -177,7 +177,7 @@ export function DesignStudio({
               aria-selected={tab === t}
               aria-controls={`panel-${t}`}
               onClick={() => setTab(t)}
-              className={cn("h-11 rounded-lg text-sm font-semibold capitalize transition-colors", tab === t ? "bg-white text-ink shadow-sm" : "text-muted")}
+              className={cn("h-11 rounded-lg text-sm font-semibold capitalize transition-colors", tab === t ? "bg-ink text-white shadow-sm" : "text-muted")}
             >
               {t}
             </button>

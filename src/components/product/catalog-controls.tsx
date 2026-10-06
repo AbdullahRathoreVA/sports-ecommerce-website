@@ -85,7 +85,7 @@ export function CatalogSearch() {
           }, 350);
         }}
         placeholder="Search: football kit, race suit, gloves…"
-        className="h-13 w-full rounded-[var(--radius-control)] border hairline bg-surface pl-12 pr-12 text-[16px] outline-none transition-colors placeholder:text-subtle focus:border-accent"
+        className="h-13 w-full rounded-[var(--radius-control)] border hairline bg-surface pl-12 pr-12 shadow-[0_1px_2px_rgba(0,0,0,0.04)] text-[16px] outline-none transition-colors placeholder:text-subtle focus:border-accent"
         style={{ height: 52 }}
       />
       {pending && <Loader2 className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 animate-spin text-subtle" aria-hidden />}
@@ -114,7 +114,7 @@ function FilterGroups({ onChange }: { onChange?: () => void }) {
   return (
     <div className="space-y-6">
       <fieldset>
-        <legend className="eyebrow text-subtle">How to buy</legend>
+        <legend className="label text-subtle">How to buy</legend>
         <div className="mt-3 flex flex-wrap gap-2">
           {MODES.map((m) => (
             <button
@@ -127,8 +127,8 @@ function FilterGroups({ onChange }: { onChange?: () => void }) {
                 onChange?.();
               }}
               className={cn(
-                "h-11 rounded-full border px-4 text-sm font-medium transition-colors",
-                mode === m.id ? "border-accent bg-accent text-accent-ink" : "hairline bg-surface text-fg hover:border-white/35",
+                "h-9 rounded-md border px-3 text-[13px] font-medium transition-colors",
+                mode === m.id ? "border-accent bg-accent/10 text-accent" : "hairline bg-surface text-fg hover:border-fg/40",
               )}
             >
               {m.label}
@@ -137,7 +137,7 @@ function FilterGroups({ onChange }: { onChange?: () => void }) {
         </div>
       </fieldset>
       <fieldset>
-        <legend className="eyebrow text-subtle">Made for</legend>
+        <legend className="label text-subtle">Made for</legend>
         <div className="mt-3 flex flex-wrap gap-2">
           {USE_CASES.map((u) => (
             <button
@@ -150,8 +150,8 @@ function FilterGroups({ onChange }: { onChange?: () => void }) {
                 onChange?.();
               }}
               className={cn(
-                "h-11 rounded-full border px-4 text-sm font-medium transition-colors",
-                use === u.id ? "border-accent bg-accent text-accent-ink" : "hairline bg-surface text-fg hover:border-white/35",
+                "h-9 rounded-md border px-3 text-[13px] font-medium transition-colors",
+                use === u.id ? "border-accent bg-accent/10 text-accent" : "hairline bg-surface text-fg hover:border-fg/40",
               )}
             >
               {u.label}
@@ -160,7 +160,7 @@ function FilterGroups({ onChange }: { onChange?: () => void }) {
         </div>
       </fieldset>
       <div>
-        <label htmlFor="sort" className="eyebrow text-subtle">
+        <label htmlFor="sort" className="label text-subtle">
           Sort by
         </label>
         <select
@@ -171,7 +171,7 @@ function FilterGroups({ onChange }: { onChange?: () => void }) {
             track("filter_use", { label: `sort:${e.target.value}` });
             onChange?.();
           }}
-          className="mt-3 h-12 w-full rounded-[var(--radius-control)] border hairline bg-surface px-3 text-[16px] outline-none focus:border-accent"
+          className="mt-3 h-11 w-full rounded-[var(--radius-control)] border hairline bg-surface px-3 text-[15px] outline-none focus:border-accent"
         >
           {SORTS.map((s) => (
             <option key={s.id} value={s.id}>
@@ -186,11 +186,12 @@ function FilterGroups({ onChange }: { onChange?: () => void }) {
 
 export function DesktopFilters() {
   return (
-    <aside className="hidden lg:block" aria-label="Filters">
-      <div className="sticky top-[calc(var(--header-h)+24px)]">
-        <FilterGroups />
-      </div>
-    </aside>
+    <div className="rounded-[var(--radius-card)] border hairline bg-surface p-5">
+      <p className="label mb-5 flex items-center gap-2 text-fg">
+        <SlidersHorizontal className="h-4 w-4 text-accent" aria-hidden /> Filters
+      </p>
+      <FilterGroups />
+    </div>
   );
 }
 
@@ -213,7 +214,7 @@ export function MobileFilters({ activeCount }: { activeCount: number }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-11 items-center gap-2 rounded-full border hairline bg-surface px-4 text-sm font-semibold"
+        className="inline-flex h-11 items-center gap-2 rounded-md border hairline bg-surface px-4 text-sm font-semibold"
         aria-haspopup="dialog"
       >
         <SlidersHorizontal className="h-4 w-4" aria-hidden /> Filter & sort
@@ -223,7 +224,7 @@ export function MobileFilters({ activeCount }: { activeCount: number }) {
         <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="Filter and sort">
           <div className="absolute inset-0 bg-black/40 animate-fade" onClick={() => setOpen(false)} aria-hidden />
           <div className="absolute inset-x-0 bottom-0 max-h-[85svh] overflow-y-auto rounded-t-[22px] bg-paper p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] animate-rise">
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-white/20" aria-hidden />
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-fg/20" aria-hidden />
             <div className="mb-5 flex items-center justify-between">
               <p className="text-lg font-semibold">Filter & sort</p>
               <button type="button" onClick={() => setOpen(false)} aria-label="Close filters" className="grid h-11 w-11 place-items-center rounded-xl hover:bg-surface-2">
@@ -231,7 +232,7 @@ export function MobileFilters({ activeCount }: { activeCount: number }) {
               </button>
             </div>
             <FilterGroups />
-            <button type="button" onClick={() => setOpen(false)} className="mt-6 h-12 w-full rounded-[var(--radius-control)] bg-white text-[15px] font-semibold text-ink">
+            <button type="button" onClick={() => setOpen(false)} className="mt-6 h-12 w-full rounded-[var(--radius-control)] bg-ink text-[15px] font-semibold text-white">
               Show results
             </button>
           </div>

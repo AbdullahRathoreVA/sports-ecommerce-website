@@ -14,7 +14,7 @@ export async function Footer() {
     <footer className="on-dark relative overflow-hidden bg-ink text-white">
       <div className="container-x grid gap-12 py-16 lg:grid-cols-[1.3fr_2fr] lg:py-20">
         <div>
-          <Logo name={s.brand.name} />
+          <Logo name={s.brand.name} tagline />
           <p className="mt-5 max-w-sm text-[15px] leading-relaxed text-white/60">{s.brand.description}</p>
           <ul className="mt-6 space-y-3 text-sm">
             {wa && (

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHero } from "@/components/site/page-hero";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { db } from "@/lib/db";
@@ -27,20 +28,19 @@ async function lookup(formData: FormData) {
 
 const MESSAGES: Record<string, string> = {
   notfound: "We couldn't find an order with that number and email. Check both and try again.",
-  format: "Check the order number format, e.g. GL-261005-K3P9.",
+  format: "Check the order number format, e.g. AL-261005-K3P9.",
   limit: "Too many attempts — please wait a few minutes.",
 };
 
 export default async function TrackPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   return (
-    <div className="container-x max-w-xl pb-28 pt-10 lg:pb-24 lg:pt-14">
-      <p className="eyebrow text-accent">Order status</p>
-      <h1 className="font-display mt-3 text-[clamp(2.6rem,9vw,4.2rem)]">Track an order</h1>
-      <p className="mt-3 text-muted">Enter the order number shown when you placed your order.</p>
+    <>
+    <PageHero eyebrow="Order status / Alrobel Sportswear" title="Track an order" intro="Enter the order number shown when you placed your order, and the email you used." />
+    <div className="container-x max-w-xl pb-28 pt-12 lg:pb-24 lg:pt-16">
       <form action={lookup} className="mt-8 space-y-4">
         <Field label="Order number" htmlFor="orderNumber">
-          <input id="orderNumber" name="orderNumber" required placeholder="GL-261005-K3P9" autoCapitalize="characters" className={`${inputClass} font-mono uppercase`} />
+          <input id="orderNumber" name="orderNumber" required placeholder="AL-261005-K3P9" autoCapitalize="characters" className={`${inputClass} font-mono uppercase`} />
         </Field>
         <Field label="Email used for the order" htmlFor="email">
           <input id="email" name="email" type="email" required autoComplete="email" className={inputClass} />
@@ -50,10 +50,11 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
             {MESSAGES[error]}
           </p>
         )}
-        <button type="submit" className="h-12 w-full rounded-[var(--radius-control)] bg-white font-semibold text-ink">
+        <button type="submit" className="h-12 w-full rounded-[var(--radius-control)] bg-ink font-semibold text-white">
           Check status
         </button>
       </form>
     </div>
+    </>
   );
 }

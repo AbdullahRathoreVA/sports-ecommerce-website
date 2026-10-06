@@ -1,29 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Clock, Layers } from "lucide-react";
+import { Clock, Package, Ruler } from "lucide-react";
 import type { ProductCard as Card } from "@/lib/catalog";
 import { formatMoney, leadTimeLabel, cn } from "@/lib/utils";
 
 /**
- * B2B-first product card: price "from", MOQ and lead time are visible without
- * a click, because those are the three facts a trade buyer qualifies a
- * supplier on. The second image swaps in on hover (pointer devices only).
+ * Trade catalogue card: SKU, name, price per piece (or "Price on request"),
+ * MOQ and lead time are visible without a click — the facts a B2B buyer
+ * qualifies a supplier on. The second image swaps in on hover.
  */
-export function ProductCard({ product, priority = false, className }: { product: Card; priority?: boolean; className?: string }) {
+export function ProductCard({ product, priority = false, className }: { product: Card & { sizes?: string[] }; priority?: boolean; className?: string }) {
   const lead = leadTimeLabel(product.leadTimeMinDays, product.leadTimeMaxDays);
-  const modeLabel =
-    product.purchaseMode === "QUOTE" ? "Quote only" : product.purchaseMode === "CART" ? "Buy now" : "Sample or bulk";
+  const badges = [
+    product.featured && { label: "Featured", tone: "bg-accent text-accent-ink" },
+    product.purchaseMode !== "QUOTE" && { label: product.purchaseMode === "CART" ? "Buy online" : "Sample available", tone: "bg-ink text-white" },
+  ].filter(Boolean) as { label: string; tone: string }[];
 
   return (
     <Link
       href={`/products/${product.slug}`}
-      className={cn("group flex flex-col", className)}
+      className={cn("group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border hairline bg-surface transition-shadow hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.35)]", className)}
       data-track="product_click"
       data-product-id={product.id}
       data-category={product.category.slug}
       data-track-label={product.name}
     >
-      <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] bg-surface-2">
+      <div className="relative aspect-square overflow-hidden bg-surface-2">
         {product.image ? (
           <>
             <Image
@@ -47,45 +49,49 @@ export function ProductCard({ product, priority = false, className }: { product:
         ) : (
           <div className="grid h-full place-items-center text-sm text-subtle">Photo coming soon</div>
         )}
-        <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
-          <span
-            className={cn(
-              "rounded-full px-2.5 py-1 text-[11px] font-semibold backdrop-blur",
-              product.purchaseMode === "QUOTE" ? "bg-ink/80 text-white" : "bg-white/90 text-ink",
-            )}
-          >
-            {modeLabel}
-          </span>
-        </div>
-      </div>
-      <div className="mt-3 flex flex-1 flex-col px-0.5">
-        <p className="font-mono text-[11px] uppercase tracking-wider text-subtle">{product.category.name}</p>
-        <h3 className="mt-1 text-[15px] font-semibold leading-snug text-fg transition-colors group-hover:text-accent sm:text-base">
-          {product.name}
-        </h3>
-        <div className="mt-auto pt-2">
-          <p className="text-[15px] text-fg">
-            {product.fromCents != null ? (
-              <>
-                <span className="text-subtle">From </span>
-                <span className="font-semibold">{formatMoney(product.fromCents, product.currency)}</span>
-                <span className="text-subtle"> / unit</span>
-              </>
-            ) : (
-              <span className="font-semibold">Price on request</span>
-            )}
-          </p>
-          <p className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
-            <span className="inline-flex items-center gap-1">
-              <Layers className="h-3.5 w-3.5" aria-hidden /> MOQ {product.moq}
-            </span>
-            {lead && (
-              <span className="inline-flex items-center gap-1">
-                <Clock className="h-3.5 w-3.5" aria-hidden /> {lead}
+        {badges.length > 0 && (
+          <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
+            {badges.map((b) => (
+              <span key={b.label} className={cn("label rounded-sm px-2 py-1 text-[0.58rem]", b.tone)}>
+                {b.label}
               </span>
-            )}
-          </p>
-        </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        <p className="flex flex-wrap items-center gap-1.5">
+          <span className="font-mono text-[10.5px] uppercase tracking-wide text-subtle">{product.sku}</span>
+          <span className="hidden rounded-sm border hairline px-1.5 py-0.5 text-[10.5px] font-medium text-muted sm:inline">Alrobel</span>
+        </p>
+        <h3 className="mt-1.5 text-[14px] font-semibold leading-snug text-fg transition-colors group-hover:text-accent sm:text-[15px]">{product.name}</h3>
+        {product.subtitle && <p className="label mt-1 line-clamp-1 text-[0.6rem] text-subtle">{product.subtitle}</p>}
+        <p className="mt-3 text-[15px]">
+          {product.fromCents != null ? (
+            <>
+              <span className="text-[11px] text-subtle">FROM </span>
+              <span className="font-semibold">{formatMoney(product.fromCents, product.currency)}</span>
+              <span className="text-[12px] text-subtle"> / piece</span>
+            </>
+          ) : (
+            <span className="font-semibold text-accent">Price on request</span>
+          )}
+        </p>
+        <p className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t hairline pt-3 text-[11.5px] text-muted [margin-top:max(0.75rem,auto)]">
+          <span className="inline-flex items-center gap-1">
+            <Package className="h-3.5 w-3.5 text-accent" aria-hidden /> MOQ {product.moq}
+          </span>
+          {lead && (
+            <span className="inline-flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5 text-accent" aria-hidden /> {lead}
+            </span>
+          )}
+          {product.sizes && product.sizes.length > 1 && (
+            <span className="hidden items-center gap-1 sm:inline-flex">
+              <Ruler className="h-3.5 w-3.5 text-accent" aria-hidden /> {product.sizes.length} sizes
+            </span>
+          )}
+        </p>
       </div>
     </Link>
   );

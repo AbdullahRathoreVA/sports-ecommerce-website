@@ -33,8 +33,8 @@ export async function Catalog({ params, category }: { params: CatalogParams; cat
             href={`/products${carry ? `?${carry}` : ""}`}
             aria-current={!category ? "page" : undefined}
             className={cn(
-              "inline-flex h-11 shrink-0 items-center rounded-full border px-4 text-sm font-semibold transition-colors",
-              !category ? "border-accent bg-accent text-accent-ink" : "hairline bg-surface hover:border-white/35",
+              "inline-flex h-10 shrink-0 items-center rounded-md border px-4 text-[13px] font-semibold transition-colors",
+              !category ? "border-ink bg-ink text-white" : "hairline bg-surface hover:border-fg/40",
             )}
           >
             All <span className="ml-1.5 font-mono text-xs opacity-60">{all.length}</span>
@@ -47,8 +47,8 @@ export async function Catalog({ params, category }: { params: CatalogParams; cat
               data-track="category_view"
               data-category={c.slug}
               className={cn(
-                "inline-flex h-11 shrink-0 items-center rounded-full border px-4 text-sm font-semibold transition-colors",
-                category === c.slug ? "border-accent bg-accent text-accent-ink" : "hairline bg-surface hover:border-white/35",
+                "inline-flex h-10 shrink-0 items-center rounded-md border px-4 text-[13px] font-semibold transition-colors",
+                category === c.slug ? "border-ink bg-ink text-white" : "hairline bg-surface hover:border-fg/40",
               )}
             >
               {c.name} <span className="ml-1.5 font-mono text-xs opacity-60">{c.productCount}</span>
@@ -57,14 +57,29 @@ export async function Catalog({ params, category }: { params: CatalogParams; cat
         </nav>
       </div>
 
-      <div className="mt-6 grid gap-8 lg:mt-10 lg:grid-cols-[220px_1fr] lg:gap-12">
-        <Suspense>
-          <DesktopFilters />
-        </Suspense>
+      <div className="mt-6 grid gap-8 lg:mt-10 lg:grid-cols-[260px_1fr] lg:gap-8">
+        <aside className="hidden lg:block" aria-label="Filters">
+          <div className="sticky top-[calc(var(--header-h)+24px)] space-y-5">
+            <Suspense>
+              <DesktopFilters />
+            </Suspense>
+            <div className="on-dark rounded-[var(--radius-card)] bg-ink p-5 text-white">
+              <p className="label text-accent">Need a bulk quote?</p>
+              <p className="mt-3 text-xl font-semibold leading-tight tracking-tight">Get custom pricing fast</p>
+              <p className="mt-2 text-[13px] leading-relaxed text-white/60">Share your target quantity and customisation. We reply with a written quote.</p>
+              <ButtonLink href="/quote" size="sm" className="mt-5 w-full" data-track="quote_start" data-track-label="Catalog sidebar">
+                Request Quote
+              </ButtonLink>
+              <ButtonLink href="/contact" size="sm" variant="outline-light" className="mt-2 w-full">
+                Talk to Sales
+              </ButtonLink>
+            </div>
+          </div>
+        </aside>
         <div>
           <div className="mb-5 flex items-center justify-between gap-3">
             <p className="text-sm text-muted" aria-live="polite">
-              {results.length} {results.length === 1 ? "product" : "products"}
+              Showing {results.length} {results.length === 1 ? "product" : "products"}
               {query.q ? <> for “{query.q}”</> : null}
             </p>
             <Suspense>
@@ -72,7 +87,7 @@ export async function Catalog({ params, category }: { params: CatalogParams; cat
             </Suspense>
           </div>
           {results.length > 0 ? (
-            <ul className="grid grid-cols-2 gap-x-3 gap-y-9 sm:gap-x-4 md:grid-cols-3 xl:grid-cols-4">
+            <ul className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
               {results.map((p, i) => (
                 <li key={p.id}>
                   <ProductCard product={p} priority={i < 4} />

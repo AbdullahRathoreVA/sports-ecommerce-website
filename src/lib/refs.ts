@@ -1,7 +1,7 @@
 import { createHmac, randomInt, timingSafeEqual } from "node:crypto";
 
 /**
- * Human-facing references: GL-261005-K3P9 (orders), RFQ-261005-7XQ2 (leads).
+ * Human-facing references: AL-261005-K3P9 (orders; older orders use GL-), RFQ-261005-7XQ2 (leads).
  * Date prefix helps staff on the phone; a random suffix (no 0/O/1/I) avoids
  * guessable sequences that would leak order volume.
  */
@@ -17,7 +17,7 @@ function datePart(d = new Date()) {
   return d.toISOString().slice(2, 10).replace(/-/g, "");
 }
 
-export const newOrderNumber = () => `GL-${datePart()}-${suffix()}`;
+export const newOrderNumber = () => `AL-${datePart()}-${suffix()}`;
 export const newLeadNumber = () => `RFQ-${datePart()}-${suffix()}`;
 
 /**

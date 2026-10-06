@@ -90,7 +90,7 @@ export function PurchasePanel({ product, whatsapp }: Props) {
                   onClick={() => setMode(m)}
                   className={cn(
                     "h-11 rounded-lg text-sm font-semibold transition-colors",
-                    mode === m ? "bg-white text-ink shadow-sm" : "text-muted hover:text-fg",
+                    mode === m ? "bg-ink text-white shadow-sm" : "text-muted hover:text-fg",
                   )}
                 >
                   {m === "sample" ? "Buy a sample" : "Bulk order"}
@@ -172,7 +172,7 @@ export function PurchasePanel({ product, whatsapp }: Props) {
             type="button"
             onClick={addToCart}
             disabled={unit == null}
-            className="mt-5 flex h-13 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-white text-[15px] font-semibold text-ink transition-colors hover:bg-white/90 disabled:opacity-50"
+            className="mt-5 flex h-13 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-ink text-[15px] font-semibold text-white transition-colors hover:bg-ink-3 disabled:opacity-50"
             style={{ height: 52 }}
           >
             {added ? <Check className="h-5 w-5" aria-hidden /> : <ShoppingBag className="h-5 w-5" aria-hidden />}
@@ -234,7 +234,7 @@ export function MobileProductBar({ name, fromCents, currency, canBuy, slug }: { 
           <p className="text-[15px] font-semibold">{fromCents != null ? `From ${formatMoney(fromCents, currency)}` : "Price on request"}</p>
         </div>
         {canBuy ? (
-          <a href="#buy" className="flex h-12 items-center rounded-[var(--radius-control)] bg-white px-5 text-[15px] font-semibold text-ink">
+          <a href="#buy" className="flex h-12 items-center rounded-[var(--radius-control)] bg-ink px-5 text-[15px] font-semibold text-white">
             Buy / sample
           </a>
         ) : null}

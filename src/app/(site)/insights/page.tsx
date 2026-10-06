@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageHero } from "@/components/site/page-hero";
 import Image from "next/image";
 import Link from "next/link";
 import { getPosts } from "@/lib/catalog";
@@ -12,11 +13,10 @@ export const metadata: Metadata = {
 export default async function InsightsPage() {
   const posts = await getPosts();
   return (
-    <div className="container-x pb-28 pt-10 lg:pb-24 lg:pt-14">
-      <p className="eyebrow text-accent">Buyer guides</p>
-      <h1 className="font-display mt-3 text-[clamp(2.6rem,9vw,4.6rem)]">Know what you&apos;re ordering.</h1>
-      <p className="mt-3 max-w-2xl text-muted">Straight answers to the questions buyers ask us most.</p>
-      <ul className="mt-10 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <>
+    <PageHero eyebrow="Buyer guides / Alrobel Sportswear" title="Know what you're ordering." intro="Straight answers to the questions buyers ask us most." />
+    <div className="container-x pb-28 pt-12 lg:pb-24 lg:pt-16">
+      <ul className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {posts.map((p) => (
           <li key={p.slug}>
             <Link href={`/insights/${p.slug}`} className="group block">
@@ -31,5 +31,6 @@ export default async function InsightsPage() {
         ))}
       </ul>
     </div>
+    </>
   );
 }

@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { PageHero, CaptionedImage } from "@/components/site/page-hero";
 import { ClipReel, FACTORY_CLIPS } from "@/components/media/clip-reel";
 import { FilmButton, FACTORY_FILM, SHORT_FILM } from "@/components/media/film-player";
+import { FACTORY_VIDEO_ENABLED } from "@/components/media/config";
 import { ButtonLink } from "@/components/ui/button";
 import { getPublishedCertifications } from "@/lib/catalog";
 
@@ -65,6 +66,7 @@ export default async function FactoryPage() {
         </div>
       </PageHero>
 
+      {FACTORY_VIDEO_ENABLED && (
       <section className="container-x py-16 lg:py-24" aria-labelledby="reel">
         <h2 id="reel" className="font-display text-[clamp(2.2rem,7vw,4rem)]">
           The process, in real footage
@@ -74,6 +76,7 @@ export default async function FactoryPage() {
           <ClipReel clips={FACTORY_CLIPS} />
         </div>
       </section>
+      )}
 
       <section className="border-t hairline bg-chalk py-16 lg:py-24" aria-labelledby="stages">
         <div className="container-x">

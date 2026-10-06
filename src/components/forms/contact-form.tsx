@@ -72,7 +72,7 @@ export function ContactForm({ productSlug }: { productSlug?: string }) {
   return (
     <form
       noValidate
-      className="space-y-4 rounded-[var(--radius-card)] border hairline bg-surface p-5 sm:p-7"
+      className="space-y-4"
       onSubmit={(e) => {
         e.preventDefault();
         void submit(e.currentTarget);
@@ -127,7 +127,7 @@ export function ContactForm({ productSlug }: { productSlug?: string }) {
           {serverError}
         </p>
       )}
-      <button type="submit" disabled={state === "sending"} className="flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-white font-semibold text-ink disabled:opacity-70 sm:w-auto sm:px-8">
+      <button type="submit" disabled={state === "sending"} className="flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-ink font-semibold text-white disabled:opacity-70 sm:w-auto sm:px-8">
         {state === "sending" && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />} Send message
       </button>
     </form>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { FACTORY_VIDEO_ENABLED } from "./config";
 import { Pause, Play } from "lucide-react";
 import { track } from "@/lib/analytics/client";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ export type Clip = { id: string; step: string; title: string; caption: string };
  * reduced motion, and can be paused by the user.
  */
 export function ClipReel({ clips }: { clips: Clip[] }) {
+  if (!FACTORY_VIDEO_ENABLED) return null;
   return (
     <ol className="scrollbar-none snap-x-mandatory -mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:grid lg:grid-cols-7 lg:gap-3 lg:overflow-visible lg:px-0">
       {clips.map((clip, i) => (

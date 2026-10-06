@@ -5,15 +5,15 @@ type Variant = "primary" | "dark" | "light" | "outline" | "outline-light" | "gho
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-control)] font-semibold tracking-tight transition-[background-color,color,border-color,transform,box-shadow] duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 select-none";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--radius-control)] font-semibold transition-[background-color,color,border-color,transform,box-shadow] duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 select-none";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-accent text-accent-ink hover:bg-accent-hover shadow-[0_1px_0_rgba(255,255,255,0.35)_inset,0_10px_30px_-12px_rgba(205,245,74,0.55)]",
-  dark: "border border-white/10 bg-surface-2 text-fg hover:bg-ink-4",
+  primary: "bg-accent text-accent-ink hover:bg-accent-hover",
+  dark: "bg-ink text-white hover:bg-ink-3",
   light: "bg-white text-ink hover:bg-white/90",
-  outline: "border border-white/15 bg-transparent text-fg hover:border-white/35 hover:bg-white/[0.04]",
-  "outline-light": "border border-white/25 bg-transparent text-white hover:border-white/60 hover:bg-white/[0.06]",
-  ghost: "bg-transparent text-fg hover:bg-white/[0.06]",
+  outline: "border border-fg/25 bg-transparent text-fg hover:border-fg/60 hover:bg-fg/[0.04]",
+  "outline-light": "border border-white/30 bg-transparent text-white hover:border-white/70 hover:bg-white/[0.06]",
+  ghost: "bg-transparent text-fg hover:bg-fg/[0.06]",
   whatsapp: "bg-[#1fae4b] text-white hover:bg-[#178f3d]",
 };
 

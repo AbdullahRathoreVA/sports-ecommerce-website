@@ -1,13 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, IBM_Plex_Mono } from "next/font/google";
+import { Exo_2, Inter, IBM_Plex_Mono } from "next/font/google";
 import { getSettings } from "@/lib/settings";
 import { siteUrl } from "@/config/site";
 import "./globals.css";
 
-const archivo = Archivo({
+const inter = Inter({
   subsets: ["latin"],
-  axes: ["wdth"],
-  variable: "--font-archivo",
+  variable: "--font-inter",
+  display: "swap",
+});
+
+// Wordmark face for the Alrobel logo (wide, heavy, sporty).
+const exo = Exo_2({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  style: ["normal", "italic"],
+  variable: "--font-exo",
   display: "swap",
 });
 
@@ -52,7 +60,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${exo.variable} ${plexMono.variable}`}>
       <body>{children}</body>
     </html>
   );
