@@ -5,6 +5,8 @@ import { getSettings } from "@/lib/settings";
 import { getAllProducts, getCategories, getFaqs, getPublishedTestimonials } from "@/lib/catalog";
 import { ButtonLink } from "@/components/ui/button";
 import { HeroUnbox } from "@/components/three/unbox-stage";
+import { ShippingGlobe } from "@/components/three/globe-stage";
+import { FactoryMap } from "@/components/site/factory-map";
 import { JsonLd, faqSchema } from "@/components/seo/json-ld";
 
 export const revalidate = 300;
@@ -393,38 +395,45 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── 05 Made in Sialkot ─────────────────────────────────────────── */}
+      {/* ─── 05 Global shipping ─────────────────────────────────────────── */}
       <section className="on-dark relative overflow-hidden border-t border-white/10 bg-ink py-20 lg:py-28" aria-labelledby="global">
-        <svg viewBox="0 0 400 400" className="pointer-events-none absolute -right-24 top-6 hidden h-[460px] w-[460px] text-white/15 lg:block" aria-hidden>
-          <circle cx="200" cy="200" r="180" fill="none" stroke="currentColor" />
-          {[40, 80, 120, 160].map((r) => (
-            <ellipse key={r} cx="200" cy="200" rx={r} ry="180" fill="none" stroke="currentColor" />
-          ))}
-          {[-120, -60, 0, 60, 120].map((y) => (
-            <ellipse key={y} cx="200" cy={200 + y} rx={Math.sqrt(180 * 180 - y * y)} ry={18} fill="none" stroke="currentColor" />
-          ))}
-          <path d="M110 150 Q200 70 290 120 T330 250" fill="none" stroke="#ef4a3e" strokeDasharray="4 6" strokeOpacity="0.9" />
-          <path d="M110 150 Q150 260 250 300" fill="none" stroke="#ef4a3e" strokeDasharray="4 6" strokeOpacity="0.9" />
-          {[
-            [110, 150],
-            [290, 120],
-            [330, 250],
-            [250, 300],
-          ].map(([x, y]) => (
-            <circle key={`${x}${y}`} cx={x} cy={y} r="5" fill="#ef4a3e" />
-          ))}
-        </svg>
-        <div className="container-x relative" data-reveal>
-          <p className="label text-white/60">05 / From Sialkot</p>
-          <h2 id="global" className="font-display mt-5 max-w-3xl text-[clamp(2.4rem,7vw,4.4rem)]">
-            Made in Sialkot.
-            <span className="block">Shipped worldwide.</span>
-          </h2>
-          <p className="mt-6 max-w-md text-[16px] leading-relaxed text-white/60">
-            A factory partner for clubs, brands, race teams and retailers — from Pakistan&apos;s sports-manufacturing city to your door, by sea,
-            air or express courier.
-          </p>
-          <dl className="mt-14 grid grid-cols-2 gap-8 border-t border-white/10 pt-8 lg:grid-cols-4">
+        <div className="container-x grid items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
+          <div data-reveal>
+            <p className="label text-white/60">05 / Global shipping</p>
+            <h2 id="global" className="font-display mt-5 max-w-3xl text-[clamp(2.4rem,7vw,4.4rem)]">
+              Made in Sialkot.
+              <span className="block">Shipped worldwide.</span>
+            </h2>
+            <p className="mt-6 max-w-md text-[16px] leading-relaxed text-white/60">
+              Our factory handles packing, export paperwork and shipping — by sea, air or express courier, door to door. Customers in the USA,
+              the UK, Europe, the Gulf and beyond receive their kits straight from Sialkot.
+            </p>
+            <ul className="mt-8 grid max-w-md grid-cols-2 gap-x-6 gap-y-3">
+              {["USA", "United Kingdom", "Europe", "Gulf & Middle East"].map((r) => (
+                <li key={r} className="flex items-center gap-2.5 border-b border-white/10 pb-3 text-sm">
+                  <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden /> {r}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs text-white/40">And more — ask us about shipping to your country.</p>
+          </div>
+          <div className="relative" data-reveal>
+            <ShippingGlobe
+              origin={{ name: "Sialkot", lat: 32.49, lon: 74.53 }}
+              destinations={[
+                { name: "New York", lat: 40.71, lon: -74.0 },
+                { name: "Los Angeles", lat: 34.05, lon: -118.24 },
+                { name: "London", lat: 51.5, lon: -0.13 },
+                { name: "Berlin", lat: 52.52, lon: 13.4 },
+                { name: "Dubai", lat: 25.2, lon: 55.27 },
+              ]}
+              className="mx-auto w-full max-w-[560px]"
+            />
+            <p className="label text-center text-[0.6rem] text-white/35">Drag to spin the globe</p>
+          </div>
+        </div>
+        <div className="container-x mt-14">
+          <dl className="grid grid-cols-2 gap-8 border-t border-white/10 pt-8 lg:grid-cols-4">
             {strip.map((f) => (
               <div key={f.label}>
                 <dt className="sr-only">{f.label}</dt>
@@ -433,6 +442,23 @@ export default async function HomePage() {
               </div>
             ))}
           </dl>
+          <div className="mt-12 grid gap-6 lg:grid-cols-[1fr_1.6fr] lg:items-stretch">
+            <div className="flex flex-col justify-between rounded-[var(--radius-card)] border border-white/10 p-6">
+              <div>
+                <p className="label text-accent">Factory & office</p>
+                <p className="mt-3 text-2xl font-semibold tracking-tight">{[settings.contact.addressLine, settings.contact.city, settings.contact.country].filter(Boolean).join(", ") || "Sialkot, Pakistan"}</p>
+                <p className="mt-3 text-sm text-white/55">Fabric, design, sublimation and stitching — all under one roof, from where every order ships.</p>
+              </div>
+              <Link href="/contact" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">
+                Contact the factory <ArrowUpRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
+            <FactoryMap
+              address={[settings.contact.addressLine, settings.contact.city, settings.contact.country].filter(Boolean).join(", ") || "Sialkot, Pakistan"}
+              mapsUrl={settings.contact.mapsUrl || undefined}
+              className="min-h-[300px]"
+            />
+          </div>
         </div>
       </section>
 

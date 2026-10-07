@@ -31,6 +31,8 @@ function contentSecurityPolicy(): string {
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",
+    // Google Maps embed for the factory location (loaded only on request).
+    "frame-src https://www.google.com https://maps.google.com",
     ...(isProd ? ["upgrade-insecure-requests"] : []),
   ].join("; ");
 }
