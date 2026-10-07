@@ -4,7 +4,7 @@ import { ArrowDown, ArrowRight, ArrowUpRight, Check, Mail, Plus, Camera } from "
 import { getSettings } from "@/lib/settings";
 import { getAllProducts, getCategories, getFaqs, getPublishedTestimonials } from "@/lib/catalog";
 import { ButtonLink } from "@/components/ui/button";
-import { HeroJersey } from "@/components/three/jersey-stage";
+import { HeroUnbox } from "@/components/three/unbox-stage";
 import { JsonLd, faqSchema } from "@/components/seo/json-ld";
 
 export const revalidate = 300;
@@ -97,24 +97,24 @@ export default async function HomePage() {
             </ul>
           </div>
 
-          <div className="relative">
-            <div className="label mb-3 flex justify-between text-white/40">
-              <span>Alrobel / 3D design studio</span>
-              <span>Drag to rotate</span>
+          <div className="relative lg:-mr-10">
+            <div className="label flex justify-between text-white/40">
+              <span>Alrobel / Made &amp; shipped</span>
+              <span>01 — 03</span>
             </div>
-            <div className="relative rounded-lg border border-white/10 bg-white/[0.02]">
-              <div className="signal-glow pointer-events-none absolute inset-0" />
-              <HeroJersey poster="/media/hero/jersey-poster.webp" posterAlt="Sublimated football jersey rendered in 3D" className="relative mx-auto aspect-square w-full max-w-[560px]" />
+            <div className="relative">
+              <div className="signal-glow pointer-events-none absolute inset-[10%]" />
+              <HeroUnbox poster="/media/hero/unbox-poster.webp" posterAlt="An Alrobel shipping box opening with three finished team kits rising out of it" className="relative mx-auto aspect-[1.08] w-full" />
               <Link
                 href="/design-studio"
-                className="absolute right-4 top-4 hidden max-w-[220px] items-start gap-3 rounded-md border border-white/10 bg-ink/90 p-3 backdrop-blur transition-colors hover:border-accent sm:flex"
+                className="absolute bottom-6 right-0 hidden max-w-[230px] items-start gap-3 rounded-md border border-white/10 bg-ink/90 p-3 backdrop-blur transition-colors hover:border-accent sm:flex"
                 data-track="customizer_start"
                 data-track-label="Hero card"
               >
                 <Plus className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
                 <span>
                   <span className="block text-sm font-semibold text-white">Made for your brand.</span>
-                  <span className="mt-0.5 block text-xs text-white/50">Design your kit in 3D</span>
+                  <span className="mt-0.5 block text-xs text-white/50">Tap a kit to design yours in 3D</span>
                 </span>
               </Link>
             </div>
