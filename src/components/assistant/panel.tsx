@@ -3,15 +3,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUp, CheckCircle2, Loader2, ShieldCheck, Sparkles, X } from "lucide-react";
+import { ArrowRight, ArrowUp, CheckCircle2, Loader2, Mic, MicOff, Paperclip, UserRound, X } from "lucide-react";
 import { Markdown } from "@/components/ui/markdown";
+import { LogoMark } from "@/components/ui/logo";
+import { prepareImage } from "@/components/admin/uploader";
 import { sessionId, track } from "@/lib/analytics/client";
 import { formatMoney, cn } from "@/lib/utils";
 import type { AssistantOpenDetail } from "./bus";
 
 type ProductMini = { slug: string; name: string; image: string | null; fromCents: number | null; currency: string; moq: number; category: string };
 type Turn =
-  | { role: "user"; content: string }
+  | { role: "user"; content: string; image?: string }
   | {
       role: "assistant";
       content: string;
@@ -19,16 +21,35 @@ type Turn =
       suggestions?: string[];
       capture?: { reason: string; prefill: { productSlug?: string; quantity?: number; summary?: string } } | null;
       engine?: string;
+      note?: boolean;
     };
 
 const STORE = "gl_assistant_v1";
+const EMAIL_STORE = "al_chat_email";
 
 const STARTERS = [
   "What can you make for my football club?",
-  "What's the MOQ for race suits?",
+  "Can you put my logo on team kits?",
   "Can I get a sample first?",
-  "Which gloves for American football?",
+  "How long does production take?",
 ];
+
+type SpeechRec = {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  start: () => void;
+  stop: () => void;
+  onresult: ((e: { results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void) | null;
+  onend: (() => void) | null;
+  onerror: (() => void) | null;
+};
+
+function speechCtor(): (new () => SpeechRec) | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as { SpeechRecognition?: new () => SpeechRec; webkitSpeechRecognition?: new () => SpeechRec };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
 
 export function AssistantPanel({
   open,
@@ -44,18 +65,30 @@ export function AssistantPanel({
   const [turns, setTurns] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [captureFor, setCaptureFor] = useState<number | null>(null);
+  const [handoff, setHandoff] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
+  const [emailDismissed, setEmailDismissed] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [canSpeak, setCanSpeak] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const recRef = useRef<SpeechRec | null>(null);
   const started = useRef(false);
   const handledInitial = useRef<string | null>(null);
 
+  const attachments = turns.flatMap((t) => (t.role === "user" && t.image ? [t.image] : []));
+
   useEffect(() => {
+    setCanSpeak(Boolean(speechCtor()));
     try {
       const saved = sessionStorage.getItem(STORE);
       // Drop malformed turns (e.g. saved by an older version) instead of crashing on them.
       if (saved) setTurns((JSON.parse(saved) as Turn[]).filter((t) => t && typeof t.content === "string" && (t.role === "user" || t.role === "assistant")));
+      setEmail(sessionStorage.getItem(EMAIL_STORE));
     } catch {
       /* ignore */
     }
@@ -68,7 +101,7 @@ export function AssistantPanel({
       /* ignore */
     }
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-  }, [turns, busy]);
+  }, [turns, busy, handoff]);
 
   useEffect(() => {
     if (!open) return;
@@ -82,7 +115,7 @@ export function AssistantPanel({
   }, [open, onClose]);
 
   const send = useCallback(
-    async (text: string) => {
+    async (text: string, image?: string) => {
       const content = text.trim().slice(0, 1200);
       if (!content || busy) return;
       setError(null);
@@ -91,7 +124,7 @@ export function AssistantPanel({
         track("ai_chat_start");
       }
       track("ai_message");
-      const next: Turn[] = [...turns, { role: "user", content }];
+      const next: Turn[] = [...turns, { role: "user", content, ...(image ? { image } : {}) }];
       setTurns(next);
       setInput("");
       setBusy(true);
@@ -100,7 +133,10 @@ export function AssistantPanel({
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            messages: next.slice(-12).map((t) => ({ role: t.role, content: t.content })),
+            messages: next
+              .filter((t) => !(t.role === "assistant" && t.note))
+              .slice(-12)
+              .map((t) => ({ role: t.role, content: t.content })),
             productSlug: initial.productSlug,
             sessionId: sessionId(),
           }),
@@ -130,109 +166,201 @@ export function AssistantPanel({
     void send(initial.question);
   }, [open, initial, send]);
 
+  async function attach(file: File) {
+    setError(null);
+    setUploading(true);
+    try {
+      const prepared = await prepareImage(file);
+      const fd = new FormData();
+      fd.append("file", prepared);
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Upload failed — please try a JPG or PNG under 4 MB.");
+      track("ai_message", { label: "attachment" });
+      await send(`I've attached an image: ${file.name.slice(0, 80)} (my logo or artwork).`, data.url);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  function toggleVoice() {
+    const Ctor = speechCtor();
+    if (!Ctor) return;
+    if (listening) {
+      recRef.current?.stop();
+      return;
+    }
+    const rec = new Ctor();
+    rec.lang = navigator.language || "en-US";
+    rec.interimResults = true;
+    rec.continuous = false;
+    const before = input ? `${input.trim()} ` : "";
+    rec.onresult = (e) => {
+      const text = Array.from(e.results)
+        .map((r) => r[0]?.transcript ?? "")
+        .join(" ");
+      setInput(before + text);
+    };
+    rec.onend = () => {
+      setListening(false);
+      inputRef.current?.focus();
+    };
+    rec.onerror = () => setListening(false);
+    recRef.current = rec;
+    setListening(true);
+    rec.start();
+  }
+
   if (!open) return null;
 
+  const assistantCount = turns.filter((t) => t.role === "assistant" && !t.note).length;
+  const showEmailCard = !email && !emailDismissed && assistantCount >= 1 && !busy;
+
   return (
-    <div className="fixed inset-0 z-[65] lg:inset-auto lg:bottom-6 lg:right-6" role="dialog" aria-modal="true" aria-label="Product assistant">
+    <div className="fixed inset-0 z-[65] lg:inset-auto lg:bottom-6 lg:right-6" role="dialog" aria-modal="true" aria-label={`${brandName} chat`}>
       <div className="absolute inset-0 bg-black/40 lg:hidden" onClick={onClose} aria-hidden />
-      <div className="absolute inset-x-0 bottom-0 top-[6svh] flex flex-col overflow-hidden rounded-t-[22px] bg-paper shadow-2xl animate-rise lg:static lg:h-[min(700px,calc(100svh-48px))] lg:w-[420px] lg:rounded-[22px] lg:ring-1 lg:ring-white/10">
-        <header className="on-dark flex items-center gap-3 bg-ink px-4 py-3.5 text-white">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-accent">
-            <Sparkles className="h-4 w-4" aria-hidden />
+      <div className="absolute inset-x-0 bottom-0 top-[5svh] flex flex-col overflow-hidden rounded-t-2xl bg-paper shadow-2xl animate-rise lg:static lg:h-[min(720px,calc(100svh-48px))] lg:w-[440px] lg:rounded-2xl lg:ring-1 lg:ring-black/10">
+        <header className="on-dark flex items-center gap-3 bg-ink px-4 py-3 text-white">
+          <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/[0.06] ring-1 ring-white/10">
+            <LogoMark className="h-5" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-signal ring-2 ring-ink" aria-hidden />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[15px] font-semibold leading-tight">{brandName} assistant</p>
-            <p className="flex items-center gap-1 text-xs text-white/60">
-              <ShieldCheck className="h-3.5 w-3.5 text-signal" aria-hidden /> Answers from our real catalogue
-            </p>
+            <p className="truncate text-[15px] font-semibold leading-tight">{brandName}</p>
+            <p className="truncate text-xs text-white/60">Online · instant replies</p>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close assistant" className="grid h-11 w-11 place-items-center rounded-xl hover:bg-white/10">
+          <button
+            type="button"
+            onClick={() => setHandoff((v) => !v)}
+            aria-pressed={handoff}
+            title="Talk to a person"
+            className="hidden h-9 items-center gap-1.5 rounded-md border border-white/15 px-2.5 text-xs font-semibold hover:bg-white/10 sm:inline-flex"
+          >
+            <UserRound className="h-3.5 w-3.5" aria-hidden /> Talk to a person
+          </button>
+          <button type="button" onClick={onClose} aria-label="Close chat" className="grid h-10 w-10 place-items-center rounded-md hover:bg-white/10">
             <X className="h-5 w-5" aria-hidden />
           </button>
         </header>
 
         <div ref={listRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-5" aria-live="polite">
+          <p className="label text-center text-[0.58rem] text-subtle">Today</p>
           {turns.length === 0 && (
-            <div>
-              <p className="text-[15px] leading-relaxed text-muted">
-                Hi — ask me about products, materials, minimum quantities, sizing or customisation. If you&apos;re ready, I can also
-                pass your requirements straight to our sales team.
-              </p>
-              <ul className="mt-4 flex flex-col gap-2">
-                {STARTERS.map((s) => (
-                  <li key={s}>
-                    <button
-                      type="button"
-                      onClick={() => send(s)}
-                      className="w-full rounded-xl border hairline bg-surface px-4 py-3 text-left text-sm font-medium text-fg transition-colors hover:border-accent hover:text-accent"
-                    >
-                      {s}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            <div className="flex gap-2.5">
+              <Avatar />
+              <div className="min-w-0 flex-1">
+                <div className="rounded-2xl rounded-tl-md bg-surface px-4 py-3 text-[15px] leading-relaxed shadow-sm ring-1 ring-black/[0.05]">
+                  Hi! 👋 Welcome to {brandName}. Ask me anything — products, fabrics, sizes, MOQs or customisation. You can also attach your logo or use your voice.
+                </div>
+                <ul className="mt-3 flex flex-col gap-2">
+                  {STARTERS.map((s) => (
+                    <li key={s}>
+                      <button
+                        type="button"
+                        onClick={() => send(s)}
+                        className="w-full rounded-xl border hairline bg-surface px-4 py-2.5 text-left text-sm font-medium text-fg transition-colors hover:border-accent hover:text-accent"
+                      >
+                        {s}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           )}
 
           {turns.map((t, i) =>
             t.role === "user" ? (
-              <div key={i} className="flex justify-end">
-                <p className="max-w-[85%] rounded-2xl rounded-br-md bg-accent px-4 py-2.5 text-[15px] font-medium leading-relaxed text-accent-ink">{t.content}</p>
+              <div key={i} className="flex flex-col items-end gap-1.5">
+                {t.image && (
+                  <a href={t.image} target="_blank" rel="noopener" className="relative block h-36 w-36 overflow-hidden rounded-xl bg-surface ring-1 ring-black/10">
+                    <Image src={t.image} alt="Your attached image" fill sizes="144px" className="object-contain" />
+                  </a>
+                )}
+                <p className="max-w-[85%] rounded-2xl rounded-br-md bg-accent px-4 py-2.5 text-[15px] leading-relaxed text-accent-ink">{t.content}</p>
               </div>
             ) : (
-              <div key={i} className="space-y-3">
-                <div className="max-w-[92%] rounded-2xl rounded-bl-md bg-surface px-4 py-3 text-[15px] ring-1 ring-white/[0.07]">
-                  <Markdown source={t.content} compact />
-                </div>
-                {t.products && t.products.length > 0 && (
-                  <ul className="scrollbar-none -mx-4 flex gap-2.5 overflow-x-auto px-4">
-                    {t.products.map((p) => (
-                      <li key={p.slug} className="w-[150px] shrink-0">
-                        <Link href={`/products/${p.slug}`} onClick={onClose} className="block overflow-hidden rounded-xl bg-surface ring-1 ring-white/[0.07] transition hover:ring-accent">
-                          <span className="relative block aspect-[4/5] bg-surface-2">
-                            {p.image && <Image src={p.image} alt="" fill sizes="150px" className="object-cover" />}
-                          </span>
-                          <span className="block p-2.5">
-                            <span className="line-clamp-2 text-[13px] font-semibold leading-snug">{p.name}</span>
-                            <span className="mt-1 block text-xs text-muted">
-                              {p.fromCents != null ? `From ${formatMoney(p.fromCents, p.currency)}` : "Quote"} · MOQ {p.moq}
+              <div key={i} className="flex gap-2.5">
+                <Avatar />
+                <div className="min-w-0 flex-1 space-y-3">
+                  <div className={cn("max-w-[95%] rounded-2xl rounded-tl-md px-4 py-3 text-[15px] shadow-sm ring-1", t.note ? "bg-emerald-50 text-emerald-900 ring-emerald-200" : "bg-surface ring-black/[0.05]")}>
+                    <Markdown source={t.content} compact />
+                  </div>
+                  {t.products && t.products.length > 0 && (
+                    <ul className="scrollbar-none -mr-4 flex gap-2.5 overflow-x-auto pr-4">
+                      {t.products.map((p) => (
+                        <li key={p.slug} className="w-[150px] shrink-0">
+                          <Link href={`/products/${p.slug}`} onClick={onClose} className="block overflow-hidden rounded-xl bg-surface ring-1 ring-black/[0.06] transition hover:ring-accent">
+                            <span className="relative block aspect-square bg-surface-2">
+                              {p.image && <Image src={p.image} alt="" fill sizes="150px" className="object-cover" />}
                             </span>
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {t.capture && captureFor !== i && (
-                  <button
-                    type="button"
-                    onClick={() => setCaptureFor(i)}
-                    className="flex h-12 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-accent text-[15px] font-semibold text-accent-ink"
-                  >
-                    Send my requirements to the sales team
-                  </button>
-                )}
-                {captureFor === i && t.capture && <LeadCapture turns={turns} prefill={t.capture.prefill} />}
-                {t.suggestions && t.suggestions.length > 0 && (
-                  <ul className="flex flex-wrap gap-2">
-                    {t.suggestions.map((s) => (
-                      <li key={s}>
-                        <button type="button" onClick={() => send(s)} className="min-h-10 rounded-full border hairline bg-surface px-3.5 py-2 text-left text-[13px] text-fg hover:border-accent hover:text-accent">
-                          {s}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                            <span className="block p-2.5">
+                              <span className="line-clamp-2 text-[13px] font-semibold leading-snug">{p.name}</span>
+                              <span className="mt-1 block text-xs text-muted">
+                                {p.fromCents != null ? `From ${formatMoney(p.fromCents, p.currency)}` : "Quote"} · MOQ {p.moq}
+                              </span>
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {t.capture && captureFor !== i && (
+                    <button type="button" onClick={() => setCaptureFor(i)} className="flex h-11 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] bg-ink text-sm font-semibold text-white">
+                      Send my requirements to the sales team <ArrowRight className="h-4 w-4" aria-hidden />
+                    </button>
+                  )}
+                  {captureFor === i && t.capture && <LeadCapture turns={turns} attachments={attachments} prefill={t.capture.prefill} defaultEmail={email} />}
+                  {t.suggestions && t.suggestions.length > 0 && (
+                    <ul className="flex flex-wrap gap-2">
+                      {t.suggestions.map((s) => (
+                        <li key={s}>
+                          <button type="button" onClick={() => send(s)} className="min-h-9 rounded-full border hairline bg-surface px-3.5 py-1.5 text-left text-[13px] text-fg hover:border-accent hover:text-accent">
+                            {s}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             ),
           )}
+
           {busy && (
-            <p className="flex items-center gap-2 text-sm text-subtle">
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> Checking the catalogue…
-            </p>
+            <div className="flex gap-2.5" aria-label="Typing">
+              <Avatar />
+              <div className="flex items-center gap-1 rounded-2xl rounded-tl-md bg-surface px-4 py-3.5 shadow-sm ring-1 ring-black/[0.05]">
+                {[0, 1, 2].map((d) => (
+                  <span key={d} className="h-2 w-2 animate-bounce rounded-full bg-subtle" style={{ animationDelay: `${d * 140}ms` }} />
+                ))}
+              </div>
+            </div>
           )}
-          {error && <p className="rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300">{error}</p>}
+
+          {showEmailCard && (
+            <EmailCard
+              turns={turns}
+              attachments={attachments}
+              onDone={(addr) => {
+                setEmail(addr);
+                try {
+                  sessionStorage.setItem(EMAIL_STORE, addr);
+                } catch {
+                  /* ignore */
+                }
+                setTurns((prev) => [...prev, { role: "assistant", note: true, content: `Thanks! Our team will email you at **${addr}** — keep chatting here meanwhile.` }]);
+              }}
+              onDismiss={() => setEmailDismissed(true)}
+            />
+          )}
+
+          {handoff && <LeadCapture turns={turns} attachments={attachments} prefill={{ summary: "Asked to talk to a person from the chat." }} defaultEmail={email} title="Talk to a person — we'll reply by email" />}
+
+          {error && <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-200">{error}</p>}
         </div>
 
         <form
@@ -242,9 +370,29 @@ export function AssistantPanel({
             void send(input);
           }}
         >
-          <div className="flex items-end gap-2 rounded-2xl border hairline bg-paper p-1.5 focus-within:border-accent">
+          <div className="flex items-end gap-1 rounded-2xl border hairline bg-paper p-1.5 focus-within:border-accent">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void attach(f);
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading || busy}
+              aria-label="Attach your logo or artwork"
+              title="Attach logo or artwork"
+              className="grid h-11 w-10 shrink-0 place-items-center rounded-xl text-muted hover:text-fg disabled:opacity-40"
+            >
+              {uploading ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : <Paperclip className="h-5 w-5" aria-hidden />}
+            </button>
             <label htmlFor="assistant-input" className="sr-only">
-              Your question
+              Your message
             </label>
             <textarea
               id="assistant-input"
@@ -259,28 +407,126 @@ export function AssistantPanel({
                   void send(input);
                 }
               }}
-              placeholder="Ask about products, MOQ, materials…"
-              className="max-h-32 min-h-11 flex-1 resize-none bg-transparent px-3 py-2.5 text-[16px] outline-none placeholder:text-subtle"
+              placeholder={listening ? "Listening…" : "Type your message…"}
+              className="max-h-32 min-h-11 flex-1 resize-none bg-transparent px-2 py-2.5 text-[16px] outline-none placeholder:text-subtle"
             />
-            <button
-              type="submit"
-              disabled={busy || !input.trim()}
-              aria-label="Send"
-              className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent text-accent-ink transition-opacity disabled:opacity-40"
-            >
+            {canSpeak && (
+              <button
+                type="button"
+                onClick={toggleVoice}
+                aria-pressed={listening}
+                aria-label={listening ? "Stop voice input" : "Speak your message"}
+                className={cn("grid h-11 w-10 shrink-0 place-items-center rounded-xl", listening ? "animate-pulse text-accent" : "text-muted hover:text-fg")}
+              >
+                {listening ? <MicOff className="h-5 w-5" aria-hidden /> : <Mic className="h-5 w-5" aria-hidden />}
+              </button>
+            )}
+            <button type="submit" disabled={busy || !input.trim()} aria-label="Send" className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent text-accent-ink transition-opacity disabled:opacity-40">
               <ArrowUp className="h-5 w-5" aria-hidden />
             </button>
           </div>
-          <p className="mt-2 px-1 text-[11px] leading-snug text-subtle">
-            AI answers come from our product data. Prices and lead times are confirmed by our team with every quote.
-          </p>
+          <div className="mt-2 flex items-center justify-between gap-3 px-1">
+            <p className="text-[11px] leading-snug text-subtle">AI answers come from our product data; prices are confirmed by our team.</p>
+            <button type="button" onClick={() => setHandoff(true)} className="shrink-0 text-[11px] font-semibold text-accent hover:underline sm:hidden">
+              Talk to a person
+            </button>
+          </div>
         </form>
       </div>
     </div>
   );
 }
 
-function LeadCapture({ turns, prefill }: { turns: Turn[]; prefill: { productSlug?: string; quantity?: number; summary?: string } }) {
+function Avatar() {
+  return (
+    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink text-white" aria-hidden>
+      <LogoMark className="h-4" />
+    </span>
+  );
+}
+
+function EmailCard({ turns, attachments, onDone, onDismiss }: { turns: Turn[]; attachments: string[]; onDone: (email: string) => void; onDismiss: () => void }) {
+  const [value, setValue] = useState("");
+  const [state, setState] = useState<"idle" | "sending" | "error">("idle");
+  const [message, setMessage] = useState<string | null>(null);
+  const lastQuestion = [...turns].reverse().find((t) => t.role === "user")?.content ?? "";
+
+  async function submit() {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+      setMessage("Please enter a valid email.");
+      return;
+    }
+    setState("sending");
+    setMessage(null);
+    try {
+      const res = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          source: "AI_ASSISTANT",
+          name: "Chat visitor",
+          email: value.trim(),
+          preferredChannel: "email",
+          message: `Left their email in the website chat. Last question: ${lastQuestion}`.slice(0, 4000),
+          transcript: turns.slice(-12).map((t) => ({ role: t.role, content: t.content.slice(0, 800) })),
+          attachments: attachments.slice(0, 6),
+          sessionId: sessionId(),
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Could not save — please try again.");
+      track("ai_lead_created");
+      onDone(value.trim());
+    } catch (e) {
+      setState("error");
+      setMessage(e instanceof Error ? e.message : "Could not save.");
+    }
+  }
+
+  return (
+    <div className="ml-10 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-black/[0.05]">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="text-sm font-semibold">Get our team&apos;s reply by email</p>
+          <p className="mt-0.5 text-xs text-muted">A real person follows up with prices and next steps — in writing.</p>
+        </div>
+        <button type="button" onClick={onDismiss} aria-label="Not now" className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-subtle hover:text-fg">
+          <X className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
+      <form
+        className="mt-3 flex overflow-hidden rounded-xl border hairline focus-within:border-accent"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void submit();
+        }}
+      >
+        <label htmlFor="chat-email" className="sr-only">
+          Your email
+        </label>
+        <input id="chat-email" type="email" autoComplete="email" value={value} onChange={(e) => setValue(e.target.value)} placeholder="Please enter your email" className="h-11 min-w-0 flex-1 bg-transparent px-3.5 text-[15px] outline-none" />
+        <button type="submit" disabled={state === "sending"} aria-label="Save email" className="grid w-12 place-items-center bg-accent text-accent-ink disabled:opacity-60">
+          {state === "sending" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <ArrowRight className="h-4 w-4" aria-hidden />}
+        </button>
+      </form>
+      {message && <p className="mt-2 text-xs text-red-700">{message}</p>}
+    </div>
+  );
+}
+
+function LeadCapture({
+  turns,
+  attachments,
+  prefill,
+  defaultEmail,
+  title = "Where should we send your quote?",
+}: {
+  turns: Turn[];
+  attachments: string[];
+  prefill: { productSlug?: string; quantity?: number; summary?: string };
+  defaultEmail: string | null;
+  title?: string;
+}) {
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [leadNumber, setLeadNumber] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -304,6 +550,7 @@ function LeadCapture({ turns, prefill }: { turns: Turn[]; prefill: { productSlug
           preferredChannel: fd.get("phone") ? "whatsapp" : "email",
           message: prefill.summary,
           transcript: turns.slice(-12).map((t) => ({ role: t.role, content: t.content.slice(0, 800) })),
+          attachments: attachments.slice(0, 6),
           website: fd.get("website"),
           sessionId: sessionId(),
         }),
@@ -312,6 +559,7 @@ function LeadCapture({ turns, prefill }: { turns: Turn[]; prefill: { productSlug
       if (!res.ok) throw new Error(data.error ?? "Could not send — please try the quote form.");
       setLeadNumber(data.leadNumber);
       setState("done");
+      track("ai_lead_created");
     } catch (e) {
       setState("error");
       setMessage(e instanceof Error ? e.message : "Could not send.");
@@ -320,42 +568,39 @@ function LeadCapture({ turns, prefill }: { turns: Turn[]; prefill: { productSlug
 
   if (state === "done") {
     return (
-      <div className="flex gap-3 rounded-2xl bg-emerald-500/10 p-4 text-[14px] text-emerald-200 ring-1 ring-emerald-500/30">
-        <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-400" aria-hidden />
+      <div className="ml-10 flex gap-3 rounded-2xl bg-emerald-50 p-4 text-[14px] text-emerald-900 ring-1 ring-emerald-200">
+        <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" aria-hidden />
         <p>
-          Sent — your reference is <strong className="font-mono">{leadNumber}</strong>. Our sales team will contact you shortly with
-          pricing and next steps.
+          Sent — your reference is <strong className="font-mono">{leadNumber}</strong>. Our team will reply by email with pricing and next steps.
         </p>
       </div>
     );
   }
 
+  const field = "h-11 w-full rounded-xl border hairline bg-paper px-3.5 text-[16px] outline-none focus:border-accent";
   return (
     <form
-      className="space-y-2.5 rounded-2xl bg-surface p-4 ring-1 ring-white/[0.09]"
+      className="ml-10 space-y-2.5 rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-black/[0.05]"
       onSubmit={(e) => {
         e.preventDefault();
         void submit(e.currentTarget);
       }}
     >
-      <p className="text-sm font-semibold">Where should we send your quote?</p>
-      <input name="name" required maxLength={80} autoComplete="name" placeholder="Your name" className="h-12 w-full rounded-xl border hairline px-3.5 text-[16px] outline-none focus:border-accent" />
-      <input name="email" type="email" required maxLength={120} autoComplete="email" placeholder="Email" className="h-12 w-full rounded-xl border hairline px-3.5 text-[16px] outline-none focus:border-accent" />
-      <input name="phone" type="tel" maxLength={30} autoComplete="tel" placeholder="WhatsApp number (optional)" className="h-12 w-full rounded-xl border hairline px-3.5 text-[16px] outline-none focus:border-accent" />
+      <p className="text-sm font-semibold">{title}</p>
+      <input name="name" required maxLength={80} autoComplete="name" placeholder="Your name" className={field} />
+      <input name="email" type="email" required maxLength={120} autoComplete="email" defaultValue={defaultEmail ?? undefined} placeholder="Email" className={field} />
+      <input name="phone" type="tel" maxLength={30} autoComplete="tel" placeholder="WhatsApp number (optional)" className={field} />
       <div className="grid grid-cols-2 gap-2.5">
-        <input name="company" maxLength={120} autoComplete="organization" placeholder="Team / company" className="h-12 w-full rounded-xl border hairline px-3.5 text-[16px] outline-none focus:border-accent" />
-        <input name="quantity" type="number" min={1} max={1000000} inputMode="numeric" defaultValue={prefill.quantity ?? undefined} placeholder="Quantity" className="h-12 w-full rounded-xl border hairline px-3.5 text-[16px] outline-none focus:border-accent" />
+        <input name="company" maxLength={120} autoComplete="organization" placeholder="Team / company" className={field} />
+        <input name="quantity" type="number" min={1} max={1000000} inputMode="numeric" defaultValue={prefill.quantity ?? undefined} placeholder="Quantity" className={field} />
       </div>
+      {attachments.length > 0 && <p className="text-xs text-muted">📎 {attachments.length} attached image{attachments.length > 1 ? "s" : ""} will be included.</p>}
       {/* Honeypot: hidden from people, irresistible to bots. */}
       <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
-      <button
-        type="submit"
-        disabled={state === "sending"}
-        className={cn("flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-ink text-[15px] font-semibold text-white", state === "sending" && "opacity-70")}
-      >
-        {state === "sending" && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />} Send to sales
+      <button type="submit" disabled={state === "sending"} className={cn("flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-ink text-[15px] font-semibold text-white", state === "sending" && "opacity-70")}>
+        {state === "sending" && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />} Send to our team
       </button>
-      {message && <p className="text-sm text-red-300">{message}</p>}
+      {message && <p className="text-sm text-red-700">{message}</p>}
       <p className="text-[11px] text-subtle">We only use these details to reply to this enquiry.</p>
     </form>
   );

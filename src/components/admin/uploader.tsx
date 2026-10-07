@@ -11,7 +11,7 @@ export type Uploaded = { id: string; url: string; width: number | null; height: 
  * browser first (max 2000px, WebP) so phone photos from the factory floor
  * upload quickly and fit the 4 MB limit.
  */
-async function prepare(file: File): Promise<File> {
+export async function prepareImage(file: File): Promise<File> {
   if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return file;
   try {
     const bitmap = await createImageBitmap(file);
@@ -40,7 +40,7 @@ export function ImageUploader({ onUploaded, label = "Upload photos", multiple = 
     setBusy(list.length);
     for (const original of list) {
       try {
-        const file = await prepare(original);
+        const file = await prepareImage(original);
         const fd = new FormData();
         fd.append("file", file);
         const res = await fetch("/api/admin/upload", { method: "POST", body: fd });

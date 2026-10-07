@@ -53,6 +53,8 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   const reqRows = Object.keys(REQ_LABEL)
     .map((k) => [REQ_LABEL[k], show(req[k])] as const)
     .filter(([, v]) => v);
+  // Images the customer attached in the chat (paths from our own /api/upload only).
+  const attachments = (Array.isArray(req.attachments) ? req.attachments : []).filter((a): a is string => typeof a === "string" && /^\/uploads\/[a-z0-9]{10,40}$/.test(a));
   const design = (lead.design ?? null) as { preview?: unknown; crest?: unknown; pattern?: unknown; colours?: unknown; sampleName?: unknown; sampleNumber?: unknown; sponsor?: unknown } | null;
   const transcript = (Array.isArray(conversation?.messages) ? (conversation!.messages as Msg[]) : []).filter((m) => m && typeof m.content === "string");
   const phoneDigits = lead.phone?.replace(/[^\d]/g, "");
@@ -120,6 +122,22 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               <blockquote className="mt-5 whitespace-pre-wrap rounded-xl bg-white/[0.03] p-4 text-[15px] leading-relaxed">{lead.message}</blockquote>
             )}
           </Card>
+
+          {attachments.length > 0 && (
+            <Card title={`Attached images (${attachments.length})`}>
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {attachments.map((src) => (
+                  <li key={src}>
+                    <a href={src} target="_blank" rel="noopener" className="block overflow-hidden rounded-xl bg-white/[0.04] ring-1 ring-white/10 hover:ring-accent">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={src} alt="Customer attachment" className="aspect-square w-full object-contain" loading="lazy" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-subtle">Uploaded by the customer in the website chat. Open to download the full file.</p>
+            </Card>
+          )}
 
           {design && (
             <Card title="Design Studio artwork">

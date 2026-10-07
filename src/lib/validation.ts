@@ -64,6 +64,8 @@ export const leadInputSchema = z.object({
     .array(z.object({ role: z.enum(["user", "assistant"]), content: text(2000) }))
     .max(30)
     .optional(),
+  /** Logos / artwork the visitor uploaded (site-hosted paths only). */
+  attachments: z.array(z.string().regex(/^\/uploads\/[a-z0-9]{10,40}$/)).max(6).optional(),
   sessionId: optionalText(40),
   /** Honeypot — must be empty. */
   website: z.string().max(200).optional(),
