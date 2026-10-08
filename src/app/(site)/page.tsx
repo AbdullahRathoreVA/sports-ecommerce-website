@@ -5,6 +5,7 @@ import { getSettings } from "@/lib/settings";
 import { getAllProducts, getCategories, getFaqs, getPublishedTestimonials } from "@/lib/catalog";
 import { ButtonLink } from "@/components/ui/button";
 import { HeroJersey } from "@/components/three/jersey-stage";
+import { PriceEstimator, type EstimatorProduct } from "@/components/catalog/price-estimator";
 import { HeroUnbox } from "@/components/three/unbox-stage";
 import { ShippingGlobe } from "@/components/three/globe-stage";
 import { FactoryMap } from "@/components/site/factory-map";
@@ -12,7 +13,7 @@ import { JsonLd, faqSchema } from "@/components/seo/json-ld";
 
 export const revalidate = 300;
 
-const MARQUEE = ["Factory direct", "Custom OEM", "Teamwear / Racing / Leather", "Worldwide shipping", "Samples before bulk", "Your label or ours"];
+const MARQUEE = ["Factory direct", "Custom OEM", "Kits / Uniforms / Gym wear", "Worldwide shipping", "Samples before bulk", "Your label or ours"];
 
 const OEM_POINTS = ["Logo & artwork", "Colours & patterns", "Fabrics & specs", "Names & numbers"];
 
@@ -32,6 +33,8 @@ const STEPS = [
 
 const SWATCHES = ["#c8231a", "#1f3fe0", "#111214", "#e8b100"];
 
+const NUMBER_WORDS = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine"];
+
 function SectionLabel({ n, children }: { n: string; children: React.ReactNode }) {
   return (
     <p className="label text-subtle">
@@ -45,6 +48,23 @@ export default async function HomePage() {
   const topFaqs = faqs.slice(0, 6);
   const byCategory = new Map<string, string[]>();
   for (const p of products) byCategory.set(p.category.slug, [...(byCategory.get(p.category.slug) ?? []), p.name]);
+  // Featured first, then anything with quantity price breaks.
+  const estimator: EstimatorProduct[] = [...products]
+    .filter((p) => p.priceTiers.length > 0)
+    .sort((x, y) => Number(y.featured) - Number(x.featured) || x.position - y.position)
+    .slice(0, 12)
+    .map((p) => ({
+      slug: p.slug,
+      name: p.name,
+      category: p.category.name,
+      image: p.image?.url ?? null,
+      tiers: p.priceTiers,
+      moq: p.moq,
+      currency: p.currency,
+      leadMin: p.leadTimeMinDays,
+      leadMax: p.leadTimeMaxDays,
+      sampleCents: p.samplePriceCents,
+    }));
 
   // Hero strip: verified company facts when the factory has supplied them, otherwise plain capabilities.
   const facts = [
@@ -157,7 +177,7 @@ export default async function HomePage() {
             <div>
               <SectionLabel n="01">Product lines</SectionLabel>
               <h2 id="cats" className="font-display mt-5 text-[clamp(2.4rem,7vw,4.4rem)]">
-                Six product lines.
+                {categories.length > 1 && categories.length < 10 ? `${NUMBER_WORDS[categories.length]} product lines.` : "Our product lines."}
                 <span className="block text-subtle">One factory standard.</span>
               </h2>
             </div>
@@ -195,6 +215,19 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
+
+          {estimator.length > 0 && (
+            <div id="estimate" className="mt-20 scroll-mt-28 lg:mt-28" data-reveal>
+              <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                <h3 className="font-display text-[clamp(2rem,5vw,3.2rem)] leading-[0.95]">
+                  Price it in seconds.
+                  <span className="block text-subtle">No email, no waiting.</span>
+                </h3>
+                <p className="max-w-sm text-[15px] text-muted">Pick a product and a quantity to see your per-piece price and bulk savings instantly.</p>
+              </div>
+              <PriceEstimator products={estimator} indicative={settings.demoMode} />
+            </div>
+          )}
         </div>
       </section>
 
@@ -209,7 +242,7 @@ export default async function HomePage() {
               <span className="block text-accent">Our factory.</span>
             </h2>
             <p className="mt-6 max-w-md text-[16px] leading-relaxed text-white/60">
-              From the first colourway to the final stitch. Kits, racing suits, jackets and gloves made with your logo, colours, labels and
+              From the first colourway to the final stitch. Kits, tracksuits, hoodies and uniforms made with your logo, colours, labels and
               packaging — we stay invisible.
             </p>
             <ul className="mt-7 grid max-w-md grid-cols-2 gap-x-6 gap-y-3 text-sm text-white/80">
@@ -280,10 +313,10 @@ export default async function HomePage() {
           </div>
           <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:gap-16">
             <figure className="relative aspect-[10/7] overflow-hidden rounded-[var(--radius-card)] bg-ink" data-reveal>
-              <Image src="/media/products/leather-craft.webp" alt="Close-up of leather panels being finished by hand" fill sizes="(min-width:1024px) 45vw, 92vw" className="object-cover" />
+              <Image src="/media/factory/printer-panels.webp" alt="Jersey panels coming off a large-format sublimation printer in the factory" fill sizes="(min-width:1024px) 45vw, 92vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
               <figcaption className="absolute bottom-5 left-6 text-white">
-                <span className="label text-white/60">Material study / product detail</span>
+                <span className="label text-white/60">Print room / sublimation</span>
                 <span className="mt-1 block text-xl font-semibold tracking-tight">Quality is in the details.</span>
               </figcaption>
             </figure>

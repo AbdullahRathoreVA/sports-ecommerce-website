@@ -58,12 +58,22 @@ if (existsSync(join(WORK, "showcase/screenshots"))) cpSync(join(WORK, "showcase/
 for (const p of EXCLUDE) rmSync(join(WORK, p), { recursive: true, force: true });
 
 git(["add", "-A"]);
-const changed = git(["status", "--porcelain"]);
-if (!changed) {
+if (git(["status", "--porcelain"])) {
+  git(["commit", "-q", "-m", `Sync ${sha}: ${subject}`]);
+  git(["branch", "-M", "main"]);
+}
+// Push whenever the local mirror is ahead — including a commit left behind by an
+// earlier push that failed mid-way (a "nothing changed" check alone would skip it).
+let ahead = "1";
+try {
+  git(["fetch", "-q", "origin", "main"]);
+  ahead = git(["rev-list", "--count", "origin/main..HEAD"]);
+} catch {
+  /* empty remote on first run: push */
+}
+if (ahead === "0") {
   console.log(`[showcase] already up to date with ${sha}`);
   process.exit(0);
 }
-git(["commit", "-q", "-m", `Sync ${sha}: ${subject}`]);
-git(["branch", "-M", "main"]);
 execFileSync("git", ["push", "-q", "-u", "origin", "main"], { cwd: WORK, stdio: "inherit" });
 console.log(`[showcase] published ${sha} → https://github.com/${PUBLIC_REPO}`);

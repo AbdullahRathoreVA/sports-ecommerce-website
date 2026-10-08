@@ -7,7 +7,7 @@ import { ContactForm } from "@/components/forms/contact-form";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Talk to our sales team about custom teamwear, racing suits, leather jackets and gloves — by WhatsApp, email or our contact form.",
+  description: "Talk to our sales team about custom team kits, uniforms and sportswear — by WhatsApp, email or our contact form.",
   alternates: { canonical: "/contact" },
 };
 

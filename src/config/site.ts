@@ -70,7 +70,8 @@ export const defaultSettings: SiteSettings = {
     shortName: "Alrobel",
     tagline: "Custom sportswear manufacturer",
     description:
-      "Manufacturer and wholesaler of sublimated teamwear, leather racing suits, leather jackets, American-football gloves and sportswear — made in our own factory in Sialkot, Pakistan, under your label or ours.",
+      // KNOWN FACT (client business card, 2026-10-07): product lines.
+      "Custom sportswear manufacturer: sublimated soccer, American football, baseball, rugby and cricket kits, tracksuits, hoodies, T-shirts, polos, gym wear and school, team and company uniforms. Your logo, labels, tags and packaging, made in our own factory in Sialkot, Pakistan.",
     houseLabel: "",
   },
   contact: {
@@ -143,11 +144,10 @@ export const footerNav: { title: string; links: NavItem[] }[] = [
   {
     title: "Products",
     links: [
-      { label: "Sublimation teamwear", href: "/products/c/sublimation-teamwear" },
-      { label: "Racing suits", href: "/products/c/motorbike-racing-suits" },
-      { label: "Leather jackets", href: "/products/c/leather-jackets" },
-      { label: "Gloves", href: "/products/c/gloves" },
-      { label: "Sportswear", href: "/products/c/sportswear" },
+      { label: "Team kits", href: "/products/c/sublimation-teamwear" },
+      { label: "Sportswear & gym wear", href: "/products/c/sportswear" },
+      { label: "American football gloves", href: "/products/c/gloves" },
+      { label: "School & company uniforms", href: "/industries" },
       { label: "All products", href: "/products" },
     ],
   },

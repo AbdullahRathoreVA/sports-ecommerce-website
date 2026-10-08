@@ -141,7 +141,7 @@ export function AnalystChat({ aiConfigured }: { aiConfigured: boolean }) {
                 void ask(input);
               }
             }}
-            placeholder="e.g. Why are racing suits getting views but no quotes?"
+            placeholder="e.g. Why are team kits getting views but no quotes?"
             className="max-h-40 min-h-12 flex-1 resize-none rounded-[var(--radius-control)] border border-white/12 bg-ink-2 px-3.5 py-3 text-[16px] outline-none focus:border-accent"
           />
           <button type="submit" disabled={busy || !input.trim()} aria-label="Ask" className="grid h-12 w-12 shrink-0 place-items-center rounded-[var(--radius-control)] bg-accent text-accent-ink disabled:opacity-40">

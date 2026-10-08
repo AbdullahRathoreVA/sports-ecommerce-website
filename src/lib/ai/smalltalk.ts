@@ -41,7 +41,7 @@ export function smallTalkKind(text: string): Kind | null {
 const JOKES = [
   "Why did the football kit go to the doctor? It had too many patches. (Ours don't — sublimated prints are dyed into the fabric, so nothing peels.)",
   "Why are goalkeepers great at saving money? Because they never let anything get past them.",
-  "I asked a racing suit for advice. It said: stay calm, stay padded, and never skip the CE armour.",
+  "Why did the hoodie join the team? It heard the squad needed more warm-ups.",
 ];
 
 type Copy = Record<Kind, string>;
@@ -52,7 +52,7 @@ function copy(brand: string, now: Date): Record<Lang, Copy> {
   return {
     en: {
       greeting: `Hello! 👋 Welcome to ${brand}. I can help you choose products, explain materials and sizing, or put together a quote. What are you looking for today?`,
-      how_are_you: "I'm doing great, thanks for asking! 😊 How about you? If you're planning kits, racing suits, jackets or gloves, I'm happy to help.",
+      how_are_you: "I'm doing great, thanks for asking! 😊 How about you? If you're planning team kits, uniforms or sportswear, I'm happy to help.",
       thanks: "You're welcome! Anything else I can help with?",
       bye: "Thanks for stopping by — take care! If you need a quote later, I'm right here.",
       who: `I'm the virtual assistant for ${brand}, an AI that knows our products and how ordering works. For anything I can't answer, I'll pass you to a real person on our sales team.`,
@@ -63,7 +63,7 @@ function copy(brand: string, now: Date): Record<Lang, Copy> {
     },
     roman: {
       greeting: `Assalam o Alaikum! 👋 ${brand} mein khush aamdeed. Main products chunne, material aur sizes samjhane, ya quote banane mein madad kar sakta hoon. Aap ko kya chahiye?`,
-      how_are_you: "Main bilkul theek hoon, poochne ka shukriya! 😊 Aap sunaiye, kaise hain? Kits, racing suits, jackets ya gloves ke baare mein kuch poochna ho to batayein.",
+      how_are_you: "Main bilkul theek hoon, poochne ka shukriya! 😊 Aap sunaiye, kaise hain? Team kits, uniforms ya sportswear ke baare mein kuch poochna ho to batayein.",
       thanks: "Koi baat nahi! Aur kuch madad chahiye?",
       bye: "Aane ka shukriya — Allah Hafiz! Baad mein quote chahiye ho to main yahin hoon.",
       who: `Main ${brand} ka virtual assistant (AI) hoon. Products aur order ke tareeqe ke baare mein bata sakta hoon, aur jo main na bata sakoon woh hamari sales team ke insaan se karwa deta hoon.`,
