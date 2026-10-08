@@ -124,8 +124,7 @@ export function HeroJersey({ poster, posterAlt, className }: { poster: string; p
         src={poster}
         alt={posterAlt}
         fill
-        priority
-        sizes="(min-width: 1024px) 45vw, 90vw"
+        sizes="(min-width: 1024px) 40vw, 90vw"
         className={cn(
           "object-contain transition-opacity duration-700",
           mode === "3d" && ready ? "opacity-0" : "opacity-100",

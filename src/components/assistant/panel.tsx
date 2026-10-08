@@ -3,10 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight, ArrowUp, CheckCircle2, Loader2, Mic, MicOff, Paperclip, UserRound, X } from "lucide-react";
+import { ArrowRight, ArrowUp, CheckCircle2, Loader2, Mic, MicOff, Paperclip, Square, UserRound, Volume2, X } from "lucide-react";
 import { Markdown } from "@/components/ui/markdown";
 import { LogoMark } from "@/components/ui/logo";
 import { prepareImage } from "@/components/admin/uploader";
+import { speak, speechSupported, stopSpeaking } from "@/lib/voice";
 import { sessionId, track } from "@/lib/analytics/client";
 import { formatMoney, cn } from "@/lib/utils";
 import type { AssistantOpenDetail } from "./bus";
@@ -73,6 +74,8 @@ export function AssistantPanel({
   const [emailDismissed, setEmailDismissed] = useState(false);
   const [listening, setListening] = useState(false);
   const [canSpeak, setCanSpeak] = useState(false);
+  const [canRead, setCanRead] = useState(false);
+  const [speakingIdx, setSpeakingIdx] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -84,6 +87,7 @@ export function AssistantPanel({
 
   useEffect(() => {
     setCanSpeak(Boolean(speechCtor()));
+    setCanRead(speechSupported());
     try {
       const saved = sessionStorage.getItem(STORE);
       // Drop malformed turns (e.g. saved by an older version) instead of crashing on them.
@@ -104,7 +108,10 @@ export function AssistantPanel({
   }, [turns, busy, handoff]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      stopSpeaking();
+      return;
+    }
     const t = setTimeout(() => inputRef.current?.focus(), 60);
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
@@ -114,8 +121,19 @@ export function AssistantPanel({
     };
   }, [open, onClose]);
 
+  const readAloud = useCallback((i: number, text: string) => {
+    if (speakingIdx === i) {
+      stopSpeaking();
+      setSpeakingIdx(null);
+      return;
+    }
+    setSpeakingIdx(i);
+    void speak(text, () => setSpeakingIdx((cur) => (cur === i ? null : cur)));
+  }, [speakingIdx]);
+
   const send = useCallback(
-    async (text: string, image?: string) => {
+    // `voice`: the question was spoken, so the answer is spoken back (hands-free).
+    async (text: string, image?: string, voice = false) => {
       const content = text.trim().slice(0, 1200);
       if (!content || busy) return;
       setError(null);
@@ -148,6 +166,10 @@ export function AssistantPanel({
         const { reply, ...rest } = data;
         if (typeof reply !== "string" || !reply.trim()) throw new Error("The assistant is unavailable right now. Our team can still help — use the quote form or WhatsApp.");
         setTurns((prev) => [...prev, { ...rest, role: "assistant", content: reply }]);
+        if (voice) {
+          setSpeakingIdx(next.length);
+          void speak(reply, () => setSpeakingIdx((cur) => (cur === next.length ? null : cur)));
+        }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Something went wrong.");
       } finally {
@@ -198,18 +220,22 @@ export function AssistantPanel({
     rec.interimResults = true;
     rec.continuous = false;
     const before = input ? `${input.trim()} ` : "";
+    let heard = "";
     rec.onresult = (e) => {
-      const text = Array.from(e.results)
+      heard = Array.from(e.results)
         .map((r) => r[0]?.transcript ?? "")
         .join(" ");
-      setInput(before + text);
+      setInput(before + heard);
     };
     rec.onend = () => {
       setListening(false);
-      inputRef.current?.focus();
+      // Spoken question → sent straight away and answered out loud.
+      if (heard.trim()) void send(before + heard, undefined, true);
+      else inputRef.current?.focus();
     };
     rec.onerror = () => setListening(false);
     recRef.current = rec;
+    stopSpeaking();
     setListening(true);
     rec.start();
   }
@@ -289,6 +315,17 @@ export function AssistantPanel({
                   <div className={cn("max-w-[95%] rounded-2xl rounded-tl-md px-4 py-3 text-[15px] shadow-sm ring-1", t.note ? "bg-emerald-50 text-emerald-900 ring-emerald-200" : "bg-surface ring-black/[0.05]")}>
                     <Markdown source={t.content} compact />
                   </div>
+                  {canRead && !t.note && (
+                    <button
+                      type="button"
+                      onClick={() => readAloud(i, t.content)}
+                      aria-pressed={speakingIdx === i}
+                      className={cn("-mt-1.5 inline-flex h-8 items-center gap-1.5 rounded-full px-2.5 text-xs font-medium", speakingIdx === i ? "bg-accent/10 text-accent" : "text-subtle hover:text-fg")}
+                    >
+                      {speakingIdx === i ? <Square className="h-3 w-3 fill-current" aria-hidden /> : <Volume2 className="h-3.5 w-3.5" aria-hidden />}
+                      {speakingIdx === i ? "Stop" : "Listen"}
+                    </button>
+                  )}
                   {t.products && t.products.length > 0 && (
                     <ul className="scrollbar-none -mr-4 flex gap-2.5 overflow-x-auto pr-4">
                       {t.products.map((p) => (

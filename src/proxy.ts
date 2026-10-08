@@ -42,7 +42,8 @@ const SECURITY_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
   "X-Frame-Options": "DENY",
   "Referrer-Policy": "strict-origin-when-cross-origin",
-  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), interest-cohort=(), browsing-topics=()",
+  // Microphone for our own pages only: voice questions in the chat.
+  "Permissions-Policy": "camera=(), microphone=(self), geolocation=(), interest-cohort=(), browsing-topics=()",
   "Cross-Origin-Opener-Policy": "same-origin",
 };
 
@@ -67,7 +68,7 @@ export async function proxy(request: NextRequest) {
   for (const [header, value] of Object.entries(SECURITY_HEADERS)) response.headers.set(header, value);
   if (isProd) response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
 
-  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin") || pathname.startsWith("/account")) {
     response.headers.set("Cache-Control", "no-store, max-age=0");
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }

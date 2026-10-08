@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 export const inputClass =
-  "h-12 w-full rounded-[var(--radius-control)] border border-white/12 bg-surface px-3.5 text-[16px] text-fg outline-none transition-colors placeholder:text-subtle focus:border-accent focus:ring-4 focus:ring-accent/15 aria-[invalid=true]:border-danger";
+  "h-12 w-full rounded-[var(--radius-control)] border border-[var(--hairline)] bg-surface px-3.5 text-[16px] text-fg outline-none transition-colors placeholder:text-subtle focus:border-accent focus:ring-4 focus:ring-accent/15 aria-[invalid=true]:border-danger";
 
 export function Field({
   label,

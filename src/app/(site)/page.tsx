@@ -4,6 +4,7 @@ import { ArrowDown, ArrowRight, ArrowUpRight, Check, Mail, Plus, Camera } from "
 import { getSettings } from "@/lib/settings";
 import { getAllProducts, getCategories, getFaqs, getPublishedTestimonials } from "@/lib/catalog";
 import { ButtonLink } from "@/components/ui/button";
+import { HeroJersey } from "@/components/three/jersey-stage";
 import { HeroUnbox } from "@/components/three/unbox-stage";
 import { ShippingGlobe } from "@/components/three/globe-stage";
 import { FactoryMap } from "@/components/site/factory-map";
@@ -223,19 +224,32 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <Link href="/design-studio" className="group block rounded-lg border border-white/10 bg-ink-2 transition-colors hover:border-white/25" data-reveal data-track="customizer_start" data-track-label="OEM card">
+          {/* A div, not a link: the 3D kit can be dragged to spin without navigating. */}
+          <div className="group relative rounded-lg border border-white/10 bg-ink-2 transition-colors hover:border-white/25" data-reveal>
             <div className="label flex items-center justify-between border-b border-white/10 px-5 py-4 text-white/50">
-              OEM / Design studio <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+              OEM / Design studio
+              <span className="flex items-center gap-2 text-[0.6rem] text-white/45">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" aria-hidden /> Live 3D
+              </span>
             </div>
-            <div className="grid-lines relative aspect-[16/10]">
-              <Image src="/media/hero/jersey-poster.webp" alt="A football kit being designed in the 3D Design Studio" fill sizes="(min-width:1024px) 40vw, 90vw" className="object-contain p-6 transition-transform duration-700 group-hover:scale-[1.03]" />
+            <div className="grid-lines relative aspect-[16/11] cursor-grab overflow-hidden active:cursor-grabbing">
+              <div className="pointer-events-none absolute left-1/2 top-1/2 h-3/4 w-3/4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/15 blur-3xl" aria-hidden />
+              <HeroJersey poster="/media/hero/jersey-poster.webp" posterAlt="A football kit being designed in the 3D Design Studio" className="absolute inset-0" />
+              <Link
+                href="/design-studio"
+                className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-sm bg-accent px-3 py-2 text-xs font-semibold text-white shadow-lg transition-colors hover:bg-accent-hover"
+                data-track="customizer_start"
+                data-track-label="OEM card"
+              >
+                Design your kit <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+              </Link>
             </div>
             <div className="grid grid-cols-2 gap-5 border-t border-white/10 px-5 py-5">
               <div>
                 <p className="label text-[0.62rem] text-white/45">01 / Colourway</p>
                 <div className="mt-3 flex gap-2">
                   {SWATCHES.map((c, i) => (
-                    <span key={c} className={`h-6 w-6 rounded-full ring-offset-2 ring-offset-ink-2 ${i === 0 ? "ring-2 ring-white/80" : ""}`} style={{ background: c }} aria-hidden />
+                    <span key={c} className={`h-6 w-6 rounded-full ring-offset-2 ring-offset-ink-2 ${i === 0 ? "ring-2 ring-white/80" : "ring-1 ring-white/25"}`} style={{ background: c }} aria-hidden />
                   ))}
                 </div>
               </div>
@@ -244,8 +258,10 @@ export default async function HomePage() {
                 <p className="label mt-3 border-b border-white/15 pb-2 text-white/70">Your brand</p>
               </div>
             </div>
-            <p className="px-5 pb-5 text-xs text-white/45">Open the Design Studio: pick colours and patterns, add names and numbers, and send the design with your quote.</p>
-          </Link>
+            <p className="px-5 pb-5 text-xs text-white/45">
+              <Link href="/design-studio" className="font-semibold text-white hover:text-accent">Open the Design Studio</Link>: pick colours and patterns, add names and numbers, and send the design with your quote.
+            </p>
+          </div>
         </div>
       </section>
 

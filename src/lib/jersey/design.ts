@@ -292,14 +292,18 @@ export function renderJersey(design: JerseyDesign, target?: HTMLCanvasElement): 
   // Crest on the wearer's left chest = viewer's right.
   drawCrest(ctx, design, W * 0.62, H * 0.3, W * 0.085);
   if (design.houseMark) {
-    ctx.fillStyle = design.textColor;
-    ctx.globalAlpha = 0.85;
+    // The Alrobel "A" mark (same paths as components/ui/logo.tsx, 120×96 box).
+    const s = (W * 0.06) / 120;
     ctx.save();
-    ctx.translate(W * 0.385, H * 0.3);
-    ctx.rotate(-Math.PI / 4);
-    ctx.fillRect(-W * 0.025, -W * 0.004, W * 0.05, W * 0.008);
+    ctx.translate(W * 0.385 - 60 * s, H * 0.3 - 48 * s);
+    ctx.scale(s, s);
+    ctx.fillStyle = design.textColor;
+    ctx.fill(new Path2D("M6 92 L52 4 L98 92 H74 L52 48 L30 92 Z"));
+    // Red streak, unless the shirt itself is red — then it goes dark to stay visible.
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(design.base.slice(i, i + 2), 16) || 0);
+    ctx.fillStyle = r! > 150 && g! < 90 && b! < 90 ? "#111214" : "#e11d26";
+    ctx.fill(new Path2D("M22 78 C46 64 74 44 118 18 C96 40 70 60 40 80 Z"));
     ctx.restore();
-    ctx.globalAlpha = 1;
   }
   if (design.number.trim()) {
     const size = fitText(ctx, design.number, W * 0.1, W * 0.065);

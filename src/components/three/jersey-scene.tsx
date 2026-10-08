@@ -160,11 +160,15 @@ function Jersey({ textureA, textureB, sweepRef, rotationRef, autoRotate, revisio
   const current = useRef(0);
   useFrame((state, delta) => {
     if (!group.current) return;
-    if (autoRotate) rotationRef.current += delta * 0.35;
+    if (autoRotate) rotationRef.current += delta * 0.55;
     // Critically damped follow so drags feel weighted, not twitchy.
     current.current = THREE.MathUtils.damp(current.current, rotationRef.current, 6, delta);
+    const t = state.clock.elapsedTime;
     group.current.rotation.y = current.current;
-    group.current.position.y = Math.sin(state.clock.elapsedTime * 0.8) * 0.012;
+    // Floats and leans toward the cursor, so it reads as an object in space, not a turntable.
+    group.current.rotation.x = THREE.MathUtils.damp(group.current.rotation.x, -state.pointer.y * 0.14 + Math.sin(t * 0.6) * 0.04, 4, delta);
+    group.current.rotation.z = THREE.MathUtils.damp(group.current.rotation.z, state.pointer.x * -0.05 + Math.sin(t * 0.45) * 0.025, 4, delta);
+    group.current.position.y = Math.sin(t * 0.9) * (autoRotate ? 0.03 : 0.012);
     if (sweepRef) uniforms.uSweep.value = sweepRef.current;
   });
 
@@ -196,7 +200,7 @@ export default function JerseyScene(props: JerseySceneProps) {
       <FrameGate active={props.active} />
       <ambientLight intensity={0.35} />
       <directionalLight position={[2.2, 2.6, 3]} intensity={1.6} />
-      <directionalLight position={[-3, 1.2, -2]} intensity={0.7} color="#d9f7a0" />
+      <directionalLight position={[-3, 1.2, -2]} intensity={1.1} color="#e11d26" />
       <Environment resolution={128}>
         <Lightformer form="rect" intensity={2.2} position={[0, 2.5, 3]} scale={[4, 2, 1]} />
         <Lightformer form="rect" intensity={1.2} position={[-3, 0.5, 1]} rotation-y={Math.PI / 2} scale={[3, 2, 1]} color="#dbe3ff" />
