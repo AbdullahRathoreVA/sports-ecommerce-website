@@ -37,6 +37,7 @@ export function QuoteForm({
   responseTime,
   source = "QUOTE_FORM",
   design,
+  contact,
 }: {
   products: ProductOption[];
   initialProduct?: string;
@@ -45,6 +46,8 @@ export function QuoteForm({
   responseTime: string;
   source?: "QUOTE_FORM" | "PRODUCT_PAGE" | "DESIGN_STUDIO";
   design?: Record<string, unknown>;
+  /** Signed-in portal customer: their details are filled in for them. */
+  contact?: { name: string; email: string; phone: string | null; company: string | null };
 }) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [s, setS] = useState<State>({
@@ -58,10 +61,10 @@ export function QuoteForm({
     targetDate: "",
     budget: "",
     message: "",
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
+    name: contact?.name ?? "",
+    email: contact?.email ?? "",
+    phone: contact?.phone ?? "",
+    company: contact?.company ?? "",
     country: "",
     preferredChannel: "email",
   });

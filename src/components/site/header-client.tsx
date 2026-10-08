@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { ArrowRight, ChevronDown, Menu, MessageCircle, Search, ShoppingBag, X, Mail } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, MessageCircle, Search, ShoppingBag, UserRound, X, Mail } from "lucide-react";
 import { useCart } from "@/components/cart/cart-context";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/config/site";
@@ -142,6 +142,14 @@ export function HeaderActions() {
         <Search className="h-5 w-5" aria-hidden />
       </Link>
       <Link
+        href="/account"
+        aria-label="Client portal: log in or my account"
+        title="Client portal"
+        className="hidden h-10 w-10 place-items-center rounded-md text-white/80 transition-colors hover:bg-white/[0.07] hover:text-white sm:grid"
+      >
+        <UserRound className="h-5 w-5" aria-hidden />
+      </Link>
+      <Link
         href="/cart"
         aria-label={`Cart${ready && count ? `, ${count} items` : ""}`}
         className="relative grid h-10 w-10 place-items-center rounded-md text-white/80 transition-colors hover:bg-white/[0.07] hover:text-white"
@@ -251,6 +259,14 @@ export function MobileMenu({
                     </Link>
                   </li>
                 ))}
+                <li>
+                  <Link href="/account" className="flex h-14 items-center justify-between text-lg font-semibold" data-track="nav_click">
+                    <span className="flex items-center gap-2.5">
+                      <UserRound className="h-5 w-5 text-accent" aria-hidden /> Client portal
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-white/40" aria-hidden />
+                  </Link>
+                </li>
               </ul>
             </nav>
           </div>

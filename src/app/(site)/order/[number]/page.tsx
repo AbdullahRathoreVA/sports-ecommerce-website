@@ -84,7 +84,7 @@ export default async function OrderPage({ params, searchParams }: Props) {
       )}
 
       {order.attachments.length > 0 && (
-        <section className="mt-10" aria-labelledby="photos-h">
+        <section id="qc" className="mt-10 scroll-mt-28" aria-labelledby="photos-h">
           <h2 id="photos-h" className="text-lg font-semibold">Photos from the factory</h2>
           <p className="mt-1 text-sm text-muted">Taken by our team during quality control and packing, before your goods left the factory.</p>
           <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">

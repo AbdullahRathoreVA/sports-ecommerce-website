@@ -130,3 +130,28 @@ export async function emailFromTeam(m: { to: string; name: string; subject: stri
     text: [`Hi ${m.name},`, "", m.body.trim(), "", `${m.sender}`, s.brand.name, "", `Reference: ${m.reference} — please keep this reference in your reply.`].join("\n"),
   });
 }
+
+/** Client portal one-time code (email verification or password reset). */
+export async function emailPortalCode(c: { email: string; name: string }, code: string, purpose: "verify" | "reset") {
+  const s = await getSettings();
+  const verify = purpose === "verify";
+  return sendMail({
+    to: c.email,
+    kind: verify ? "portal_verify" : "portal_reset",
+    replyTo: s.contact.email || null,
+    subject: `${code} is your ${s.brand.name} ${verify ? "verification" : "password reset"} code`,
+    text: [
+      `Hi ${c.name},`,
+      "",
+      verify ? "Use this code to verify your email and see your quotes and orders in your client portal:" : "Use this code to reset your client portal password:",
+      "",
+      `    ${code}`,
+      "",
+      "It expires in 15 minutes. If you didn't ask for this, you can ignore this email.",
+      "",
+      `${siteUrl}/account`,
+      "",
+      s.brand.name,
+    ].join("\n"),
+  });
+}

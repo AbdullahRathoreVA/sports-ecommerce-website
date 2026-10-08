@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { Badge, Card, LEAD_TONE, ORDER_TONE, humanise, StatTile, th, td } from "@/components/admin/ui";
 import { countryLabel } from "@/lib/admin/insights";
 import { formatMoney } from "@/lib/utils";
+import { revokePortalSessions, verifyPortalEmail } from "../actions";
 
 export const metadata: Metadata = { title: "Customer" };
 
@@ -47,6 +48,32 @@ export default async function CustomerDetailPage({ params }: { params: Promise<{
         <div className="mt-3 flex flex-wrap gap-4 text-sm">
           <a href={`mailto:${customer.email}`} className="inline-flex items-center gap-1.5 text-accent hover:underline"><Mail className="h-4 w-4" aria-hidden /> {customer.email}</a>
           {customer.phone && <a href={`tel:${customer.phone}`} className="inline-flex items-center gap-1.5 text-muted hover:text-fg"><Phone className="h-4 w-4" aria-hidden /> {customer.phone}</a>}
+        </div>
+        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl bg-white/[0.03] px-4 py-3 text-sm ring-1 ring-white/10">
+          <span className="font-semibold">Client portal:</span>
+          {!customer.passwordHash ? (
+            <span className="text-muted">no account yet</span>
+          ) : (
+            <>
+              <Badge tone={customer.emailVerifiedAt ? "good" : "warn"}>{customer.emailVerifiedAt ? "email verified" : "email not verified"}</Badge>
+              <span className="text-muted">
+                joined {customer.portalSince?.toLocaleDateString("en-GB", { dateStyle: "medium" }) ?? "—"}
+                {customer.lastLoginAt ? ` · last login ${customer.lastLoginAt.toLocaleDateString("en-GB", { dateStyle: "medium" })}` : ""}
+              </span>
+              {!customer.emailVerifiedAt && (
+                <form action={verifyPortalEmail.bind(null, customer.id)}>
+                  <button type="submit" className="rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-white" title="Only after confirming this is really the customer (phone / WhatsApp)">
+                    Mark email verified
+                  </button>
+                </form>
+              )}
+              <form action={revokePortalSessions.bind(null, customer.id)}>
+                <button type="submit" className="rounded-md border border-white/15 px-3 py-1.5 text-xs font-semibold hover:bg-white/10">
+                  Sign out all devices
+                </button>
+              </form>
+            </>
+          )}
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getCurrentCustomer } from "@/lib/customer-auth";
 import { PageHero } from "@/components/site/page-hero";
 import { Clock, FileCheck2, ShieldCheck } from "lucide-react";
 import { getAllProducts } from "@/lib/catalog";
@@ -14,7 +15,7 @@ export const metadata: Metadata = {
 type Props = { searchParams: Promise<{ product?: string; qty?: string; category?: string }> };
 
 export default async function QuotePage({ searchParams }: Props) {
-  const [params, products, settings] = await Promise.all([searchParams, getAllProducts(), getSettings()]);
+  const [params, products, settings, customer] = await Promise.all([searchParams, getAllProducts(), getSettings(), getCurrentCustomer()]);
   const qty = Number(params.qty);
   return (
     <>
@@ -38,6 +39,7 @@ export default async function QuotePage({ searchParams }: Props) {
             initialQty={Number.isInteger(qty) && qty > 0 ? qty : undefined}
             whatsapp={settings.contact.whatsapp}
             responseTime={settings.contact.responseTime}
+            contact={customer ?? undefined}
           />
         </div>
       </div>

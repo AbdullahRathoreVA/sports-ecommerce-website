@@ -230,6 +230,7 @@ enum CustomerSource {
   CONTACT
   AI_ASSISTANT
   DESIGN_STUDIO
+  PORTAL
 }
 
 /// Public visitors never have accounts. A customer record is created from an
@@ -246,10 +247,39 @@ model Customer {
   isDemo    Boolean        @default(false)
   orders    Order[]
   leads     Lead[]
+
+  /// Client portal. Null until the customer creates an account; bcrypt only.
+  passwordHash    String?
+  /// Past quotes and orders under this email stay hidden until the address is proven.
+  emailVerifiedAt DateTime?
+  portalSince     DateTime?
+  /// Bumped on password change / sign-out-everywhere to revoke every session.
+  tokenVersion    Int       @default(0)
+  failedLogins    Int       @default(0)
+  lockedUntil     DateTime?
+  lastLoginAt     DateTime?
+  codes           CustomerCode[]
+
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
   @@index([createdAt])
+}
+
+/// One-time 6-digit codes for email verification and password reset (stored as HMACs).
+model CustomerCode {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  /// "verify" | "reset"
+  purpose    String
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([customerId, purpose, createdAt])
 }
 
 enum OrderStatus {
