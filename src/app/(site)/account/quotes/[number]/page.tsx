@@ -36,6 +36,9 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ nu
   const rows = Object.entries(REQ_LABEL).flatMap(([k, label]) => (typeof req[k] === "string" && req[k] ? [[label, req[k] as string] as const] : []));
   const attachments = (Array.isArray(req.attachments) ? req.attachments : []).filter((a): a is string => typeof a === "string" && /^\/uploads\/[a-z0-9]{10,40}$/.test(a));
   const preview = (lead.design as { preview?: unknown } | null)?.preview;
+  const roster = (Array.isArray(req.roster) ? req.roster : []).filter(
+    (p): p is { name: string; number: string; size: string } => !!p && typeof p === "object" && typeof (p as { size?: unknown }).size === "string",
+  );
   const wa = whatsappLink(settings, `Hi Alrobel, about my quote request ${lead.leadNumber}:`);
   // The customer's own words only; the chat transcript appended for the team stays internal.
   const message = lead.message?.split("\n— Assistant conversation —")[0]?.trim();
@@ -80,6 +83,22 @@ export default async function QuoteDetailPage({ params }: { params: Promise<{ nu
               ))}
             </dl>
             {message && <blockquote className="mt-5 whitespace-pre-wrap rounded-md bg-surface-2 p-4 text-[15px] leading-relaxed">{message}</blockquote>}
+            {roster.length > 0 && (
+              <details className="mt-5 rounded-md ring-1 ring-black/[0.06]">
+                <summary className="cursor-pointer px-4 py-3 text-sm font-semibold">Squad list · {roster.length} players</summary>
+                <table className="w-full border-t hairline text-sm">
+                  <tbody className="divide-y hairline">
+                    {roster.map((p, i) => (
+                      <tr key={i}>
+                        <td className="px-4 py-1.5">{p.name || "—"}</td>
+                        <td className="px-4 py-1.5 font-mono">{p.number || "—"}</td>
+                        <td className="px-4 py-1.5 font-semibold">{p.size || "?"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </details>
+            )}
             {attachments.length > 0 && (
               <ul className="mt-5 flex flex-wrap gap-3">
                 {attachments.map((src) => (

@@ -84,7 +84,11 @@ export async function createLead(input: LeadInput) {
           category: product?.category.slug ?? input.category,
           quantity: input.quantity,
           // Visitor-uploaded images (logo/artwork from the chat) ride along with the requirements.
-          requirements: input.attachments?.length ? { ...requirements, attachments: input.attachments } : requirements,
+          requirements: {
+            ...requirements,
+            ...(input.attachments?.length ? { attachments: input.attachments } : {}),
+            ...(input.roster?.length ? { roster: input.roster } : {}),
+          },
           budget: input.budget,
           targetDate: input.targetDate,
           message: [input.message, input.transcript?.length ? `\n— Assistant conversation —\n${input.transcript.map((t) => `${t.role === "user" ? "Customer" : "Assistant"}: ${t.content}`).join("\n")}` : ""]

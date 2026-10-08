@@ -9,6 +9,8 @@ import { adminParams, type AdminSearchParams } from "@/lib/admin/params";
 import { PageHeader, Card, StatTile, DemoNotice, Badge, ORDER_TONE, LEAD_TONE, humanise, th, td } from "@/components/admin/ui";
 import { LineChart, BarList, Funnel } from "@/components/admin/charts";
 import { RangePicker } from "@/components/admin/range-picker";
+import { LaunchChecklist } from "@/components/admin/launch-checklist";
+import { getLaunchChecklist } from "@/lib/admin/launch";
 import { formatMoney, formatPercent, formatNumber, timeAgo } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Overview" };
@@ -35,7 +37,10 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
       ? db.lead.findMany({ orderBy: { createdAt: "desc" }, take: 5, where: includeDemo ? {} : { isDemo: false }, select: { id: true, leadNumber: true, name: true, company: true, productName: true, quantity: true, status: true, source: true, createdAt: true } })
       : Promise.resolve([]),
   ]);
-  const insights = analytics ? await buildInsights(range, includeDemo, perf) : [];
+  const [insights, launch] = await Promise.all([
+    analytics ? buildInsights(range, includeDemo, perf) : Promise.resolve([]),
+    can(admin.role, "viewAudit") ? getLaunchChecklist() : Promise.resolve([]),
+  ]);
   const { current: c, previous: p } = kpis;
   const fmtDay = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 
@@ -45,6 +50,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
         <RangePicker active={range.key} />
       </PageHeader>
       <DemoNotice show={demoExists} includeDemo={includeDemo} href={demoHref} />
+      {launch.length > 0 && <LaunchChecklist items={launch} />}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6">
         <StatTile label="Visitors" value={formatNumber(c.visitors)} current={c.visitors} previous={p.visitors} />

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, Loader2, MessageCircle, Sparkles, Wand2 } from "lucide-react";
 import { Choice, Field, inputClass } from "./field";
+import { SquadList } from "./squad-list";
+import { breakdownText, type Player } from "@/lib/roster";
 import { COUNTRIES, TOP_COUNTRIES } from "@/lib/countries";
 import { sessionId, track } from "@/lib/analytics/client";
 import { cn } from "@/lib/utils";
@@ -69,6 +71,8 @@ export function QuoteForm({
     preferredChannel: "email",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [roster, setRoster] = useState<Player[]>([]);
+  const [sizeBreakdown, setSizeBreakdown] = useState("");
   const [brief, setBrief] = useState("");
   const [briefState, setBriefState] = useState<"idle" | "busy" | "done" | "error">("idle");
   const [filled, setFilled] = useState<string[]>([]);
@@ -161,7 +165,8 @@ export function QuoteForm({
           productSlug: s.productSlug || undefined,
           productName: s.productSlug ? undefined : s.productName || undefined,
           quantity: Number(s.quantity) || undefined,
-          requirements: { colors: s.colors, branding: s.branding, sizes: s.sizes, material: s.material },
+          requirements: { colors: s.colors, branding: s.branding, sizes: s.sizes, material: s.material, sizeBreakdown: sizeBreakdown || undefined },
+          roster: roster.length ? roster : undefined,
           targetDate: s.targetDate || undefined,
           budget: s.budget || undefined,
           message: s.message || undefined,
@@ -285,7 +290,7 @@ export function QuoteForm({
           </Field>
           {!s.productSlug && (
             <Field label="What do you need?" htmlFor="productName" hint="Describe the product — we make to specification.">
-              <input id="productName" value={s.productName} maxLength={120} onChange={(e) => set("productName", e.target.value)} className={inputClass} placeholder="e.g. Rugby jerseys, cycling kit, leather gloves…" />
+              <input id="productName" value={s.productName} maxLength={120} onChange={(e) => set("productName", e.target.value)} className={inputClass} placeholder="e.g. Rugby jerseys, cricket whites, school uniforms…" />
             </Field>
           )}
 
@@ -297,6 +302,22 @@ export function QuoteForm({
           >
             <input id="quantity" type="number" inputMode="numeric" min={1} max={1000000} value={s.quantity} onChange={(e) => set("quantity", e.target.value)} className={inputClass} aria-invalid={!!errors.quantity} />
           </Field>
+
+          <SquadList
+            applied={roster}
+            onApply={(r) => {
+              if (!r) {
+                setRoster([]);
+                setSizeBreakdown("");
+                return;
+              }
+              const text = breakdownText(r.breakdown);
+              setRoster(r.players);
+              setSizeBreakdown(text.slice(0, 600));
+              set("quantity", String(r.players.length));
+              if (text) set("sizes", text.slice(0, 300));
+            }}
+          />
 
           <fieldset className="space-y-4 rounded-[var(--radius-card)] border hairline bg-chalk/60 p-4 sm:p-5">
             <legend className="px-1 text-sm font-semibold">Details that make the quote accurate</legend>

@@ -55,6 +55,13 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     .filter(([, v]) => v);
   // Images the customer attached in the chat (paths from our own /api/upload only).
   const attachments = (Array.isArray(req.attachments) ? req.attachments : []).filter((a): a is string => typeof a === "string" && /^\/uploads\/[a-z0-9]{10,40}$/.test(a));
+  // Squad list from the quote form (names, numbers, sizes).
+  const roster = (Array.isArray(req.roster) ? req.roster : []).filter(
+    (p): p is { name: string; number: string; size: string } => !!p && typeof p === "object" && typeof (p as { size?: unknown }).size === "string",
+  );
+  const rosterCsv = roster.length
+    ? `data:text/csv;charset=utf-8,${encodeURIComponent(["Name,Number,Size", ...roster.map((p) => [p.name, p.number, p.size].map((v) => `"${String(v ?? "").replace(/"/g, '""')}"`).join(","))].join("\n"))}`
+    : null;
   const design = (lead.design ?? null) as { preview?: unknown; crest?: unknown; pattern?: unknown; colours?: unknown; sampleName?: unknown; sampleNumber?: unknown; sponsor?: unknown } | null;
   const transcript = (Array.isArray(conversation?.messages) ? (conversation!.messages as Msg[]) : []).filter((m) => m && typeof m.content === "string");
   const phoneDigits = lead.phone?.replace(/[^\d]/g, "");
@@ -122,6 +129,38 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               <blockquote className="mt-5 whitespace-pre-wrap rounded-xl bg-white/[0.03] p-4 text-[15px] leading-relaxed">{lead.message}</blockquote>
             )}
           </Card>
+
+          {roster.length > 0 && (
+            <Card title={`Squad list (${roster.length} players)`}>
+              <div className="max-h-80 overflow-auto rounded-xl ring-1 ring-white/10">
+                <table className="w-full text-sm">
+                  <thead className="sticky top-0 bg-white/[0.06] text-left text-subtle">
+                    <tr>
+                      <th className="px-3 py-2 font-medium">#</th>
+                      <th className="px-3 py-2 font-medium">Name</th>
+                      <th className="px-3 py-2 font-medium">Number</th>
+                      <th className="px-3 py-2 font-medium">Size</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {roster.map((p, i) => (
+                      <tr key={i}>
+                        <td className="px-3 py-1.5 text-subtle tabular-nums">{i + 1}</td>
+                        <td className="px-3 py-1.5">{p.name || "—"}</td>
+                        <td className="px-3 py-1.5 font-mono">{p.number || "—"}</td>
+                        <td className="px-3 py-1.5 font-semibold">{p.size || "?"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {rosterCsv && (
+                <a href={rosterCsv} download={`${lead.leadNumber}-squad.csv`} className="mt-3 inline-flex text-sm font-semibold text-accent hover:underline">
+                  Download for production (CSV)
+                </a>
+              )}
+            </Card>
+          )}
 
           {attachments.length > 0 && (
             <Card title={`Attached images (${attachments.length})`}>

@@ -48,6 +48,7 @@ export const leadInputSchema = z.object({
       decoration: optionalText(200),
       packaging: optionalText(200),
       notes: optionalText(1000),
+      sizeBreakdown: optionalText(600),
     })
     .partial()
     .optional(),
@@ -63,6 +64,11 @@ export const leadInputSchema = z.object({
   transcript: z
     .array(z.object({ role: z.enum(["user", "assistant"]), content: text(2000) }))
     .max(30)
+    .optional(),
+  /** Squad list from the quote form: one row per player. */
+  roster: z
+    .array(z.object({ name: z.string().trim().max(40), number: z.string().trim().regex(/^\d{0,3}$/), size: z.string().trim().max(8) }))
+    .max(500)
     .optional(),
   /** Logos / artwork the visitor uploaded (site-hosted paths only). */
   attachments: z.array(z.string().regex(/^\/uploads\/[a-z0-9]{10,40}$/)).max(6).optional(),
