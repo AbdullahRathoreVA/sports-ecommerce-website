@@ -123,7 +123,7 @@ export function ContactForm({ productSlug }: { productSlug?: string }) {
       </Field>
       <input name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
       {serverError && (
-        <p className="rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300" role="alert">
+        <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-200" role="alert">
           {serverError}
         </p>
       )}

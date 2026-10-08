@@ -46,7 +46,7 @@ export default async function TrackPage({ searchParams }: { searchParams: Promis
           <input id="email" name="email" type="email" required autoComplete="email" className={inputClass} />
         </Field>
         {error && MESSAGES[error] && (
-          <p className="rounded-xl bg-red-500/10 px-4 py-3 text-sm text-red-300" role="alert">
+          <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 ring-1 ring-red-200" role="alert">
             {MESSAGES[error]}
           </p>
         )}

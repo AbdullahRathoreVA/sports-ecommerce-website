@@ -58,7 +58,8 @@
   --color-cobalt-50: #eef1ff;
   --color-signal: #22c55e;
   --color-amber: #f59e0b;
-  --color-danger: #f87171;
+  /* Readable on light pages (≈5.9:1 on white); lightened inside dark sections below. */
+  --color-danger: #c81e1e;
 
   --radius-card: 6px;
   --radius-control: 4px;
@@ -111,6 +112,7 @@
   --color-accent: #e11d26;
   --color-accent-hover: #f0353c;
   --color-accent-ink: #ffffff;
+  --color-danger: #f87171;
   color: var(--color-fg);
 }
 
