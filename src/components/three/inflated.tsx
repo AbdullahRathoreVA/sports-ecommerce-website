@@ -105,7 +105,7 @@ export function useInflated(base: string, aspect: number, depth: number): Inflat
     Promise.all([loadHeight(`${base}-height.png`), loadTexture(`${base}-front.webp`), loadTexture(`${base}-back.webp`)]).then(([hm, front, backTex]) => {
       if (!alive) return;
       // Lambert keeps the shader tiny (fast to compile everywhere); the photo already carries studio light.
-      const mk = (map: THREE.Texture) => new THREE.MeshLambertMaterial({ map, emissive: new THREE.Color("#ffffff"), emissiveMap: map, emissiveIntensity: 0.32 });
+      const mk = (map: THREE.Texture) => new THREE.MeshLambertMaterial({ map, emissive: new THREE.Color("#ffffff"), emissiveMap: map, emissiveIntensity: 0.32, alphaTest: 0.5, alphaToCoverage: true });
       setAsset({ geometry: buildInflatedGeometry(hm, aspect, depth), materials: [mk(front), mk(backTex)] });
     });
     return () => {

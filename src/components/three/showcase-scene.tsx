@@ -41,7 +41,7 @@ export type ShowcaseSceneProps = {
 
 const DIR = "/media/catalog/3d/";
 const ASPECT: Record<string, number> = {
-  "gk-a-back": 0.6073, "gk-a-palm": 0.6073, "gk-b-back": 0.678, "gk-b-palm": 0.678,
+  "gk-a-back": 0.6073, "gk-a-palm": 0.6369, "gk-b-back": 0.678, "gk-b-palm": 0.6943,
   "jersey-red-10": 0.7543, "jersey-red": 0.8234, "moto-white-red": 0.6286, "moto-b": 0.4361,
   "racing-a": 0.5042, "racing-b": 0.6837, "leather-black-red": 0.8141, "tracksuit-a": 0.4922, "tracksuit-b": 0.4909,
 };
@@ -103,7 +103,8 @@ function useInflatedSet(names: string[]) {
   const [set, setSet] = useState<Record<string, Mesh3D> | null>(null);
   useEffect(() => {
     let alive = true;
-    const mk = (map: THREE.Texture) => new THREE.MeshLambertMaterial({ map, emissive: new THREE.Color("#ffffff"), emissiveMap: map, emissiveIntensity: 0.34 });
+    // The texture alpha is the product outline: alphaTest cuts it pixel-smooth, alphaToCoverage anti-aliases it.
+    const mk = (map: THREE.Texture) => new THREE.MeshLambertMaterial({ map, emissive: new THREE.Color("#ffffff"), emissiveMap: map, emissiveIntensity: 0.34, alphaTest: 0.5, alphaToCoverage: true });
     Promise.all(
       names.map(async (n) => {
         const [hm, front, back] = await Promise.all([loadHeight(`${DIR}${n}-height.png`), loadTexture(`${DIR}${n}-front.webp`), loadTexture(`${DIR}${n}-back.webp`)]);

@@ -7,6 +7,7 @@ import { PATTERNS, PRESETS, renderJersey, syncCanvasFont, CANVAS_W, CANVAS_H, ty
 import { QuoteForm } from "@/components/forms/quote-form";
 import { track } from "@/lib/analytics/client";
 import { cn } from "@/lib/utils";
+import { GearDesigner } from "./gear-designer";
 
 const JerseyScene = dynamic(() => import("@/components/three/jersey-scene"), { ssr: false });
 
@@ -23,7 +24,7 @@ function supports3d() {
   }
 }
 
-export function DesignStudio({
+function KitDesigner({
   products,
   whatsapp,
   responseTime,
@@ -356,5 +357,52 @@ export function DesignStudio({
         </div>
       )}
     </div>
+  );
+}
+
+type Item = "kit" | "gloves" | "ball";
+const ITEMS: { id: Item; label: string; sub: string }[] = [
+  { id: "kit", label: "Team kit", sub: "Jersey, pattern, names & numbers" },
+  { id: "gloves", label: "Goalkeeper gloves", sub: "Colour, cut & your logo" },
+  { id: "ball", label: "Football", sub: "Panels, colours & your crest" },
+];
+
+/** Design Studio: pick what to design, then customise it in 3D and send it with a quote. */
+export function DesignStudio(props: { products: { slug: string; name: string; category: string; moq: number }[]; whatsapp: string; responseTime: string }) {
+  const [item, setItem] = useState<Item>("kit");
+  useEffect(() => {
+    const q = new URLSearchParams(location.search).get("item");
+    if (q === "gloves" || q === "ball" || q === "kit") setItem(q);
+  }, []);
+  const choose = (id: Item) => {
+    setItem(id);
+    const u = new URL(location.href);
+    if (id === "kit") u.searchParams.delete("item");
+    else u.searchParams.set("item", id);
+    history.replaceState(null, "", u);
+    track("customizer_start", { label: `design-studio-switch-${id}` });
+  };
+  return (
+    <>
+      <div role="tablist" aria-label="What are you designing?" className="mb-6 grid grid-cols-3 gap-2">
+        {ITEMS.map((it) => (
+          <button
+            key={it.id}
+            type="button"
+            role="tab"
+            aria-selected={item === it.id}
+            onClick={() => choose(it.id)}
+            className={cn(
+              "rounded-[var(--radius-card)] border px-3 py-3 text-left transition-colors sm:px-4",
+              item === it.id ? "border-ink bg-ink text-white" : "hairline bg-surface hover:border-black/30",
+            )}
+          >
+            <span className="block text-sm font-semibold sm:text-base">{it.label}</span>
+            <span className={cn("mt-0.5 hidden text-xs sm:block", item === it.id ? "text-white/60" : "text-muted")}>{it.sub}</span>
+          </button>
+        ))}
+      </div>
+      {item === "kit" ? <KitDesigner {...props} /> : <GearDesigner key={item} kind={item} {...props} />}
+    </>
   );
 }

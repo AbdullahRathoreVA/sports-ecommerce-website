@@ -120,7 +120,23 @@ void main() {
   #include <colorspace_fragment>
 }`;
 
-export function ProBall({ radius = 1, panel = "#d9161f", base = "#e9e8e4", seam = "#26272b", rim = "#ff3b44" }: { radius?: number; panel?: string; base?: string; seam?: string; rim?: string }) {
+/** `logo`: a customer's crest (canvas) printed on the front hexagon instead of the Alrobel mark. */
+export function ProBall({
+  radius = 1,
+  panel = "#d9161f",
+  base = "#e9e8e4",
+  seam = "#26272b",
+  rim = "#ff3b44",
+  logo = null,
+}: {
+  radius?: number;
+  panel?: string;
+  base?: string;
+  seam?: string;
+  rim?: string;
+  logo?: HTMLCanvasElement | null;
+}) {
+  // One material for the ball's lifetime; colours and crest are uniforms, so changing them never recompiles.
   const material = useMemo(() => {
     const c = centres();
     const target = new THREE.Vector3(0.3, 0.2, 1).normalize();
@@ -137,26 +153,39 @@ export function ProBall({ radius = 1, panel = "#d9161f", base = "#e9e8e4", seam 
       uniforms: {
         uCentres: { value: c },
         uInvH: { value: c.map((_, k) => 1 / (k < 12 ? H_PENT : H_HEX)) },
-        uPanel: { value: new THREE.Color(panel) },
-        uBase: { value: new THREE.Color(base) },
-        uSeam: { value: new THREE.Color(seam) },
-        uRim: { value: new THREE.Color(rim) },
+        uPanel: { value: new THREE.Color() },
+        uBase: { value: new THREE.Color() },
+        uSeam: { value: new THREE.Color() },
+        uRim: { value: new THREE.Color() },
         uLogo: { value: null },
         uLogoIdx: { value: logoIdx },
         uLogoU: { value: u },
         uLogoV: { value: v },
       },
     });
-  }, [panel, base, seam, rim]);
+  }, []);
 
   useEffect(() => {
-    const t = logoTexture();
+    (material.uniforms.uPanel!.value as THREE.Color).set(panel);
+    (material.uniforms.uBase!.value as THREE.Color).set(base);
+    (material.uniforms.uSeam!.value as THREE.Color).set(seam);
+    (material.uniforms.uRim!.value as THREE.Color).set(rim);
+  }, [material, panel, base, seam, rim]);
+
+  useEffect(() => {
+    let t: THREE.Texture;
+    if (logo) {
+      t = new THREE.CanvasTexture(logo);
+      t.colorSpace = THREE.SRGBColorSpace;
+      t.anisotropy = 8;
+    } else {
+      t = logoTexture();
+    }
     material.uniforms.uLogo!.value = t;
-    return () => {
-      t.dispose();
-      material.dispose();
-    };
-  }, [material]);
+    return () => t.dispose();
+  }, [material, logo]);
+
+  useEffect(() => () => material.dispose(), [material]);
 
   return (
     <mesh material={material}>

@@ -49,6 +49,8 @@ export default async function ProductPage({ params }: Props) {
   const lead = leadTimeLabel(product.leadTimeMinDays, product.leadTimeMaxDays);
   const canBuy = product.purchaseMode !== "QUOTE" && (product.priceTiers.length > 0 || (product.purchaseMode === "BOTH" && product.samplePriceCents != null));
   const isTeamwear = product.category.slug === "sublimation-teamwear";
+  // Products with a live 3D designer link straight into the matching Design Studio mode.
+  const studioItem = isTeamwear ? "" : product.category.slug === "goalkeeper-gloves" ? "?item=gloves" : product.category.slug === "footballs" ? "?item=ball" : null;
   const shipsFrom = [settings.contact.city, settings.contact.country].filter(Boolean).join(", ") || "our factory";
 
   return (
@@ -156,8 +158,8 @@ export default async function ProductPage({ params }: Props) {
                   </li>
                 ))}
               </ul>
-              {isTeamwear && (
-                <Link href="/design-studio" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline" data-track="customizer_start" data-track-label="Product page">
+              {studioItem !== null && (
+                <Link href={`/design-studio${studioItem}`} className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline" data-track="customizer_start" data-track-label="Product page">
                   Try your design in the 3D Design Studio →
                 </Link>
               )}
