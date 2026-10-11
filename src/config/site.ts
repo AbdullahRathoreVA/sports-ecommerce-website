@@ -163,7 +163,9 @@ export const footerNav: { title: string; links: NavItem[] }[] = [
 
 /**
  * Other offices. KNOWN FACT (owner via Kaif, 2026-10-11): Italy office, contact
- * Mian Muhammad Bilal, +39 344 408 0435. City given as "Neuro" — to confirm
- * (probably Nuoro) before adding it; shown as "Italy" until then.
+ * Mian Muhammad Bilal, +39 344 408 0435. City confirmed as Nuoro.
  */
-export const OFFICES = [{ label: "Italy office", country: "Italy", flag: "🇮🇹", person: "Mian Muhammad Bilal", phone: "+39 344 408 0435" }];
+export const OFFICES = [{ label: "Italy office", country: "Nuoro, Italy", flag: "🇮🇹", person: "Mian Muhammad Bilal", phone: "+39 344 408 0435" }];
+
+/** KNOWN FACT (owner via Kaif, 2026-10-11): MOQ 50 pieces per design, custom pricing per order, one sample $150. */
+export const ORDER_TERMS = { moq: 50, sampleCents: 15000, currency: "USD" } as const;

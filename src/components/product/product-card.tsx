@@ -75,7 +75,7 @@ export function ProductCard({ product, priority = false, className }: { product:
               <span className="text-[12px] text-subtle"> / piece</span>
             </>
           ) : (
-            <span className="font-semibold text-accent">Price on request</span>
+            <span className="font-semibold text-accent">Custom pricing</span>
           )}
         </p>
         <p className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t hairline pt-3 text-[11.5px] text-muted [margin-top:max(0.75rem,auto)]">

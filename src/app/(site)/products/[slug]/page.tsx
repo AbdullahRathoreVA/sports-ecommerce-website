@@ -47,7 +47,7 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
   const related = await getRelatedProducts(product, 4);
   const lead = leadTimeLabel(product.leadTimeMinDays, product.leadTimeMaxDays);
-  const canBuy = product.purchaseMode !== "QUOTE" && product.priceTiers.length > 0;
+  const canBuy = product.purchaseMode !== "QUOTE" && (product.priceTiers.length > 0 || (product.purchaseMode === "BOTH" && product.samplePriceCents != null));
   const isTeamwear = product.category.slug === "sublimation-teamwear";
   const shipsFrom = [settings.contact.city, settings.contact.country].filter(Boolean).join(", ") || "our factory";
 
@@ -112,7 +112,10 @@ export default async function ProductPage({ params }: Props) {
                 <span className="text-base font-normal text-white/60"> / piece</span>
               </p>
             ) : (
-              <p className="mt-1.5 text-2xl font-semibold uppercase tracking-tight text-accent">Price on request</p>
+              <>
+                <p className="mt-1.5 text-2xl font-semibold uppercase tracking-tight text-accent">Custom pricing</p>
+                <p className="mt-1 text-sm text-white/60">Quoted to your quantity and requirements.</p>
+              </>
             )}
             <p className="mt-3 flex items-center gap-2 text-[13px] text-white/60">
               <MapPin className="h-4 w-4 shrink-0 text-accent" aria-hidden /> Ships from {shipsFrom} · freight quoted on confirmation

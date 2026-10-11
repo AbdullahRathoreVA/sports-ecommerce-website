@@ -8,7 +8,7 @@ export async function DemoBanner() {
     <div className="on-dark bg-ink-2">
       <p className="container-x py-2 text-center text-[12.5px] leading-snug text-muted">
         <span className="mr-1.5 inline-block rounded-sm bg-accent px-2 py-0.5 font-mono text-[10.5px] font-medium uppercase tracking-wider text-accent-ink">Preview</span>
-        Prices and some product photos are placeholders until the factory confirms them.
+        Preview site — product details are still being finalised with the factory.
       </p>
     </div>
   );

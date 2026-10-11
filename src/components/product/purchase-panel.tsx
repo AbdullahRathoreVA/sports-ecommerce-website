@@ -35,10 +35,13 @@ type Props = {
  */
 export function PurchasePanel({ product, whatsapp }: Props) {
   const { add } = useCart();
-  const canBuy = product.purchaseMode !== "QUOTE" && product.priceTiers.length > 0;
+  // Bulk online needs price breaks; without them bulk is custom-quoted, but a sample can still be bought.
+  const canBuyBulk = product.purchaseMode !== "QUOTE" && product.priceTiers.length > 0;
   const hasSample = product.purchaseMode === "BOTH" && product.samplePriceCents != null;
+  const canBuy = canBuyBulk || hasSample;
   const bulkMin = Math.max(product.moq, product.priceTiers.find((t) => t.minQty >= product.moq)?.minQty ?? product.moq);
   const [mode, setMode] = useState<"sample" | "bulk">(hasSample ? "sample" : "bulk");
+  const showToggle = hasSample && canBuyBulk;
   const [qty, setQty] = useState(bulkMin);
   // Default to a common adult size (M), not the first in the list (often a youth size).
   const [size, setSize] = useState<string>(() => {
@@ -56,7 +59,7 @@ export function PurchasePanel({ product, whatsapp }: Props) {
     : null;
 
   function addToCart() {
-    if (!canBuy || unit == null) return;
+    if (!(mode === "sample" ? hasSample : canBuyBulk) || unit == null) return;
     add({
       productId: product.id,
       slug: product.slug,
@@ -79,7 +82,7 @@ export function PurchasePanel({ product, whatsapp }: Props) {
     <div className="space-y-5">
       {canBuy && (
         <div className="rounded-[var(--radius-card)] border hairline bg-surface p-4 sm:p-5">
-          {hasSample && (
+          {showToggle && (
             <div role="radiogroup" aria-label="Order type" className="grid grid-cols-2 gap-1 rounded-xl bg-surface-2 p-1">
               {(["sample", "bulk"] as const).map((m) => (
                 <button
@@ -99,7 +102,7 @@ export function PurchasePanel({ product, whatsapp }: Props) {
             </div>
           )}
 
-          <div className={cn("flex items-end justify-between gap-3", hasSample && "mt-4")}>
+          <div className={cn("flex items-end justify-between gap-3", showToggle && "mt-4")}>
             <div>
               <p className="text-sm text-muted">{mode === "sample" ? "Sample price" : "Unit price"}</p>
               <p className="mt-0.5 text-3xl font-semibold tracking-tight">{unit != null ? formatMoney(unit, product.currency) : "—"}</p>
@@ -195,7 +198,7 @@ export function PurchasePanel({ product, whatsapp }: Props) {
           onClick={() => track("quote_start", { productId: product.id, label: product.name })}
           className="flex h-12 items-center justify-center gap-2 rounded-[var(--radius-control)] bg-accent text-[15px] font-semibold text-accent-ink transition-colors hover:bg-accent-hover sm:col-span-2"
         >
-          <FileText className="h-[18px] w-[18px]" aria-hidden /> {canBuy ? "Customise & request a quote" : "Request a quote"}
+          <FileText className="h-[18px] w-[18px]" aria-hidden /> {canBuyBulk ? "Customise & request a quote" : `Get bulk pricing (MOQ ${product.moq > 1 ? product.moq : "on request"})`}
         </Link>
         {waLink ? (
           <a
@@ -231,7 +234,7 @@ export function MobileProductBar({ name, fromCents, currency, canBuy, slug }: { 
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] text-muted">{name}</p>
-          <p className="text-[15px] font-semibold">{fromCents != null ? `From ${formatMoney(fromCents, currency)}` : "Price on request"}</p>
+          <p className="text-[15px] font-semibold">{fromCents != null ? `From ${formatMoney(fromCents, currency)}` : "Custom pricing"}</p>
         </div>
         {canBuy ? (
           <a href="#buy" className="flex h-12 items-center rounded-[var(--radius-control)] bg-ink px-5 text-[15px] font-semibold text-white">

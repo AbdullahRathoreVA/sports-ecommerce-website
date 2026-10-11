@@ -6,6 +6,8 @@ import { getSettings } from "@/lib/settings";
 import { getAllProducts, getCategories, getFaqs, getPublishedTestimonials } from "@/lib/catalog";
 import { ButtonLink } from "@/components/ui/button";
 import { HeroJersey } from "@/components/three/jersey-stage";
+import { ORDER_TERMS } from "@/config/site";
+import { formatMoney } from "@/lib/utils";
 import { PriceEstimator, type EstimatorProduct } from "@/components/catalog/price-estimator";
 import { HeroUnbox } from "@/components/three/unbox-stage";
 import { ShippingGlobe } from "@/components/three/globe-stage";
@@ -219,6 +221,38 @@ export default async function HomePage() {
               </li>
             ))}
           </ul>
+
+          {estimator.length === 0 && (
+            <div id="estimate" className="mt-20 scroll-mt-28 lg:mt-28" data-reveal>
+              <div className="on-dark grid overflow-hidden rounded-[var(--radius-card)] bg-ink text-white lg:grid-cols-[1.1fr_2fr]">
+                <div className="relative p-7 sm:p-10">
+                  <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-accent/25 blur-[90px]" aria-hidden />
+                  <p className="label relative text-accent">Pricing</p>
+                  <h3 className="font-display relative mt-4 text-[clamp(2rem,4.5vw,3rem)] leading-[0.95]">
+                    Priced to your order.
+                    <span className="block text-white/45">Not a price list.</span>
+                  </h3>
+                  <p className="relative mt-4 max-w-sm text-[15px] text-white/60">Tell us the product, quantity and design — we send a written quote for exactly what you need.</p>
+                  <Link href="/quote" className="relative mt-7 inline-flex h-12 items-center gap-2 rounded-[var(--radius-control)] bg-accent px-6 font-semibold text-white hover:bg-accent-hover" data-track="cta_click" data-track-label="Pricing: get a quote">
+                    Get my price <ArrowUpRight className="h-4 w-4" aria-hidden />
+                  </Link>
+                </div>
+                <dl className="grid border-t border-white/10 sm:grid-cols-3 lg:border-l lg:border-t-0">
+                  {[
+                    { k: "Minimum order", v: `${ORDER_TERMS.moq} pieces`, d: "Per design. Mix sizes, names and numbers within it." },
+                    { k: "Sample", v: formatMoney(ORDER_TERMS.sampleCents, ORDER_TERMS.currency), d: "Check fabric, fit and print before you order in bulk." },
+                    { k: "Bulk price", v: "Custom", d: "The more you order, the better the price per piece." },
+                  ].map((t, i) => (
+                    <div key={t.k} className={`p-7 sm:p-8 ${i > 0 ? "border-t border-white/10 sm:border-l sm:border-t-0" : ""}`}>
+                      <dt className="label text-[0.62rem] text-white/45">{t.k}</dt>
+                      <dd className="font-display mt-3 text-[clamp(2rem,4vw,2.8rem)] leading-none">{t.v}</dd>
+                      <dd className="mt-3 text-sm text-white/55">{t.d}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
+          )}
 
           {estimator.length > 0 && (
             <div id="estimate" className="mt-20 scroll-mt-28 lg:mt-28" data-reveal>

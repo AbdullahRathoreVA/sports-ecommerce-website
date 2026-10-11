@@ -69,7 +69,7 @@ export function productFacts(p: ProductDetail) {
     samplePrice: p.samplePriceCents != null ? formatMoney(p.samplePriceCents, p.currency) : "On request",
     priceTiers: p.priceTiers.length
       ? p.priceTiers.map((t) => `${t.minQty}+ units: ${formatMoney(t.unitCents, p.currency)} each`).join("; ")
-      : "Price on request",
+      : "Custom pricing: quoted to the customer's quantity and requirements",
     specs: p.specs.map((s) => `${s.label}: ${s.value}`),
     materials: p.materials,
     customisation: p.customizations,
