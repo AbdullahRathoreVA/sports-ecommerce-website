@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { PRESETS, renderJersey, syncCanvasFont, type JerseyDesign } from "@/lib/jersey/design";
 import { cn } from "@/lib/utils";
+import { deviceTier } from "@/lib/device";
 
 const JerseyScene = dynamic(() => import("./jersey-scene"), { ssr: false });
 
@@ -16,20 +17,6 @@ const JerseyScene = dynamic(() => import("./jersey-scene"), { ssr: false });
  *   - reduced motion → 3D renders, but no auto-rotate and no sweep animation
  *   - off-screen or hidden tab → render loop paused
  */
-function capability(): "3d" | "poster" {
-  if (typeof window === "undefined") return "poster";
-  const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-  if (nav.connection?.saveData) return "poster";
-  if (typeof nav.deviceMemory === "number" && nav.deviceMemory <= 2) return "poster";
-  try {
-    const c = document.createElement("canvas");
-    if (!(c.getContext("webgl2") || c.getContext("webgl"))) return "poster";
-  } catch {
-    return "poster";
-  }
-  return "3d";
-}
-
 export function HeroJersey({ poster, posterAlt, className }: { poster: string; posterAlt: string; className?: string }) {
   const wrap = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<"poster" | "3d">("poster");
@@ -50,10 +37,23 @@ export function HeroJersey({ poster, posterAlt, className }: { poster: string; p
     reduced.current = still || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (still) setStill(true);
     if (still) rotation.current = Number(new URLSearchParams(location.search).get("still")) || 0;
-    if (capability() !== "3d") return;
+    if (deviceTier() !== "3d") return;
     const el = wrap.current;
     if (!el) return;
-    const io = new IntersectionObserver(([entry]) => setVisible(entry!.isIntersecting), { rootMargin: "200px" });
+    let started = false;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        setVisible(entry!.isIntersecting);
+        // Load the 3D only when the card comes near the screen, not at page load.
+        if (entry!.isIntersecting && !started) {
+          started = true;
+          const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+          if (idle) idle(start, { timeout: 1500 });
+          else setTimeout(start, 300);
+        }
+      },
+      { rootMargin: "400px" },
+    );
     io.observe(el);
     const start = () => {
       document.fonts?.ready.then(() => {
@@ -64,9 +64,6 @@ export function HeroJersey({ poster, posterAlt, className }: { poster: string; p
         setMode("3d");
       });
     };
-    const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
-    if (idle) idle(start, { timeout: 1500 });
-    else setTimeout(start, 600);
     return () => io.disconnect();
   }, []);
 

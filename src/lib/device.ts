@@ -1,0 +1,39 @@
+/**
+ * One decision for every 3D scene on the site. Every device with WebGL gets
+ * the live 3D (the owner wants it everywhere); only data-saver mode, very slow
+ * networks or no WebGL fall back to the photoreal still. `deviceQuality`
+ * then picks the render resolution so weaker devices stay smooth.
+ */
+export type DeviceTier = "3d" | "lite";
+
+let cached: DeviceTier | null = null;
+
+export function deviceTier(): DeviceTier {
+  if (cached) return cached;
+  if (typeof window === "undefined") return "lite";
+  const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean; effectiveType?: string } };
+  const params = new URLSearchParams(location.search);
+  if (params.has("3d")) return (cached = "3d"); // force for testing / screenshots
+  if (params.has("lite")) return (cached = "lite");
+  const reasons = [nav.connection?.saveData, nav.connection?.effectiveType === "2g" || nav.connection?.effectiveType === "slow-2g"];
+  let webgl = false;
+  try {
+    const c = document.createElement("canvas");
+    webgl = Boolean(c.getContext("webgl2") || c.getContext("webgl"));
+  } catch {
+    webgl = false;
+  }
+  cached = webgl && !reasons.some(Boolean) ? "3d" : "lite";
+  return cached;
+}
+
+/** Render resolution budget: phones and low-memory machines draw fewer pixels, everything else gets crisp output. */
+export function deviceQuality(): "high" | "low" {
+  if (typeof window === "undefined") return "low";
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  const weak =
+    (typeof nav.deviceMemory === "number" && nav.deviceMemory < 4) ||
+    (typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency < 4) ||
+    (window.matchMedia("(pointer: coarse)").matches && window.innerWidth < 1024);
+  return weak ? "low" : "high";
+}

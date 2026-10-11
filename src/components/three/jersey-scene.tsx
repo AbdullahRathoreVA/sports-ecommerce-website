@@ -196,6 +196,9 @@ export default function JerseyScene(props: JerseySceneProps) {
       camera={{ position: [0, 0.02, 2.95], fov: 32 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: !!props.still }}
       shadows={false}
+      onCreated={({ gl }) => {
+        gl.debug.checkShaderErrors = process.env.NODE_ENV !== "production";
+      }}
     >
       <FrameGate active={props.active} />
       <ambientLight intensity={0.35} />

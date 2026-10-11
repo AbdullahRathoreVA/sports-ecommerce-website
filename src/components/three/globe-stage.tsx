@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import type { Destination } from "./globe-scene";
 import { cn } from "@/lib/utils";
+import { deviceTier } from "@/lib/device";
 
 const GlobeScene = dynamic(() => import("./globe-scene"), { ssr: false });
 
@@ -14,14 +15,7 @@ export function ShippingGlobe({ origin, destinations, className }: { origin: Des
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const nav = navigator as Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
-    if (nav.connection?.saveData || (typeof nav.deviceMemory === "number" && nav.deviceMemory <= 2)) return;
-    try {
-      const c = document.createElement("canvas");
-      if (!(c.getContext("webgl2") || c.getContext("webgl"))) return;
-    } catch {
-      return;
-    }
+    if (deviceTier() !== "3d") return;
     const el = wrap.current;
     if (!el) return;
     const io = new IntersectionObserver(

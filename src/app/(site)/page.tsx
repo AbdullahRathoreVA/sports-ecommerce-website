@@ -9,7 +9,7 @@ import { HeroJersey } from "@/components/three/jersey-stage";
 import { ORDER_TERMS } from "@/config/site";
 import { formatMoney } from "@/lib/utils";
 import { PriceEstimator, type EstimatorProduct } from "@/components/catalog/price-estimator";
-import { HeroUnbox } from "@/components/three/unbox-stage";
+import { HeroShowcase } from "@/components/three/showcase-stage";
 import { ShippingGlobe } from "@/components/three/globe-stage";
 import { FactoryMap } from "@/components/site/factory-map";
 import { JsonLd, faqSchema } from "@/components/seo/json-ld";
@@ -125,25 +125,20 @@ export default async function HomePage() {
 
           {/* Phones see the ball, gloves and kit first: they are the main show. */}
           <div className="relative order-first -mx-2 lg:order-none lg:-mr-10 lg:ml-0">
-            <div className="label hidden justify-between text-white/40 sm:flex">
-              <span>Alrobel / Made &amp; shipped</span>
-              <span>01 — 03</span>
+            <div className="label hidden items-center justify-between text-white/40 sm:flex">
+              <span>Alrobel / The full range</span>
+              <Link href="/design-studio" className="inline-flex items-center gap-1.5 text-white/60 hover:text-accent" data-track="customizer_start" data-track-label="Hero: design yours">
+                Design yours in 3D <ArrowUpRight className="h-3.5 w-3.5" aria-hidden />
+              </Link>
             </div>
             <div className="relative">
               <div className="signal-glow pointer-events-none absolute inset-[10%]" />
-              <HeroUnbox poster="/media/hero/unbox-poster.webp" posterAlt="An Alrobel box opening with a football, goalkeeper gloves and a team kit rising out of it" className="relative mx-auto aspect-[1.08] w-full" />
-              <Link
-                href="/design-studio"
-                className="absolute bottom-6 right-0 hidden max-w-[230px] items-start gap-3 rounded-md border border-white/10 bg-ink/90 p-3 backdrop-blur transition-colors hover:border-accent sm:flex"
-                data-track="customizer_start"
-                data-track-label="Hero card"
-              >
-                <Plus className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden />
-                <span>
-                  <span className="block text-sm font-semibold text-white">Made for your brand.</span>
-                  <span className="mt-0.5 block text-xs text-white/50">Tap a kit to design yours in 3D</span>
-                </span>
-              </Link>
+              <HeroShowcase
+                poster="/media/hero/showroom-poster-v1.webp"
+                stagePoster="/media/hero/showroom-stage-v1.webp"
+                posterAlt="The Alrobel range in 3D: jerseys, goalkeeper gloves, footballs, motorbike and racing suits, leather jackets and tracksuits orbiting the Alrobel logo"
+                className="relative mx-auto aspect-[1.08] w-full"
+              />
             </div>
           </div>
         </div>
