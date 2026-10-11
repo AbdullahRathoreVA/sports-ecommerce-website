@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -187,11 +187,37 @@ function FrameGate({ active }: { active: boolean }) {
   return null;
 }
 
+/** Compiles every shader in the background once the model is in the scene, then lets frames run (no first-frame freeze). */
+function Precompile({ onDone }: { onDone: () => void }) {
+  const { gl, scene, camera } = useThree();
+  useEffect(() => {
+    let alive = true;
+    // One frame later the jersey (suspended on its model) is mounted; compile then.
+    const id = requestAnimationFrame(() => {
+      gl.compileAsync(scene, camera)
+        .catch(() => undefined)
+        .then(() => alive && onDone());
+    });
+    return () => {
+      alive = false;
+      cancelAnimationFrame(id);
+    };
+  }, [gl, scene, camera, onDone]);
+  return null;
+}
+
+function PrecompileWhenLoaded({ onDone }: { onDone: () => void }) {
+  useGLTF(MODEL_URL, false, true);
+  return <Precompile onDone={onDone} />;
+}
+
 export default function JerseyScene(props: JerseySceneProps) {
+  const [ready, setReady] = useState(false);
+  const onDone = useCallback(() => setReady(true), []);
   return (
     <Canvas
       className={props.className}
-      frameloop={props.active || props.still ? "always" : "never"}
+      frameloop={ready && (props.active || props.still) ? "always" : "never"}
       dpr={[1, 1.75]}
       camera={{ position: [0, 0.02, 2.95], fov: 32 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: !!props.still }}
@@ -218,6 +244,9 @@ export default function JerseyScene(props: JerseySceneProps) {
         revision={props.revision}
       />
       <ContactShadows position={[0, -0.72, 0]} opacity={0.38} scale={3.2} blur={2.6} far={1.6} resolution={256} frames={1} />
+      <Suspense fallback={null}>
+        <PrecompileWhenLoaded onDone={onDone} />
+      </Suspense>
     </Canvas>
   );
 }

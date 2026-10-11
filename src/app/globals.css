@@ -282,3 +282,27 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .hero-lite { animation: none; }
 }
+
+/* Route loading skeleton (src/app/(site)/loading.tsx). */
+@keyframes skeleton-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgb(255 255 255 / 0.06) 25%, rgb(255 255 255 / 0.12) 50%, rgb(255 255 255 / 0.06) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+.skeleton-light {
+  background: linear-gradient(90deg, rgb(17 18 20 / 0.05) 25%, rgb(17 18 20 / 0.1) 50%, rgb(17 18 20 / 0.05) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes loading-bar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.loading-bar { background: linear-gradient(90deg, transparent, var(--color-accent), transparent); animation: loading-bar 1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .skeleton, .skeleton-light, .loading-bar { animation: none; }
+}
