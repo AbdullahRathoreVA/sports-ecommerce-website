@@ -91,7 +91,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
                   <MapPin className="h-4 w-4" aria-hidden /> {o.label}
                 </dt>
                 <dd className="mt-1.5 text-muted">
-                  {o.person} · {o.country}
+                  {o.country}
                   <br />
                   <a href={`tel:${o.phone.replace(/\s+/g, "")}`} className="text-accent underline" data-track="phone_click" data-track-label={o.label}>
                     {o.phone}

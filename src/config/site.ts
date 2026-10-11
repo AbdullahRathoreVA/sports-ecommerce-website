@@ -162,7 +162,8 @@ export const footerNav: { title: string; links: NavItem[] }[] = [
 ];
 
 /**
- * Other offices. KNOWN FACT (owner via Kaif, 2026-10-11): Italy office, contact
+ * Other offices (contact page only; owner asked to keep it out of the footer and not to show the
+ * contact person's name, 2026-10-11). KNOWN FACT (owner via Kaif, 2026-10-11): Italy office, contact
  * Mian Muhammad Bilal, +39 344 408 0435. City confirmed as Nuoro.
  */
 export const OFFICES = [{ label: "Italy office", country: "Nuoro, Italy", flag: "🇮🇹", person: "Mian Muhammad Bilal", phone: "+39 344 408 0435" }];
