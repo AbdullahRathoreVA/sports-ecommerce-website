@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { BrandTile } from "@/components/ui/brand-tile";
 import Link from "next/link";
 import { ArrowDown, ArrowRight, ArrowUpRight, Check, Mail, Plus, Camera } from "lucide-react";
 import { getSettings } from "@/lib/settings";
@@ -18,7 +19,7 @@ const MARQUEE = ["Factory direct", "Custom OEM", "Kits / Uniforms / Gym wear", "
 const OEM_POINTS = ["Logo & artwork", "Colours & patterns", "Fabrics & specs", "Names & numbers"];
 
 const WHY = [
-  { title: "Own factory", body: "Printing, cutting, stitching and finishing happen under one roof in Sialkot — no middlemen between you and production." },
+  { title: "Own factory", body: "Your order is made in our own factory in Sialkot — no middlemen between you and production." },
   { title: "Samples before bulk", body: "First orders start with an approval sample, so colours, fit and branding are signed off before production." },
   { title: "Everything in writing", body: "Quotes, approvals and order updates are confirmed by email — a clear record for you and for us." },
   { title: "Worldwide shipping", body: "Packed per order and sent by air, sea or express courier, with tracking shared as soon as it ships." },
@@ -100,8 +101,8 @@ export default async function HomePage() {
               <span className="block text-accent">Our creation.</span>
             </h1>
             <p className="mt-6 max-w-lg text-pretty text-[16px] leading-relaxed text-white/65 sm:text-[17px]">
-              Team kits, uniforms and sportswear — designed, sublimated and stitched in our own factory in Sialkot and shipped worldwide.
-              We make to your wishes, under your label or ours.
+              Footballs, goalkeeper gloves and soccer uniforms — plus team kits and sportswear, made in our own factory in Sialkot and
+              shipped worldwide. We make to your wishes, under your label or ours.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <ButtonLink href="/quote" size="lg" data-track="cta_click" data-track-label="Hero: Get a quote">
@@ -190,11 +191,13 @@ export default async function HomePage() {
               <li key={c.slug} data-reveal style={{ "--reveal-delay": `${(i % 3) * 70}ms` } as React.CSSProperties}>
                 <Link href={`/products/c/${c.slug}`} className="group block" data-track="category_view" data-category={c.slug}>
                   <div className="relative aspect-[4/3.3] overflow-hidden rounded-[var(--radius-card)] bg-surface-2">
-                    {c.image && (
+                    {c.image ? (
                       <Image src={c.image} alt={c.imageAlt ?? ""} fill sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 92vw" className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.04]" />
+                    ) : (
+                      <BrandTile compact className="absolute inset-0" />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                    <span className="label absolute left-4 top-4 text-white/70">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="label absolute left-4 top-4 rounded-sm bg-ink/80 px-2 py-1 text-white/80 backdrop-blur">{String(i + 1).padStart(2, "0")}</span>
                     <h3 className="absolute bottom-4 left-5 text-[clamp(1.6rem,3vw,2.1rem)] font-semibold tracking-tight text-white">{c.name}</h3>
                   </div>
                   <p className="mt-4 text-[15px] font-medium">{c.tagline}</p>
@@ -313,10 +316,10 @@ export default async function HomePage() {
           </div>
           <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:gap-16">
             <figure className="relative aspect-[10/7] overflow-hidden rounded-[var(--radius-card)] bg-ink" data-reveal>
-              <Image src="/media/factory/printer-panels.webp" alt="Jersey panels coming off a large-format sublimation printer in the factory" fill sizes="(min-width:1024px) 45vw, 92vw" className="object-cover" />
+              <Image src="/media/renders/gloves-red.webp" alt="Alrobel goalkeeper gloves: latex palm and branded backhand" fill sizes="(min-width:1024px) 45vw, 92vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
               <figcaption className="absolute bottom-5 left-6 text-white">
-                <span className="label text-white/60">Print room / sublimation</span>
+                <span className="label text-white/60">Product detail / goalkeeper gloves</span>
                 <span className="mt-1 block text-xl font-semibold tracking-tight">Quality is in the details.</span>
               </figcaption>
             </figure>
@@ -496,7 +499,7 @@ export default async function HomePage() {
               <div>
                 <p className="label text-accent">Factory & office</p>
                 <p className="mt-3 text-2xl font-semibold tracking-tight">{[settings.contact.addressLine, settings.contact.city, settings.contact.country].filter(Boolean).join(", ") || "Sialkot, Pakistan"}</p>
-                <p className="mt-3 text-sm text-white/55">Fabric, design, sublimation and stitching — all under one roof, from where every order ships.</p>
+                <p className="mt-3 text-sm text-white/55">Our own factory in Sialkot, from where every order ships.</p>
               </div>
               <Link href="/contact" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-accent hover:underline">
                 Contact the factory <ArrowUpRight className="h-4 w-4" aria-hidden />

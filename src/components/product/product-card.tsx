@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandTile } from "@/components/ui/brand-tile";
 import Image from "next/image";
 import { Clock, Package, Ruler } from "lucide-react";
 import type { ProductCard as Card } from "@/lib/catalog";
@@ -47,7 +48,7 @@ export function ProductCard({ product, priority = false, className }: { product:
             )}
           </>
         ) : (
-          <div className="grid h-full place-items-center text-sm text-subtle">Photo coming soon</div>
+          <BrandTile label={product.name} />
         )}
         {badges.length > 0 && (
           <div className="absolute left-2.5 top-2.5 flex flex-col items-start gap-1.5">
@@ -79,7 +80,7 @@ export function ProductCard({ product, priority = false, className }: { product:
         </p>
         <p className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t hairline pt-3 text-[11.5px] text-muted [margin-top:max(0.75rem,auto)]">
           <span className="inline-flex items-center gap-1">
-            <Package className="h-3.5 w-3.5 text-accent" aria-hidden /> MOQ {product.moq}
+            <Package className="h-3.5 w-3.5 text-accent" aria-hidden /> MOQ {product.moq > 1 ? product.moq : "on request"}
           </span>
           {lead && (
             <span className="inline-flex items-center gap-1">

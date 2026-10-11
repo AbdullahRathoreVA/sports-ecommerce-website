@@ -8,7 +8,7 @@ import { ButtonLink } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Alrobel Sportswear is a custom sportswear manufacturer in Sialkot, Pakistan — fabric, design, sublimation and stitching under one roof, exporting worldwide.",
+    "Alrobel Sportswear is a custom sportswear manufacturer with its own factory in Sialkot, Pakistan, exporting worldwide.",
   alternates: { canonical: "/about" },
 };
 
@@ -63,8 +63,8 @@ export default async function AboutPage() {
               </a>
             </div>
           </div>
-          <figure className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-ink-3">
-            <Image src="/media/factory/print-room.webp" alt="Sublimation printers in our print room" fill priority sizes="(min-width:1024px) 50vw, 92vw" className="object-cover" />
+          <figure className="grid-lines relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-ink-3">
+            <Image src="/media/hero/unbox-poster.webp" alt="Alrobel box with a football, goalkeeper gloves and a team kit" fill priority sizes="(min-width:1024px) 50vw, 92vw" className="object-contain p-6" />
             <figcaption className="label absolute bottom-4 left-4 flex items-center gap-2 rounded-sm bg-ink/85 px-3 py-2 text-white/80 backdrop-blur">
               <ShieldCheck className="h-4 w-4 text-accent" aria-hidden /> Sialkot · Pakistan
             </figcaption>
@@ -92,12 +92,12 @@ export default async function AboutPage() {
           </div>
           <div className="mt-10 grid overflow-hidden rounded-[var(--radius-card)] border hairline lg:grid-cols-2">
             <div className="relative min-h-[320px] bg-surface-2">
-              <Image src="/media/work/royal-saints-trio.webp" alt="Three finished team kits from our factory" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" />
+              <Image src="/media/renders/kit-alrobel-front.webp" alt="Alrobel black and red team kit" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" />
             </div>
             <div className="flex flex-col justify-between bg-chalk p-8 lg:p-12">
               <p className="label text-subtle">01 — Our foundation</p>
               <p className="mt-6 text-[clamp(1.4rem,2.6vw,2rem)] leading-snug tracking-tight">
-                We make sportswear to your wishes — fabric, design, sublimation and stitching, all under one roof in {s.contact.city || "Sialkot"}.
+                We make sportswear to your wishes, in our own factory in {s.contact.city || "Sialkot"}.
               </p>
               <p className="mt-8 border-t hairline pt-5 text-sm text-muted">
                 <span className="font-semibold text-fg">{s.brand.name}</span> · Your vision, our creation.
@@ -123,12 +123,12 @@ export default async function AboutPage() {
       <section className="on-dark bg-ink py-16 lg:py-24">
         <div className="container-x grid gap-12 lg:grid-cols-[1fr_1.4fr]">
           <div>
-            <p className="label text-accent">Under one roof</p>
+            <p className="label text-accent">How kits are made</p>
             <h2 className="font-display mt-5 text-[clamp(2.4rem,6vw,4rem)]">
               From fabric
               <span className="block text-white/45">to finished kit.</span>
             </h2>
-            <p className="mt-5 max-w-sm text-white/60">Every step happens in our own factory, so we control quality and timing from the first cut to the final stitch.</p>
+            <p className="mt-5 max-w-sm text-white/60">Your order is made in our own factory, checked against your approved sample.</p>
           </div>
           <ul className="border-t border-white/10">
             {CRAFT.map((c, i) => (

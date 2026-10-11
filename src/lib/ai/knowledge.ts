@@ -1,7 +1,7 @@
 import "server-only";
 import { getAllProducts, getFaqs, getPosts, type ProductDetail } from "@/lib/catalog";
 import { getSettings } from "@/lib/settings";
-import { formatMoney, leadTimeLabel } from "@/lib/utils";
+import { formatMoney, leadTimeLabel, moqLabel } from "@/lib/utils";
 import type { SiteSettings } from "@/config/site";
 
 /**
@@ -27,14 +27,15 @@ export async function loadKnowledge(): Promise<Knowledge> {
   };
 }
 
-/** Evidence-backed capabilities — each is visible in the factory's own photos and video. */
+/**
+ * Confirmed capabilities only (business card + owner, 2026-10-11). Machine-level
+ * details are NOT claimed: earlier photos showed a different company's factory.
+ */
 export const FACTORY_CAPABILITIES = [
-  "Own factory (manufacturer and wholesaler)",
-  "In-house large-format sublimation printers and heat presses",
-  "Multi-head embroidery machines",
-  "In-house cutting and stitching halls",
-  "Finishing, checking and packing per order",
-  "OEM / private label: custom labels, neck tape, hang tags and packaging",
+  "Own factory in Sialkot, Pakistan (manufacturer)",
+  "Custom manufacturing to the customer's design",
+  "OEM / private label: custom logos, labels, tags and packaging",
+  "Worldwide shipping",
 ];
 
 export function unknownFacts(s: SiteSettings): string[] {
@@ -62,7 +63,7 @@ export function productFacts(p: ProductDetail) {
         : p.purchaseMode === "CART"
           ? "Buy online"
           : "Buy a sample or bulk online, or request a quote for custom work",
-    moq: `${p.moq} units`,
+    moq: moqLabel(p.moq).toLowerCase(),
     leadTime: leadTimeLabel(p.leadTimeMinDays, p.leadTimeMaxDays) ?? "Confirmed with quote",
     samplePrice: p.samplePriceCents != null ? formatMoney(p.samplePriceCents, p.currency) : "On request",
     priceTiers: p.priceTiers.length

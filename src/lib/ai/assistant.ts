@@ -7,7 +7,7 @@ import { topK, type Doc } from "./retrieve";
 import { detectIntents, extractQuantity, isBuyingSignal, type Intent } from "./intent";
 import { offTopicFallback, smallTalk } from "./smalltalk";
 import type { ProductDetail } from "@/lib/catalog";
-import { formatMoney, leadTimeLabel } from "@/lib/utils";
+import { formatMoney, leadTimeLabel, moqLabel } from "@/lib/utils";
 
 /**
  * Product assistant. Two engines, one contract:
@@ -81,7 +81,7 @@ function groundedAnswer(k: Knowledge, messages: ChatMessage[], focus: ProductDet
   }
   if (top && (has("moq") || has("price") || has("sample") || has("lead_time"))) {
     const f = productFacts(top);
-    if (has("moq")) lines.push(`The **${top.name}** starts at **${f.moq}** for bulk orders.`);
+    if (has("moq")) lines.push(top.moq > 1 ? `The **${top.name}** starts at **${f.moq}** for bulk orders.` : `The minimum order for the **${top.name}** is confirmed with your quote — tell me how many you need.`);
     if (has("price")) lines.push(`Pricing for the **${top.name}**: ${f.priceTiers}.`);
     if (has("sample")) lines.push(`Samples: ${top.samplePriceCents != null ? `you can order a single sample for **${f.samplePrice}** from the product page.` : "available on request — we'll confirm cost with your quote."}`);
     if (has("lead_time")) lines.push(`Typical lead time is **${f.leadTime}**, confirmed in writing with your quote.`);
@@ -112,13 +112,13 @@ function groundedAnswer(k: Knowledge, messages: ChatMessage[], focus: ProductDet
     );
   }
   if (has("about")) {
-    lines.push(`${s.brand.name} is a manufacturer and wholesaler with its own factory${s.contact.city ? ` in ${[s.contact.city, s.contact.country].filter(Boolean).join(", ")}` : ""}: in-house sublimation printing and heat presses, embroidery, cutting and stitching. [See inside the factory](/factory).`);
+    lines.push(`${s.brand.name} is a manufacturer and wholesaler with its own factory${s.contact.city ? ` in ${[s.contact.city, s.contact.country].filter(Boolean).join(", ")}` : ""}, making custom sportswear to each customer's design, under their label or ours.`);
   }
   if ((has("recommend") || lines.length === 0) && products.length > 0 && !has("certification")) {
     lines.push(
       products.length === 1
         ? `I'd suggest the **${products[0]!.name}** — ${products[0]!.summary}`
-        : `Here are the best matches from our catalogue:\n${products.map((p) => `- **${p.name}** — ${p.subtitle ?? p.category.name}; MOQ ${p.moq}${p.fromCents != null ? `, from ${formatMoney(p.fromCents, p.currency)}` : ""}`).join("\n")}`,
+        : `Here are the best matches from our catalogue:\n${products.map((p) => `- **${p.name}** — ${p.subtitle ?? p.category.name}; MOQ ${moqLabel(p.moq).toLowerCase()}${p.fromCents != null ? `, from ${formatMoney(p.fromCents, p.currency)}` : ""}`).join("\n")}`,
     );
   }
   if (has("greeting") && lines.length === 0) {

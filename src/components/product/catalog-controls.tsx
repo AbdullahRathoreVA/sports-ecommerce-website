@@ -23,9 +23,11 @@ const MODES = [
 export const USE_CASES = [
   { id: "clubs", label: "Clubs" },
   { id: "schools", label: "Schools" },
+  { id: "academies", label: "Academies" },
   { id: "brands", label: "Brands" },
   { id: "retailers", label: "Retailers" },
-  { id: "riders", label: "Riders" },
+  // Tag id stays "riders" so existing links keep working.
+  { id: "riders", label: "Motorbike" },
   { id: "racing-teams", label: "Race teams" },
 ];
 

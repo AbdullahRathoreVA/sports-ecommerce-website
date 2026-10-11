@@ -11,12 +11,8 @@ import { cn } from "@/lib/utils";
 const UnboxScene = dynamic(() => import("./unbox-scene"), { ssr: false });
 type BoxArt = ReturnType<typeof renderBoxArt>;
 
-/** Three kits for the opening: Alrobel black/red, an American-football jersey and a white/red team kit. */
-const KITS: JerseyDesign[] = [
-  PRESETS[0]!.design as JerseyDesign,
-  { base: "#1d3fc4", accent: "#ffffff", trim: "#ffffff", pattern: "solid", sponsor: "ALROBEL", name: "ALROBEL", number: "23", textColor: "#ffffff", houseMark: true } as JerseyDesign,
-  { base: "#f2f2f0", accent: "#e11d26", trim: "#111214", pattern: "chevron", sponsor: "YOUR BRAND", name: "SIALKOT", number: "10", textColor: "#111214", houseMark: true } as JerseyDesign,
-];
+/** The kit that rises with the ball and gloves: Alrobel black/red. */
+const KITS: JerseyDesign[] = [PRESETS[0]!.design as JerseyDesign];
 
 function capability(): "3d" | "poster" {
   if (typeof window === "undefined") return "poster";
@@ -83,6 +79,7 @@ export function HeroUnbox({ poster, posterAlt, className }: { poster: string; po
             settled={settled}
             still={still}
             onKitClick={() => router.push("/design-studio")}
+            onGearClick={() => router.push("/products")}
             className="h-full w-full"
           />
         </div>

@@ -5,13 +5,15 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { bakeJersey, createProjectedMaterial } from "./projected-material";
+import { Football, GlovePair } from "./gear";
 
 /**
  * Opening scene, premium-packaging style: the lid of an Alrobel presentation
  * box lifts off and comes to rest standing behind it (big logo facing you), a
- * red glow spills out and three finished kits rise and float — "your vision,
- * our creation", made and shipped. ~3 s intro, then an idle float that
- * follows the pointer and the scroll. Clicking a kit opens the Design Studio.
+ * red glow spills out and a finished kit rises with a match ball and a pair
+ * of goalkeeper gloves — "your vision, our creation", made and shipped. ~3 s
+ * intro, then an idle float that follows the pointer and the scroll. Clicking
+ * the kit opens the Design Studio; the gear opens the catalogue.
  */
 
 export type BoxArt = { front: HTMLCanvasElement; lid: HTMLCanvasElement; side: HTMLCanvasElement };
@@ -24,6 +26,7 @@ export type UnboxSceneProps = {
   settled?: boolean;
   still?: boolean;
   onKitClick?: () => void;
+  onGearClick?: () => void;
   className?: string;
 };
 
@@ -51,11 +54,11 @@ const easeOutBack = (x: number) => {
 };
 const seg = (t: number, start: number, dur: number) => clamp01((t - start) / dur);
 
-// Final poses for the kits: centre, left, right.
+// Final poses: kit (centre), goalkeeper gloves (left), match ball (right).
 const POSES = [
   { pos: new THREE.Vector3(0, 1.22, 0.22), rotY: 0, scale: 0.64 },
-  { pos: new THREE.Vector3(-1.12, 1.0, 0.0), rotY: 0.55, scale: 0.53 },
-  { pos: new THREE.Vector3(1.12, 1.0, 0.0), rotY: -0.55, scale: 0.53 },
+  { pos: new THREE.Vector3(-1.1, 1.04, 0.12), rotY: 0.42, scale: 0.57 },
+  { pos: new THREE.Vector3(1.08, 0.9, 0.2), rotY: -0.3, scale: 0.27 },
 ];
 
 function useCanvasTexture(canvas: HTMLCanvasElement) {
@@ -174,7 +177,7 @@ function Box({ progress, boxArt }: { progress: React.MutableRefObject<number>; b
 function Kits({ kits, progress, onKitClick }: { kits: HTMLCanvasElement[]; progress: React.MutableRefObject<number>; onKitClick?: () => void }) {
   const { scene } = useGLTF(MODEL_URL, false, true);
   const baked = useMemo(() => bakeJersey(scene), [scene]);
-  const materials = useMemo(() => kits.map((c) => createProjectedMaterial(c, baked.min, baked.max).material), [kits, baked]);
+  const materials = useMemo(() => kits.slice(0, 1).map((c) => createProjectedMaterial(c, baked.min, baked.max).material), [kits, baked]);
   const groups = useRef<(THREE.Group | null)[]>([]);
   const hovered = useRef<number | null>(null);
   const spin = useRef([0, 0, 0]);
@@ -227,6 +230,56 @@ function Kits({ kits, progress, onKitClick }: { kits: HTMLCanvasElement[]; progr
         </group>
       ))}
     </>
+  );
+}
+
+/** Rises out of the box like the kit (pose 1 = gloves, 2 = ball), then floats; hover turns it to face you. */
+function Gear({ index, progress, spin: spinning, onClick, children }: { index: 1 | 2; progress: React.MutableRefObject<number>; spin?: boolean; onClick?: () => void; children: React.ReactNode }) {
+  const group = useRef<THREE.Group>(null);
+  const inner = useRef<THREE.Group>(null);
+  const hovered = useRef(false);
+  const turn = useRef(0);
+  useFrame((state, delta) => {
+    const g = group.current;
+    if (!g) return;
+    const t = progress.current;
+    const time = state.clock.elapsedTime;
+    const dt = Math.min(delta, 1 / 30);
+    const pose = POSES[index]!;
+    const start = 1.0 + index * 0.22;
+    const rise = easeOutBack(seg(t, start, 1.1));
+    g.visible = t > start - 0.05;
+    g.position.set(pose.pos.x * rise, 0.2 + (pose.pos.y - 0.2) * rise + Math.sin(time * 0.9 + index * 1.7) * 0.03 * rise, pose.pos.z * rise);
+    g.scale.setScalar(0.12 + (pose.scale - 0.12) * easeOutCubic(seg(t, start, 0.9)));
+    const target = hovered.current ? 0 : pose.rotY + Math.sin(time * 0.45 + index) * 0.16;
+    turn.current = THREE.MathUtils.damp(turn.current, target, 3, dt);
+    g.rotation.y = turn.current + (1 - rise) * Math.PI * 2;
+    // The ball keeps rolling slowly on its own axis.
+    if (spinning && inner.current) {
+      inner.current.rotation.y += dt * 0.6;
+      inner.current.rotation.x = Math.sin(time * 0.5) * 0.25;
+    }
+  });
+  return (
+    <group
+      ref={group}
+      visible={false}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        hovered.current = true;
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        hovered.current = false;
+        document.body.style.cursor = "";
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
+    >
+      <group ref={inner}>{children}</group>
+    </group>
   );
 }
 
@@ -295,6 +348,12 @@ function Stage({ props }: { props: UnboxSceneProps }) {
     <group ref={rig} position={[0, -0.5, 0]}>
       <Box progress={progress} boxArt={props.boxArt} />
       <Kits kits={props.kits} progress={progress} onKitClick={props.onKitClick} />
+      <Gear index={1} progress={progress} onClick={props.onGearClick}>
+        <GlovePair />
+      </Gear>
+      <Gear index={2} progress={progress} spin onClick={props.onGearClick}>
+        <Football />
+      </Gear>
       {!props.settled && <Sparks progress={progress} />}
     </group>
   );

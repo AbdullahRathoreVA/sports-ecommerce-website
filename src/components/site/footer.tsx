@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { getSettings, whatsappLink } from "@/lib/settings";
-import { footerNav } from "@/config/site";
+import { footerNav, OFFICES } from "@/config/site";
 import { Logo } from "@/components/ui/logo";
 
 export async function Footer() {
@@ -43,6 +43,16 @@ export async function Footer() {
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden /> {address}
               </li>
             )}
+            {OFFICES.map((o) => (
+              <li key={o.label} className="text-white/60">
+                <span className="inline-flex items-start gap-2.5">
+                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden /> {o.label} · {o.person}
+                </span>
+                <a href={`tel:${o.phone.replace(/\s+/g, "")}`} className="ml-[26px] block text-white/80 hover:text-white" data-track="phone_click" data-track-label={o.label}>
+                  {o.phone}
+                </a>
+              </li>
+            ))}
           </ul>
           {s.contact.responseTime && <p className="mt-6 text-xs text-white/45">{s.contact.responseTime}</p>}
         </div>

@@ -125,7 +125,6 @@ export const primaryNav: NavItem[] = [
 /** "Company" dropdown in the header. */
 export const companyNav: NavItem[] = [
   { label: "About us", href: "/about", description: "Who we are and how we work" },
-  { label: "Our factory", href: "/factory", description: "Printing, cutting, stitching and QC in Sialkot" },
   { label: "Industries", href: "/industries", description: "Clubs, brands, racing teams and retailers" },
   { label: "Buyer guides", href: "/insights", description: "Fabrics, CE ratings and ordering checklists" },
   { label: "Track an order", href: "/track", description: "Check your order status" },
@@ -136,7 +135,6 @@ export const footerNav: { title: string; links: NavItem[] }[] = [
     title: "Company",
     links: [
       { label: "About us", href: "/about" },
-      { label: "Our factory", href: "/factory" },
       { label: "Buyer guides", href: "/insights" },
       { label: "Contact", href: "/contact" },
     ],
@@ -162,3 +160,10 @@ export const footerNav: { title: string; links: NavItem[] }[] = [
     ],
   },
 ];
+
+/**
+ * Other offices. KNOWN FACT (owner via Kaif, 2026-10-11): Italy office, contact
+ * Mian Muhammad Bilal, +39 344 408 0435. City given as "Neuro" — to confirm
+ * (probably Nuoro) before adding it; shown as "Italy" until then.
+ */
+export const OFFICES = [{ label: "Italy office", country: "Italy", flag: "🇮🇹", person: "Mian Muhammad Bilal", phone: "+39 344 408 0435" }];

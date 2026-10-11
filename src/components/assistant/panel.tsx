@@ -337,7 +337,7 @@ export function AssistantPanel({
                             <span className="block p-2.5">
                               <span className="line-clamp-2 text-[13px] font-semibold leading-snug">{p.name}</span>
                               <span className="mt-1 block text-xs text-muted">
-                                {p.fromCents != null ? `From ${formatMoney(p.fromCents, p.currency)}` : "Quote"} · MOQ {p.moq}
+                                {p.fromCents != null ? `From ${formatMoney(p.fromCents, p.currency)}` : "Quote"} · MOQ {p.moq > 1 ? p.moq : "on request"}
                               </span>
                             </span>
                           </Link>

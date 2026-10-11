@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight, Clock, Minus, PackageCheck, Plus, TrendingDown } from "lucide-react";
 import { nextTier, unitPriceFor, type PriceTier } from "@/lib/pricing";
+import { BrandTile } from "@/components/ui/brand-tile";
 import { formatMoney, cn } from "@/lib/utils";
 
 export type EstimatorProduct = {
@@ -86,7 +87,7 @@ export function PriceEstimator({ products, indicative }: { products: EstimatorPr
                 )}
               >
                 <span className="relative block aspect-[4/3] bg-white/5">
-                  {x.image && <Image src={x.image} alt="" fill sizes="144px" className="object-cover" />}
+                  {x.image ? <Image src={x.image} alt="" fill sizes="144px" className="object-cover" /> : <BrandTile compact />}
                 </span>
                 <span className="line-clamp-2 min-h-[2.6rem] px-2.5 py-2 text-[12.5px] font-semibold leading-snug">{x.name}</span>
               </button>

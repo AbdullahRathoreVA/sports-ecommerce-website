@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OFFICES } from "@/config/site";
 import Link from "next/link";
 import { ArrowUpRight, Clock, FileText, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
@@ -84,6 +85,20 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
                 </dd>
               </div>
             )}
+            {OFFICES.map((o) => (
+              <div key={o.label}>
+                <dt className="flex items-center gap-2 font-semibold">
+                  <MapPin className="h-4 w-4" aria-hidden /> {o.label}
+                </dt>
+                <dd className="mt-1.5 text-muted">
+                  {o.person} · {o.country}
+                  <br />
+                  <a href={`tel:${o.phone.replace(/\s+/g, "")}`} className="text-accent underline" data-track="phone_click" data-track-label={o.label}>
+                    {o.phone}
+                  </a>
+                </dd>
+              </div>
+            ))}
             {(s.contact.hours || s.contact.responseTime) && (
               <div>
                 <dt className="flex items-center gap-2 font-semibold">

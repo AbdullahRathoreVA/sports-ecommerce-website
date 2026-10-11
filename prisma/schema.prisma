@@ -199,7 +199,8 @@ model ProductImage {
   width     Int?
   height    Int?
   position  Int     @default(0)
-  /// "client" = supplied by the factory; "placeholder" = generated stand-in.
+  /// "client" = supplied by the factory; "placeholder" = generated stand-in;
+  /// "render" = 3D studio render; "retired" = kept but no longer shown.
   source    String  @default("client")
 
   @@index([productId, position])

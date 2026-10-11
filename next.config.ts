@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "@react-three/drei"],
   },
+  // The factory showcase page was removed (the photos were not Alrobel's own factory).
+  async redirects() {
+    return [{ source: "/factory", destination: "/about", permanent: true }];
+  },
   async headers() {
     return [
       {

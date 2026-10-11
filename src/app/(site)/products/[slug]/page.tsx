@@ -10,7 +10,7 @@ import { ProductCard } from "@/components/product/product-card";
 import { ProductTabs } from "@/components/product/product-tabs";
 import { ProductView } from "@/components/analytics/category-view";
 import { JsonLd, breadcrumbSchema, productSchema } from "@/components/seo/json-ld";
-import { formatMoney, leadTimeLabel } from "@/lib/utils";
+import { formatMoney, leadTimeLabel, moqLabel } from "@/lib/utils";
 
 export const revalidate = 300;
 
@@ -121,7 +121,7 @@ export default async function ProductPage({ params }: Props) {
 
           <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {[
-              { icon: Package, label: "MOQ", value: `${product.moq} units` },
+              { icon: Package, label: "MOQ", value: moqLabel(product.moq) },
               { icon: Clock, label: "Lead time", value: lead ?? "On quote" },
               { icon: PackageCheck, label: "Sample", value: product.samplePriceCents != null ? formatMoney(product.samplePriceCents, product.currency) : "On request" },
               { icon: Ruler, label: "Sizes", value: product.sizes.length ? `${product.sizes.length} options` : "Made to order" },

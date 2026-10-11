@@ -69,3 +69,8 @@ export function timeAgo(date: Date | string, now = new Date()): string {
 export function safeJson(value: unknown): string {
   return JSON.stringify(value).replace(/</g, "\\u003c");
 }
+
+/** MOQ for display. 1 means "not set yet" (new lines before the factory confirms it). */
+export function moqLabel(moq: number, unit = "units"): string {
+  return moq > 1 ? `${moq} ${unit}` : "On request";
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BrandTile } from "@/components/ui/brand-tile";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -110,7 +111,7 @@ export function ProductsMenu({ categories }: { categories: Cat[] }) {
               data-category={c.slug}
             >
               <span className="relative h-16 w-14 shrink-0 overflow-hidden rounded-lg bg-white/5">
-                {c.image && <Image src={c.image} alt="" fill sizes="56px" className="object-cover" />}
+                {c.image ? <Image src={c.image} alt="" fill sizes="56px" className="object-cover" /> : <BrandTile compact />}
               </span>
               <span className="min-w-0">
                 <span className="block text-sm font-semibold text-white">{c.name}</span>

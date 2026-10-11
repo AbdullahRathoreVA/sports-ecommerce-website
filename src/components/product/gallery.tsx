@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { BrandTile } from "@/components/ui/brand-tile";
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +15,7 @@ export function ProductGallery({ images, name }: { images: Img[]; name: string }
   const [active, setActive] = useState(0);
   const rail = useRef<HTMLDivElement>(null);
   if (images.length === 0) {
-    return <div className="grid aspect-[4/5] place-items-center rounded-[var(--radius-card)] bg-surface-2 text-subtle">Photography coming soon</div>;
+    return <BrandTile label={name} className="aspect-[4/5] rounded-[var(--radius-card)]" />;
   }
 
   return (

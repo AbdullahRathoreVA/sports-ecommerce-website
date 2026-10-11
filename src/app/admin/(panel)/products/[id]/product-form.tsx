@@ -366,7 +366,7 @@ export function ProductForm({ id, initial, categories, usage }: { id: string | n
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <Label htmlFor="p-video" hint="Optional">Video path</Label>
-              <input id="p-video" value={v.videoUrl} placeholder="/media/clips/press.mp4" aria-invalid={Boolean(err("videoUrl"))} onChange={(e) => set("videoUrl", e.target.value)} className={inputClass} />
+              <input id="p-video" value={v.videoUrl} placeholder="https://… (MP4 link)" aria-invalid={Boolean(err("videoUrl"))} onChange={(e) => set("videoUrl", e.target.value)} className={inputClass} />
             </div>
             <div>
               <Label htmlFor="p-sheet" hint="Optional">Spec sheet link</Label>

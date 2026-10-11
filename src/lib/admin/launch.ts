@@ -1,7 +1,6 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
-import { FACTORY_VIDEO_ENABLED } from "@/components/media/config";
 
 /**
  * Go-live checklist (idea from triad-thread-studio's launch gate): every item
@@ -15,7 +14,8 @@ export type LaunchItem = { key: string; label: string; done: boolean; how: strin
 export async function getLaunchChecklist(): Promise<LaunchItem[]> {
   const [settings, placeholderProducts, demoOrders, demoLeads, certs, testimonials] = await Promise.all([
     getSettings(),
-    db.product.count({ where: { status: "ACTIVE", images: { some: { source: "placeholder" } } } }),
+    // Real photo = supplied by the factory; 3D renders and "coming soon" tiles don't count.
+    db.product.count({ where: { status: "ACTIVE", category: { published: true }, images: { none: { source: "client" } } } }),
     db.order.count({ where: { isDemo: true } }),
     db.lead.count({ where: { isDemo: true } }),
     db.certification.count({ where: { published: true } }),
@@ -35,8 +35,8 @@ export async function getLaunchChecklist(): Promise<LaunchItem[]> {
       required: true,
       label: "Real product photos",
       done: placeholderProducts === 0,
-      detail: placeholderProducts ? `${placeholderProducts} products still use placeholder photos` : undefined,
-      how: "Send real photos of each product; they replace the placeholders in Products.",
+      detail: placeholderProducts ? `${placeholderProducts} products have no real photo yet (3D render or "coming soon")` : undefined,
+      how: "Send real photos of each product (Alrobel's own products only); they are uploaded in Products.",
     },
     { key: "prices", required: true, label: "Prices confirmed and demo mode off", done: !settings.demoMode, how: "Once every price and MOQ is confirmed, turn off demo mode in Content → Settings." },
     {
@@ -50,6 +50,5 @@ export async function getLaunchChecklist(): Promise<LaunchItem[]> {
     { key: "indexing", required: true, label: "Google allowed to list the site", done: process.env.SITE_INDEXABLE === "true", how: "Switched on at launch, after the items above (Abdullah)." },
     { key: "certs", required: false, label: "Certifications", done: certs > 0, how: "Only real certificates: send the name, issuer and number of each, then add them in Content." },
     { key: "testimonials", required: false, label: "Client reviews", done: testimonials > 0, how: "Real quotes from clients (with their permission), added in Content." },
-    { key: "video", required: false, label: "New factory video", done: FACTORY_VIDEO_ENABLED, how: "Send the new factory and product videos; they are cut into short clips for the site." },
   ];
 }

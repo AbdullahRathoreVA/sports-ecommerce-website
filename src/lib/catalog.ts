@@ -71,7 +71,8 @@ export type CategorySummary = {
 
 const productInclude = {
   category: { select: { slug: true, name: true } },
-  images: { orderBy: { position: "asc" as const } },
+  // "retired" photos are kept in the database but never shown (owner asked for new photos, 2026-10-11).
+  images: { where: { source: { not: "retired" } }, orderBy: { position: "asc" as const } },
 };
 
 type ProductRow = Awaited<ReturnType<typeof loadProductRows>>[number];
