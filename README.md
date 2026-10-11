@@ -35,7 +35,7 @@ It also includes a private admin for the factory team: orders, leads, analytics,
   - **Sample + quote**: buy a sample now, get a quote for the bulk order.
 - **Design Studio**: customers design a kit (patterns, colours, name, number, sponsor, crest) on a live 3D model and send it with a quote request.
 - Cart and checkout with prices re-calculated on the server. A recorded terms-of-sale acceptance and a signed, token-gated order tracking page.
-- Factory section built from the factory's own footage: an edited tour, process clips and production photos.
+- Procedural 3D gear (32-panel match ball, goalkeeper gloves) and a render studio that turns it into catalogue images until real photography arrives.
 
 **AI (free-tier providers, with a fallback that needs no AI at all)**
 - **Product assistant.** It chats naturally (greetings, small talk, general questions) in English, Urdu, Roman Urdu and Hindi. Prices, MOQs, lead times and certifications come only from the catalogue data. Every product it recommends is checked against the live catalogue.
@@ -98,7 +98,7 @@ npm test                    # unit tests (pricing, date ranges, assistant small 
 
 This is the **public showcase** copy. It is synced automatically from the private working repository on every update.
 
-The factory's own photos and videos (`public/media/factory`, `work`, `clips`, `films`) and internal planning documents are **not included**, out of respect for the client's privacy. Pages that use them will show empty media when run from this copy. Product images marked "placeholder" are generated stand-ins until the client supplies photography.
+Client photography is not included in this copy, out of respect for the client's privacy. Product images marked "render" are 3D studio renders made by the site's own render studio.
 
 ---
 

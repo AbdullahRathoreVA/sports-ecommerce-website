@@ -16,7 +16,7 @@ export const revalidate = 300;
 
 const MARQUEE = ["Factory direct", "Custom OEM", "Kits / Uniforms / Gym wear", "Worldwide shipping", "Samples before bulk", "Your label or ours"];
 
-const OEM_POINTS = ["Logo & artwork", "Colours & patterns", "Fabrics & specs", "Names & numbers"];
+const OEM_POINTS = ["Logo & artwork", "Colours & patterns", "Fabrics & specs", "Names & numbers", "Numbered kit bags"];
 
 const WHY = [
   { title: "Own factory", body: "Your order is made in our own factory in Sialkot — no middlemen between you and production." },
@@ -101,8 +101,8 @@ export default async function HomePage() {
               <span className="block text-accent">Our creation.</span>
             </h1>
             <p className="mt-6 max-w-lg text-pretty text-[16px] leading-relaxed text-white/65 sm:text-[17px]">
-              Footballs, goalkeeper gloves and soccer uniforms — plus team kits and sportswear, made in our own factory in Sialkot and
-              shipped worldwide. We make to your wishes, under your label or ours.
+              Footballs, goalkeeper gloves and soccer uniforms — plus motorbike suits, leather jackets and sportswear, made in our own
+              factory in Sialkot and shipped worldwide. We make to your wishes, under your label or ours.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <ButtonLink href="/quote" size="lg" data-track="cta_click" data-track-label="Hero: Get a quote">
@@ -121,14 +121,15 @@ export default async function HomePage() {
             </ul>
           </div>
 
-          <div className="relative lg:-mr-10">
-            <div className="label flex justify-between text-white/40">
+          {/* Phones see the ball, gloves and kit first: they are the main show. */}
+          <div className="relative order-first -mx-2 lg:order-none lg:-mr-10 lg:ml-0">
+            <div className="label hidden justify-between text-white/40 sm:flex">
               <span>Alrobel / Made &amp; shipped</span>
               <span>01 — 03</span>
             </div>
             <div className="relative">
               <div className="signal-glow pointer-events-none absolute inset-[10%]" />
-              <HeroUnbox poster="/media/hero/unbox-poster.webp" posterAlt="An Alrobel shipping box opening with three finished team kits rising out of it" className="relative mx-auto aspect-[1.08] w-full" />
+              <HeroUnbox poster="/media/hero/unbox-poster.webp" posterAlt="An Alrobel box opening with a football, goalkeeper gloves and a team kit rising out of it" className="relative mx-auto aspect-[1.08] w-full" />
               <Link
                 href="/design-studio"
                 className="absolute bottom-6 right-0 hidden max-w-[230px] items-start gap-3 rounded-md border border-white/10 bg-ink/90 p-3 backdrop-blur transition-colors hover:border-accent sm:flex"

@@ -131,7 +131,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           </Card>
 
           {roster.length > 0 && (
-            <Card title={`Squad list (${roster.length} players)`}>
+            <Card title={`Squad list (${roster.length} players · ${roster.length} numbered kit bags)`}>
               <div className="max-h-80 overflow-auto rounded-xl ring-1 ring-white/10">
                 <table className="w-full text-sm">
                   <thead className="sticky top-0 bg-white/[0.06] text-left text-subtle">

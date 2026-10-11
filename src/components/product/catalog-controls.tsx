@@ -20,15 +20,14 @@ const MODES = [
   { id: "quote", label: "Quote / bulk" },
 ];
 
+// Owner's choice (2026-10-11): who it's for, plus the two lines buyers ask for by name.
 export const USE_CASES = [
   { id: "clubs", label: "Clubs" },
   { id: "schools", label: "Schools" },
-  { id: "academies", label: "Academies" },
   { id: "brands", label: "Brands" },
-  { id: "retailers", label: "Retailers" },
   // Tag id stays "riders" so existing links keep working.
   { id: "riders", label: "Motorbike" },
-  { id: "racing-teams", label: "Race teams" },
+  { id: "leather", label: "Leather" },
 ];
 
 function useQueryUpdater() {

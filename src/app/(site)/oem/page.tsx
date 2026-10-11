@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { ArrowDown, ArrowUpRight, Box, Brush, Camera, Factory, PenTool, Plus, Ruler, Shirt, Tag } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
 import { ButtonLink } from "@/components/ui/button";
@@ -104,6 +105,36 @@ export default async function OemPage() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* Tech packs */}
+      <section className="py-16 lg:py-24" aria-labelledby="techpack-h">
+        <div className="container-x">
+          <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr] lg:items-end">
+            <div>
+              <p className="label text-accent">Tech packs</p>
+              <h2 id="techpack-h" className="font-display mt-4 text-[clamp(2.2rem,5vw,3.6rem)] leading-[0.95]">
+                Send your tech pack.
+                <span className="block text-subtle">Or we'll make one with you.</span>
+              </h2>
+            </div>
+            <p className="max-w-md text-[15px] text-muted">
+              Fabric, collar, cuffs, panels, crest size and position, colourway — everything is written down and approved before production, so the
+              finished kit matches what you signed off.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-5 lg:grid-cols-2">
+            {[
+              { src: "/media/catalog/techpack-jersey-specs.webp", alt: "Example football jersey tech pack: fabric, collar, cuff, side panels, hem and colourway callouts", caption: "Specification sheet" },
+              { src: "/media/catalog/techpack-jersey-parts.webp", alt: "Example tech pack showing each jersey panel laid out: front, back, sleeves, collar, side panels and hem", caption: "Panel breakdown" },
+            ].map((t) => (
+              <figure key={t.src} className="overflow-hidden rounded-[var(--radius-card)] bg-surface ring-1 ring-black/[0.06]">
+                <Image src={t.src} alt={t.alt} width={1280} height={760} sizes="(min-width:1024px) 45vw, 92vw" className="h-auto w-full" />
+                <figcaption className="label border-t hairline px-5 py-3 text-subtle">Example / {t.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       </section>
 

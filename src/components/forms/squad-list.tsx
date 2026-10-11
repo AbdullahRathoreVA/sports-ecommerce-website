@@ -82,6 +82,10 @@ export function SquadList({ onApply, applied }: { onApply: (r: RosterResult | nu
                   ))}
                 </ul>
               </div>
+              <p className="flex items-center gap-2 rounded-md bg-surface-2 px-3 py-2 text-sm">
+                <span className="font-semibold">+ {result.players.length} kit bags</span>
+                <span className="text-muted">— every uniform comes with its own bag, printed with the player&apos;s number</span>
+              </p>
               {(result.duplicateNumbers.length > 0 || result.missingSize > 0) && (
                 <ul className="space-y-1.5 rounded-md bg-amber-50 p-3 text-sm text-amber-900 ring-1 ring-amber-200">
                   {result.duplicateNumbers.length > 0 && (

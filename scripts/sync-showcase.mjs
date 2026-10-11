@@ -17,6 +17,8 @@ const PUBLIC_REPO = process.env.SHOWCASE_REPO ?? "AbdullahRathoreVA/sports-ecomm
 const WORK = resolve(process.env.SHOWCASE_DIR ?? "D:/.tmp/showcase-repo");
 const ROOT = resolve(import.meta.dirname, "..");
 const EXCLUDE = [
+  // Client product photos and tech packs (private to the client).
+  "public/media/catalog",
   "public/media/factory",
   "public/media/work",
   "public/media/clips",

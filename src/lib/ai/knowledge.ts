@@ -34,6 +34,7 @@ export async function loadKnowledge(): Promise<Knowledge> {
 export const FACTORY_CAPABILITIES = [
   "Own factory in Sialkot, Pakistan (manufacturer)",
   "Custom manufacturing to the customer's design",
+  "Every uniform comes with its own kit bag, printed with the player's number (70 uniforms = 70 numbered bags)",
   "OEM / private label: custom logos, labels, tags and packaging",
   "Worldwide shipping",
 ];

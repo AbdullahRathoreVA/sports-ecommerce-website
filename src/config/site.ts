@@ -71,7 +71,7 @@ export const defaultSettings: SiteSettings = {
     tagline: "Custom sportswear manufacturer",
     description:
       // KNOWN FACT (client business card, 2026-10-07): product lines.
-      "Custom sportswear manufacturer: sublimated soccer, American football, baseball, rugby and cricket kits, tracksuits, hoodies, T-shirts, polos, gym wear and school, team and company uniforms. Your logo, labels, tags and packaging, made in our own factory in Sialkot, Pakistan.",
+      "Custom sportswear and leather manufacturer: footballs, goalkeeper gloves, soccer and American football uniforms, motorbike and racing suits, leather jackets, tracksuits and gym wear. Your logo, labels, tags and packaging, made in our own factory in Sialkot, Pakistan.",
     houseLabel: "",
   },
   contact: {
