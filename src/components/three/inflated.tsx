@@ -32,36 +32,55 @@ export function loadHeight(url: string): Promise<{ w: number; h: number; data: U
   });
 }
 
-export function buildInflatedGeometry(map: { w: number; h: number; data: Uint8ClampedArray }, aspect: number, depth: number) {
+/**
+ * `step` > 1 builds a coarser mesh (step² fewer triangles) for small on-screen products; the mask is grown by
+ * `step` so the mesh still covers the whole outline (the visible edge comes from the texture alpha).
+ */
+export function buildInflatedGeometry(map: { w: number; h: number; data: Uint8ClampedArray }, aspect: number, depth: number, step = 1) {
   const { w: W, h: H, data } = map;
   const height = new Float32Array(W * H);
   for (let i = 0; i < W * H; i++) height[i] = data[i * 4]! / 255;
-  const inside = (x: number, y: number) => x >= 0 && y >= 0 && x < W && y < H && height[y * W + x]! > 0;
+  const raw = (x: number, y: number) => x >= 0 && y >= 0 && x < W && y < H && height[y * W + x]! > 0;
+  let cover = raw;
+  if (step > 1) {
+    const grown = new Uint8Array(W * H);
+    for (let y = 0; y < H; y++)
+      for (let x = 0; x < W; x++) {
+        if (!raw(x, y)) continue;
+        for (let dy = -step; dy <= step; dy++) for (let dx = -step; dx <= step; dx++) if (x + dx >= 0 && y + dy >= 0 && x + dx < W && y + dy < H) grown[(y + dy) * W + x + dx] = 1;
+      }
+    cover = (x, y) => x >= 0 && y >= 0 && x < W && y < H && grown[y * W + x] === 1;
+  }
+  const cols = Math.floor((W - 1) / step) + 1;
+  const rows = Math.floor((H - 1) / step) + 1;
+  const inside = (i: number, j: number) => i >= 0 && j >= 0 && i < cols && j < rows && cover(i * step, j * step);
 
   const positions: number[] = [];
   const uvs: number[] = [];
-  const front = new Int32Array(W * H).fill(-1);
-  const back = new Int32Array(W * H).fill(-1);
+  const front = new Int32Array(cols * rows).fill(-1);
+  const back = new Int32Array(cols * rows).fill(-1);
   const push = (x: number, y: number, z: number) => {
     positions.push((x / (W - 1) - 0.5) * aspect, 0.5 - y / (H - 1), z);
     uvs.push(x / (W - 1), 1 - y / (H - 1));
     return positions.length / 3 - 1;
   };
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      if (!inside(x, y)) continue;
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < cols; i++) {
+      if (!inside(i, j)) continue;
+      const x = i * step;
+      const y = j * step;
       // Outline vertices sit at z = 0 so front and back meet with no crack.
-      const edge = !inside(x - 1, y) || !inside(x + 1, y) || !inside(x, y - 1) || !inside(x, y + 1);
+      const edge = !inside(i - 1, j) || !inside(i + 1, j) || !inside(i, j - 1) || !inside(i, j + 1);
       const z = edge ? 0 : height[y * W + x]! * depth;
-      front[y * W + x] = push(x, y, z);
-      back[y * W + x] = push(x, y, -z);
+      front[j * cols + i] = push(x, y, z);
+      back[j * cols + i] = push(x, y, -z);
     }
   }
   const frontIdx: number[] = [];
   const backIdx: number[] = [];
-  for (let y = 0; y < H - 1; y++) {
-    for (let x = 0; x < W - 1; x++) {
-      const a = y * W + x, b = a + 1, c = a + W, d = c + 1;
+  for (let j = 0; j < rows - 1; j++) {
+    for (let i = 0; i < cols - 1; i++) {
+      const a = j * cols + i, b = a + 1, c = a + cols, d = c + 1;
       if (front[a]! < 0 || front[b]! < 0 || front[c]! < 0 || front[d]! < 0) continue;
       frontIdx.push(front[a]!, front[c]!, front[b]!, front[b]!, front[c]!, front[d]!);
       backIdx.push(back[a]!, back[b]!, back[c]!, back[b]!, back[d]!, back[c]!);

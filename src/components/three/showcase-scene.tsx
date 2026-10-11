@@ -108,7 +108,7 @@ function useInflatedSet(names: string[]) {
     Promise.all(
       names.map(async (n) => {
         const [hm, front, back] = await Promise.all([loadHeight(`${DIR}${n}-height.png`), loadTexture(`${DIR}${n}-front.webp`), loadTexture(`${DIR}${n}-back.webp`)]);
-        const mesh: Mesh3D = { geometry: buildInflatedGeometry(hm, ASPECT[n] ?? 0.7, 0.06), materials: [mk(front), mk(back)] };
+        const mesh: Mesh3D = { geometry: buildInflatedGeometry(hm, ASPECT[n] ?? 0.7, 0.06, 2), materials: [mk(front), mk(back)] };
         return [n, mesh] as [string, Mesh3D];
       }),
     ).then((entries) => {
@@ -420,8 +420,9 @@ function Stage({ props, onCompiled }: { props: ShowcaseSceneProps; onCompiled: (
 
 export default function ShowcaseScene(props: ShowcaseSceneProps) {
   const quality = useMemo(() => deviceQuality(), []);
-  // Poster capture renders at full resolution; live views adapt to the device.
-  const top = props.still ? 2 : quality === "high" ? 1.6 : 1.15;
+  // Render at the screen's real sharpness (phones are 2–3×): capped at 2, and 1.5 only on genuinely weak devices.
+  const native = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1;
+  const top = props.still ? 2 : Math.min(native, quality === "high" ? 2 : 1.5);
   const [dpr, setDpr] = useState(top);
   const [ready, setReady] = useState(false);
   const onReady = props.onReady;
@@ -445,7 +446,8 @@ export default function ShowcaseScene(props: ShowcaseSceneProps) {
       }}
     >
       <fog attach="fog" args={["#0b0c0e", 7.4, 12.5]} />
-      {!props.still && <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(top)} />}
+      {/* If frames get slow, step down gently — never below 1.25 (that is what made products look pixelated). */}
+      {!props.still && <PerformanceMonitor onDecline={() => setDpr(Math.max(1.25, Math.min(top, 1.5)))} onIncline={() => setDpr(top)} />}
       <ambientLight intensity={1.05} />
       <hemisphereLight args={["#ffffff", "#2a1012", 0.55]} />
       <directionalLight position={[2.5, 4, 5]} intensity={1.4} />

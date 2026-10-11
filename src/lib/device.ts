@@ -27,13 +27,11 @@ export function deviceTier(): DeviceTier {
   return cached;
 }
 
-/** Render resolution budget: phones and low-memory machines draw fewer pixels, everything else gets crisp output. */
+/** Render resolution budget: only low-memory / few-core devices draw fewer pixels; phones and computers get crisp output. */
 export function deviceQuality(): "high" | "low" {
   if (typeof window === "undefined") return "low";
   const nav = navigator as Navigator & { deviceMemory?: number };
-  const weak =
-    (typeof nav.deviceMemory === "number" && nav.deviceMemory < 4) ||
-    (typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency < 4) ||
-    (window.matchMedia("(pointer: coarse)").matches && window.innerWidth < 1024);
+  // Modern phones have the GPU for sharp output; only genuinely weak hardware renders softer.
+  const weak = (typeof nav.deviceMemory === "number" && nav.deviceMemory < 4) || (typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency < 4);
   return weak ? "low" : "high";
 }

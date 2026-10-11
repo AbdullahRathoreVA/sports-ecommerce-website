@@ -136,7 +136,8 @@ export default function GearStudioScene({
   className?: string;
 }) {
   const [ready, setReady] = useState(false);
-  const dpr = useMemo(() => (deviceQuality() === "high" ? 1.6 : 1.2), []);
+  // The studio shows one product large: render at the screen's real sharpness (capped at 2).
+  const dpr = useMemo(() => Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, deviceQuality() === "high" ? 2 : 1.5), []);
   const onReady = useMemo(() => () => setReady(true), []);
   return (
     <Canvas
