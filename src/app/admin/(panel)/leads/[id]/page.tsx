@@ -6,7 +6,8 @@ import { requireAdminPage } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Badge, Card, LEAD_TONE, humanise } from "@/components/admin/ui";
 import { EmailComposer } from "@/components/admin/email-composer";
-import { LeadControls, LeadNoteForm } from "./controls";
+import { CreateOrderForm, LeadControls, LeadNoteForm } from "./controls";
+import { getSettings } from "@/lib/settings";
 import { emailLead } from "../actions";
 import { countryLabel } from "@/lib/admin/insights";
 
@@ -43,10 +44,11 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     },
   });
   if (!lead) notFound();
-  const [team, emails, conversation] = await Promise.all([
+  const [team, emails, conversation, settings] = await Promise.all([
     db.adminUser.findMany({ where: { active: true, role: { in: ["OWNER", "ADMIN", "SALES"] } }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     db.emailLog.findMany({ where: { leadId: id }, orderBy: { createdAt: "desc" } }),
     db.aiConversation.findFirst({ where: { OR: [{ leadId: id }, ...(lead.sessionId ? [{ sessionId: lead.sessionId, kind: "assistant" }] : [])] }, orderBy: { updatedAt: "desc" } }),
+    getSettings(),
   ]);
 
   const req = (lead.requirements ?? {}) as Record<string, unknown>;
@@ -264,6 +266,16 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           <Card title="Pipeline">
             <LeadControls leadId={lead.id} status={lead.status} assignedToId={lead.assignedToId} team={team} />
           </Card>
+
+          {lead.status !== "LOST" && (
+            <Card title="Turn into an order">
+              <CreateOrderForm
+                leadId={lead.id}
+                defaults={{ productName: lead.product?.name ?? lead.productName ?? lead.category ?? "Custom order", quantity: lead.quantity, country: lead.country }}
+                paymentMethods={settings.commerce.paymentMethods.map((m) => ({ id: m.id, label: m.label }))}
+              />
+            </Card>
+          )}
           <Card title="Reply by email">
             <EmailComposer
               to={lead.email}

@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { audit, AuthError, requireAdmin } from "@/lib/auth";
-import { emailFromTeam } from "@/lib/emails";
+import { emailFromTeam, emailOrderReceived } from "@/lib/emails";
+import { getSettings } from "@/lib/settings";
+import { newOrderNumber } from "@/lib/refs";
 
 export type ActionResult = { ok: true; message?: string } | { ok: false; error: string };
 
@@ -69,4 +71,111 @@ export async function emailLead(leadId: string, subject: string, body: string): 
   revalidatePath(`/admin/leads/${leadId}`);
   if (r.status === "failed") return { ok: false, error: "The email provider rejected the message — it is logged as failed. Check the address and try again." };
   return { ok: true, message: r.status === "sent" ? "Email sent and saved to the record." : "Saved to the record. Sending starts once the company email domain is connected." };
+}
+
+/**
+ * Custom orders agreed by quote, email or WhatsApp become real orders here, so the
+ * customer gets the same tracking page (status, QC photos, tracking number) as an
+ * online order. The agreed price is entered by the team; nothing is calculated.
+ */
+const orderFromLeadSchema = z.object({
+  productName: z.string().trim().min(2).max(120),
+  quantity: z.coerce.number().int().min(1).max(1_000_000),
+  unitPrice: z.coerce.number().min(0).max(100_000),
+  paymentMethod: z.string().trim().min(1).max(40),
+  shipLine1: z.string().trim().min(2).max(160),
+  shipCity: z.string().trim().min(1).max(80),
+  shipPostal: z.string().trim().max(20).optional(),
+  shipCountry: z.string().trim().min(2).max(60),
+  note: z.string().trim().max(2000).optional(),
+});
+
+export async function createOrderFromLead(leadId: string, input: z.input<typeof orderFromLeadSchema>): Promise<ActionResult & { orderId?: string }> {
+  let admin;
+  try {
+    admin = await requireAdmin("manageOrders");
+  } catch (e) {
+    if (e instanceof AuthError) return { ok: false, error: "You don't have permission to create orders." };
+    throw e;
+  }
+  const parsed = orderFromLeadSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? "Check the order details." };
+  const d = parsed.data;
+  const lead = await db.lead.findUnique({ where: { id: leadId }, include: { product: { include: { images: { where: { source: { not: "retired" } }, orderBy: { position: "asc" }, take: 1 } } } } });
+  if (!lead) return { ok: false, error: "Lead not found." };
+  const settings = await getSettings();
+  if (!settings.commerce.paymentMethods.some((m) => m.id === d.paymentMethod)) return { ok: false, error: "Choose a payment method." };
+
+  const customer = lead.customerId
+    ? { id: lead.customerId }
+    : await db.customer.upsert({
+        where: { email: lead.email },
+        update: {},
+        create: { email: lead.email, name: lead.name, phone: lead.phone, company: lead.company, country: d.shipCountry, source: "QUOTE" },
+        select: { id: true },
+      });
+  const unitCents = Math.round(d.unitPrice * 100);
+  const totalCents = unitCents * d.quantity;
+  const req = (lead.requirements ?? {}) as Record<string, unknown>;
+  const sizes = typeof req.sizeBreakdown === "string" ? req.sizeBreakdown : typeof req.sizes === "string" ? req.sizes : null;
+
+  let order = null;
+  for (let attempt = 0; attempt < 4 && !order; attempt++) {
+    try {
+      order = await db.order.create({
+        data: {
+          orderNumber: newOrderNumber(),
+          customerId: customer.id,
+          status: "CONFIRMED",
+          paymentMethod: d.paymentMethod,
+          subtotalCents: totalCents,
+          totalCents,
+          currency: settings.commerce.currency,
+          contactName: lead.name,
+          contactEmail: lead.email,
+          contactPhone: lead.phone,
+          company: lead.company,
+          shipLine1: d.shipLine1,
+          shipCity: d.shipCity,
+          shipPostal: d.shipPostal || null,
+          shipCountry: d.shipCountry,
+          customerNote: [d.note, sizes ? `Sizes: ${sizes}` : null].filter(Boolean).join("\n") || null,
+          isDemo: lead.isDemo,
+          items: {
+            create: [
+              {
+                productId: lead.productId,
+                nameSnapshot: d.productName,
+                skuSnapshot: lead.product?.sku ?? "CUSTOM",
+                imageSnapshot: lead.product?.images[0]?.url ?? null,
+                size: null,
+                isSample: false,
+                quantity: d.quantity,
+                unitCents,
+                totalCents,
+              },
+            ],
+          },
+          events: { create: [{ kind: "created", toValue: "CONFIRMED", note: `Custom order created from quote ${lead.leadNumber}`, actorEmail: admin.email }] },
+        },
+        include: { items: true },
+      });
+    } catch (error) {
+      if (attempt === 3) throw error;
+    }
+  }
+  if (!order) return { ok: false, error: "Could not create the order — please try again." };
+
+  await db.lead.update({ where: { id: leadId }, data: { status: "WON", customerId: customer.id } });
+  await db.leadNote.create({ data: { leadId, authorEmail: admin.email, body: `Order ${order.orderNumber} created (${d.quantity} × ${d.productName}).` } });
+  await audit(admin, "order.create_from_lead", "Order", order.id, { leadNumber: lead.leadNumber, totalCents });
+  // Same confirmation + tracking link an online order gets (logged even before email sending is switched on).
+  const mail = await emailOrderReceived(order).catch(() => ({ status: "failed" as const }));
+  revalidatePath(`/admin/leads/${leadId}`);
+  revalidatePath("/admin/orders");
+  return {
+    ok: true,
+    orderId: order.id,
+    message: `Order ${order.orderNumber} created${mail.status === "sent" ? " and the customer emailed their tracking link" : ""}.`,
+  };
 }

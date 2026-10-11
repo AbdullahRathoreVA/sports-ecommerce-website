@@ -142,10 +142,11 @@ export const footerNav: { title: string; links: NavItem[] }[] = [
   {
     title: "Products",
     links: [
-      { label: "Team kits", href: "/products/c/sublimation-teamwear" },
-      { label: "Sportswear & gym wear", href: "/products/c/sportswear" },
-      { label: "American football gloves", href: "/products/c/gloves" },
-      { label: "School & company uniforms", href: "/industries" },
+      { label: "Footballs", href: "/products/c/footballs" },
+      { label: "Goalkeeper gloves", href: "/products/c/goalkeeper-gloves" },
+      { label: "Soccer uniforms", href: "/products/c/sublimation-teamwear" },
+      { label: "Motorbike suits", href: "/products/c/motorbike-racing-suits" },
+      { label: "Leather jackets", href: "/products/c/leather-jackets" },
       { label: "All products", href: "/products" },
     ],
   },
