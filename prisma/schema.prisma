@@ -581,7 +581,7 @@ model AuditLog {
 // name, email or IP is ever attached to it); visitors who send Global Privacy
 // Control or Do Not Track get a per-day hash instead, so they are counted but
 // never recognised on a later day. IP addresses are used only to derive the
-// country at the edge and are never stored.
+// country and city at the edge and are never stored.
 
 model Visitor {
   id          String    @id
@@ -614,6 +614,7 @@ model Session {
   browser      String?
   os           String?
   country      String?
+  city         String?
   isReturning  Boolean  @default(false)
   isBot        Boolean  @default(false)
   isDemo       Boolean  @default(false)

@@ -13,6 +13,7 @@ const NAV_PERMISSION: Record<NavKey, Permission> = {
   leads: "manageLeads",
   customers: "viewCustomers",
   products: "manageProducts",
+  photos: "manageProducts",
   content: "manageContent",
   ai: "useAdminAi",
   audit: "viewAudit",

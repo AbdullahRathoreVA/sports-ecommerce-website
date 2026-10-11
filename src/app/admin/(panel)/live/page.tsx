@@ -25,7 +25,7 @@ export default async function LivePage({ searchParams }: { searchParams: Promise
       where: { createdAt: { gte: since }, name: { not: "heartbeat" }, ...(includeDemo ? {} : { isDemo: false }) },
       orderBy: { createdAt: "desc" },
       take: 60,
-      select: { id: true, name: true, path: true, label: true, createdAt: true, session: { select: { country: true, device: true } } },
+      select: { id: true, name: true, path: true, label: true, createdAt: true, session: { select: { country: true, city: true, device: true } } },
     }),
   ]);
   const byPage = new Map<string, number>();
@@ -69,7 +69,7 @@ export default async function LivePage({ searchParams }: { searchParams: Promise
                         <td className={td}>
                           <span className="flex items-center gap-2">
                             <Icon className="h-4 w-4 text-muted" aria-label={s.device} />
-                            <span>{s.country ? countryLabel(s.country) : "Unknown"}</span>
+                            <span>{s.city ?? (s.country ? countryLabel(s.country) : "Unknown")}</span>
                             {s.isReturning && <Badge tone="info">returning</Badge>}
                           </span>
                           <span className="block text-xs text-subtle">{[s.browser, s.os].filter(Boolean).join(" · ")}</span>
@@ -113,7 +113,7 @@ export default async function LivePage({ searchParams }: { searchParams: Promise
                     {e.label && <span className="text-muted"> · {e.label}</span>}
                     <span className="block truncate font-mono text-xs text-subtle">{e.path}</span>
                     <span className="block text-xs text-subtle">
-                      {timeAgo(e.createdAt)} · {e.session.country ? countryLabel(e.session.country) : "Unknown"} · {e.session.device}
+                      {timeAgo(e.createdAt)} · {e.session.city ?? (e.session.country ? countryLabel(e.session.country) : "Unknown")} · {e.session.device}
                     </span>
                   </span>
                 </li>

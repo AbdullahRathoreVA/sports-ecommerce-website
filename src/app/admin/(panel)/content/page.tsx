@@ -5,13 +5,14 @@ import { db } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { PageHeader } from "@/components/admin/ui";
 import { SettingsForm } from "./settings-form";
-import { CertEditor, FaqEditor, PostEditor, PurgeDemo, TestimonialEditor } from "./editors";
+import { CategoryEditor, CertEditor, FaqEditor, PostEditor, PurgeDemo, TestimonialEditor } from "./editors";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Content & settings" };
 
 const TABS = [
   ["settings", "Site settings"],
+  ["categories", "Categories"],
   ["faqs", "FAQs"],
   ["guides", "Buyer guides"],
   ["testimonials", "Testimonials"],
@@ -28,6 +29,16 @@ export default async function ContentPage({ searchParams }: { searchParams: Prom
   let body: React.ReactNode = null;
   if (tab === "settings") {
     body = <SettingsForm initial={await getSettings()} />;
+  } else if (tab === "categories") {
+    const rows = await db.category.findMany({ orderBy: { position: "asc" }, include: { _count: { select: { products: { where: { status: "ACTIVE" } } } } } });
+    body = (
+      <>
+        <p className="mb-4 text-sm text-muted">The product lines shown on the home page and in the Products menu. Change a photo, the wording or the order, or hide a line.</p>
+        <CategoryEditor
+          items={rows.map((r) => ({ id: r.id, slug: r.slug, name: r.name, shortName: r.shortName ?? "", tagline: r.tagline ?? "", description: r.description, image: r.image ?? "", imageAlt: r.imageAlt ?? "", position: r.position, published: r.published, products: r._count.products }))}
+        />
+      </>
+    );
   } else if (tab === "faqs") {
     const rows = await db.faq.findMany({ orderBy: [{ position: "asc" }, { createdAt: "asc" }] });
     body = <FaqEditor items={rows.map((r) => ({ id: r.id, question: r.question, answer: r.answer, topic: r.topic, position: r.position, published: r.published }))} />;

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { audit, AuthError, changedFields, requireAdmin, type Permission } from "@/lib/auth";
 import { SETTINGS_TAG, siteSettingsSchema, getSettings } from "@/lib/settings";
-import { CONTENT_TAG } from "@/lib/catalog";
+import { CATALOG_TAG, CONTENT_TAG } from "@/lib/catalog";
 
 export type Result = { ok: true; message?: string } | { ok: false; error: string };
 
@@ -213,4 +213,33 @@ export async function purgeDemoData(confirmation: string): Promise<Result> {
   await audit(admin, "demo.purge", "System", null, counts);
   revalidatePath("/admin", "layout");
   return { ok: true, message: `Removed ${counts.orders} orders, ${counts.leads} leads, ${counts.customers} customers, ${counts.sessions.toLocaleString()} sessions and ${counts.events.toLocaleString()} events.` };
+}
+
+/* ── Product categories (home page "product lines" cards) ───────────── */
+
+const categorySchema = z.object({
+  name: z.string().trim().min(2).max(60),
+  shortName: z.string().trim().max(40),
+  tagline: z.string().trim().max(120),
+  description: z.string().trim().min(10).max(2000),
+  image: z.string().trim().max(300).refine((v) => v === "" || /^\/(uploads|media)\//.test(v), "Upload the photo here"),
+  imageAlt: z.string().trim().max(160),
+  position: z.number().int().min(0).max(999),
+  published: z.boolean(),
+});
+
+export async function saveCategory(id: string, input: z.input<typeof categorySchema>): Promise<Result> {
+  const admin = await guard("manageProducts");
+  if (!admin) return { ok: false, error: "You don't have permission to change categories." };
+  const parsed = categorySchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+  const d = parsed.data;
+  const row = await db.category.update({
+    where: { id },
+    data: { ...d, shortName: d.shortName || null, tagline: d.tagline || null, image: d.image || null, imageAlt: d.imageAlt || d.name },
+  });
+  await audit(admin, "category.update", "Category", row.id, { name: d.name, published: d.published });
+  updateTag(CATALOG_TAG);
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Saved — the site is updated." };
 }

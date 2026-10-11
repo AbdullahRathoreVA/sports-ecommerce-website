@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Loader2, Plus, Trash2 } from "lucide-react";
-import { deleteContent, purgeDemoData, saveCertification, saveFaq, savePost, saveTestimonial, type Result } from "./actions";
+import { deleteContent, purgeDemoData, saveCategory, saveCertification, saveFaq, savePost, saveTestimonial, type Result } from "./actions";
 import { ImageUploader } from "@/components/admin/uploader";
 import { inputClass } from "@/components/forms/field";
 import { cn, slugify } from "@/lib/utils";
@@ -290,5 +290,72 @@ export function PurgeDemo({ counts, allowed }: { counts: { orders: number; leads
       )}
       {msg && <p className={cn("mt-3 text-sm", msg.ok ? "text-emerald-300" : "text-red-300")} role="status">{msg.text}</p>}
     </div>
+  );
+}
+
+/* ── Categories ── */
+
+export type CategoryRow = { id: string; slug: string; name: string; shortName: string; tagline: string; description: string; image: string; imageAlt: string; position: number; published: boolean; products: number };
+
+function CategoryForm({ row }: { row: CategoryRow }) {
+  const [f, setF] = useState(row);
+  const { pending, msg, run } = useSave();
+  return (
+    <form
+      className="grid gap-4 sm:grid-cols-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        run(() => saveCategory(row.id, { name: f.name, shortName: f.shortName, tagline: f.tagline, description: f.description, image: f.image, imageAlt: f.imageAlt, position: f.position, published: f.published }));
+      }}
+    >
+      <div className="sm:col-span-2">
+        <p className="mb-1.5 text-sm font-medium">Card photo</p>
+        <div className="flex flex-wrap items-center gap-4">
+          {f.image ? (
+            <span className="relative aspect-[4/3] w-44 overflow-hidden rounded-lg bg-surface-2">
+              <Image src={f.image} alt="" fill sizes="176px" className="object-cover" />
+            </span>
+          ) : (
+            <span className="grid aspect-[4/3] w-44 place-items-center rounded-lg bg-surface-2 text-xs text-subtle">No photo</span>
+          )}
+          <div className="min-w-0 flex-1">
+            <ImageUploader multiple={false} label="Upload a new photo" onUploaded={(u) => setF((p) => ({ ...p, image: u.url, imageAlt: p.imageAlt || p.name }))} />
+            {f.image && (
+              <button type="button" onClick={() => setF({ ...f, image: "" })} className="mt-2 text-sm text-red-300">
+                Remove photo
+              </button>
+            )}
+          </div>
+        </div>
+        <p className="mt-1.5 text-xs text-subtle">Shown on the home page and in the Products menu. A clear product photo on a plain background works best.</p>
+      </div>
+      <In id={`cn-${row.id}`} label="Name"><input id={`cn-${row.id}`} value={f.name} maxLength={60} onChange={(e) => setF({ ...f, name: e.target.value })} className={inputClass} /></In>
+      <In id={`cs-${row.id}`} label="Short name" hint="Menus & buttons"><input id={`cs-${row.id}`} value={f.shortName} maxLength={40} onChange={(e) => setF({ ...f, shortName: e.target.value })} className={inputClass} /></In>
+      <In id={`ct-${row.id}`} label="Tagline" wide><input id={`ct-${row.id}`} value={f.tagline} maxLength={120} onChange={(e) => setF({ ...f, tagline: e.target.value })} className={inputClass} /></In>
+      <In id={`cd-${row.id}`} label="Description" wide><textarea id={`cd-${row.id}`} rows={3} value={f.description} maxLength={2000} onChange={(e) => setF({ ...f, description: e.target.value })} className={area} /></In>
+      <In id={`cp-${row.id}`} label="Order on the site" hint="Lower first"><input id={`cp-${row.id}`} inputMode="numeric" value={f.position} onChange={(e) => setF({ ...f, position: Number(e.target.value.replace(/\D/g, "")) || 0 })} className={inputClass} /></In>
+      <In id={`ca-${row.id}`} label="Photo description" hint="For Google & screen readers"><input id={`ca-${row.id}`} value={f.imageAlt} maxLength={160} onChange={(e) => setF({ ...f, imageAlt: e.target.value })} className={inputClass} /></In>
+      <label className="flex items-center gap-2 text-sm sm:col-span-2"><input type="checkbox" checked={f.published} onChange={(e) => setF({ ...f, published: e.target.checked })} className="h-4 w-4 accent-[var(--color-accent)]" /> Show this category on the site</label>
+      <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
+        <button type="submit" disabled={pending} className="flex h-11 items-center gap-2 rounded-[var(--radius-control)] bg-accent px-5 text-sm font-semibold text-accent-ink disabled:opacity-70">
+          {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />} Save
+        </button>
+        <a href={`/products/c/${row.slug}`} target="_blank" rel="noopener" className="text-sm text-muted underline hover:text-fg">View on site</a>
+        {msg && <p className={cn("w-full text-sm", msg.ok ? "text-emerald-300" : "text-red-300")} role="status">{msg.text}</p>}
+      </div>
+    </form>
+  );
+}
+
+export function CategoryEditor({ items }: { items: CategoryRow[] }) {
+  const [open, setOpen] = useState<string | null>(null);
+  return (
+    <ul className="space-y-2">
+      {items.map((c) => (
+        <Item key={c.id} title={c.name} meta={<>{pub(c.published)} · {c.products} products · order {c.position}</>} open={open === c.id} onToggle={() => setOpen(open === c.id ? null : c.id)}>
+          <CategoryForm row={c} />
+        </Item>
+      ))}
+    </ul>
   );
 }

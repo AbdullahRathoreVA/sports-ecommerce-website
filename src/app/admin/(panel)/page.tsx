@@ -113,6 +113,9 @@ export default async function OverviewPage({ searchParams }: { searchParams: Pro
         <Card title="Countries">
           <BarList data={breakdowns.countries.map((x) => ({ label: countryName(x.label).replace(/^the /, "").replace(/^./, (m) => m.toUpperCase()), value: x.value }))} />
         </Card>
+        <Card title="Top cities">
+          <BarList data={breakdowns.cities} empty="Cities appear as visitors arrive" />
+        </Card>
         <Card title="Devices">
           <BarList data={breakdowns.devices.map((x) => ({ label: x.label[0]!.toUpperCase() + x.label.slice(1), value: x.value }))} />
         </Card>

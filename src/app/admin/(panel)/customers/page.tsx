@@ -10,7 +10,7 @@ import { formatMoney, timeAgo } from "@/lib/utils";
 export const metadata: Metadata = { title: "Customers" };
 const PER_PAGE = 30;
 
-type SP = { q?: string; page?: string; data?: string };
+type SP = { q?: string; page?: string; data?: string; view?: string };
 
 export default async function CustomersPage({ searchParams }: { searchParams: Promise<SP> }) {
   await requireAdminPage("viewCustomers");
@@ -19,6 +19,8 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   const page = Math.max(1, Number(sp.page) || 1);
   const where: Prisma.CustomerWhereInput = {
     ...(sp.data === "real" ? { isDemo: false } : {}),
+    // "Signed up" = created a client-portal account.
+    ...(sp.view === "portal" ? { passwordHash: { not: null } } : {}),
     ...(q
       ? {
           OR: [
@@ -29,7 +31,8 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         }
       : {}),
   };
-  const [customers, total] = await Promise.all([
+  const weekAgo = new Date(Date.now() - 7 * 86_400_000);
+  const [customers, total, portalTotal, portalWeek, portalVerified] = await Promise.all([
     db.customer.findMany({
       where,
       orderBy: { createdAt: "desc" },
@@ -38,6 +41,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       include: { _count: { select: { orders: true, leads: true } } },
     }),
     db.customer.count({ where }),
+    db.customer.count({ where: { passwordHash: { not: null } } }),
+    db.customer.count({ where: { passwordHash: { not: null }, portalSince: { gte: weekAgo } } }),
+    db.customer.count({ where: { passwordHash: { not: null }, emailVerifiedAt: { not: null } } }),
   ]);
   // Lifetime value only counts orders that weren't cancelled or refunded.
   const spend = customers.length
@@ -57,6 +63,32 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <PageHeader title="Customers" description="Everyone who has ordered, asked for a quote or contacted you. Created automatically — visitors never need an account." />
+      <div className="mb-4 grid grid-cols-3 gap-3 sm:max-w-xl">
+        {(
+          [
+            ["Portal accounts", portalTotal],
+            ["Signed up this week", portalWeek],
+            ["Email verified", portalVerified],
+          ] as const
+        ).map(([k, v]) => (
+          <div key={k} className="rounded-xl border hairline bg-surface p-3">
+            <p className="text-2xl font-semibold tabular-nums">{v}</p>
+            <p className="text-xs text-subtle">{k}</p>
+          </div>
+        ))}
+      </div>
+      <nav className="mb-4 flex gap-2" aria-label="Customer view">
+        {(
+          [
+            ["", "Everyone"],
+            ["portal", "Signed up (client portal)"],
+          ] as const
+        ).map(([v, l]) => (
+          <Link key={v} href={href({ view: v || undefined, page: undefined })} aria-current={(sp.view ?? "") === v ? "page" : undefined} className={`h-9 rounded-full border px-3.5 text-sm font-medium leading-9 ${(sp.view ?? "") === v ? "border-white bg-white text-ink" : "hairline text-muted hover:text-fg"}`}>
+            {l}
+          </Link>
+        ))}
+      </nav>
       <form className="mb-4 flex gap-2" role="search">
         <label htmlFor="cq" className="sr-only">Search customers</label>
         <input id="cq" name="q" defaultValue={q} placeholder="Search name, email, company" className="h-11 w-full max-w-sm rounded-[var(--radius-control)] border hairline bg-surface px-3.5 text-[15px] outline-none focus:border-accent" />
@@ -72,6 +104,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                 <th className={th}>Customer</th>
                 <th className={th}>Country</th>
                 <th className={th}>First contact</th>
+                <th className={th}>Portal</th>
                 <th className={`${th} text-right`}>Orders</th>
                 <th className={`${th} text-right`}>Enquiries</th>
                 <th className={`${th} text-right`}>Lifetime value</th>
@@ -90,6 +123,13 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                     </td>
                     <td className={`${td} text-muted`}>{c.country ? countryLabel(c.country) : "—"}</td>
                     <td className={`${td} text-muted`}>{humanise(c.source)}</td>
+                    <td className={`${td} whitespace-nowrap`}>
+                      {c.passwordHash ? (
+                        <Badge tone={c.emailVerifiedAt ? "good" : "warn"}>{c.emailVerifiedAt ? "signed up" : "not verified"}</Badge>
+                      ) : (
+                        <span className="text-subtle">—</span>
+                      )}
+                    </td>
                     <td className={`${td} text-right tabular-nums`}>{c._count.orders}</td>
                     <td className={`${td} text-right tabular-nums`}>{c._count.leads}</td>
                     <td className={`${td} text-right font-semibold tabular-nums`}>{s?._sum.totalCents ? formatMoney(s._sum.totalCents) : "—"}</td>

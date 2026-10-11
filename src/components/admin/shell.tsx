@@ -17,13 +17,14 @@ import {
   ScrollText,
   ShieldCheck,
   ShoppingCart,
+  Images,
   Users,
   X,
 } from "lucide-react";
 import { LogoMark } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 
-export type NavKey = "overview" | "live" | "analytics" | "orders" | "leads" | "customers" | "products" | "content" | "ai" | "audit" | "users";
+export type NavKey = "overview" | "live" | "analytics" | "orders" | "leads" | "customers" | "products" | "photos" | "content" | "ai" | "audit" | "users";
 
 const NAV: { key: NavKey; label: string; href: string; icon: typeof Activity }[] = [
   { key: "overview", label: "Overview", href: "/admin", icon: LayoutDashboard },
@@ -33,6 +34,7 @@ const NAV: { key: NavKey; label: string; href: string; icon: typeof Activity }[]
   { key: "leads", label: "Leads & quotes", href: "/admin/leads", icon: ClipboardList },
   { key: "customers", label: "Customers", href: "/admin/customers", icon: Users },
   { key: "products", label: "Products", href: "/admin/products", icon: Package },
+  { key: "photos", label: "Photos", href: "/admin/photos", icon: Images },
   { key: "content", label: "Content & settings", href: "/admin/content", icon: FileText },
   { key: "ai", label: "AI analyst", href: "/admin/ai", icon: Bot },
   { key: "audit", label: "Audit log", href: "/admin/audit", icon: ScrollText },

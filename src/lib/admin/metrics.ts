@@ -107,7 +107,7 @@ export async function getTimeSeries(range: DateRange, includeDemo: boolean): Pro
 
 export type Breakdown = { label: string; value: number }[];
 
-async function sessionBreakdown(column: "channel" | "country" | "device" | "referrerHost" | "browser" | "os", range: DateRange, includeDemo: boolean, limit = 8): Promise<Breakdown> {
+async function sessionBreakdown(column: "channel" | "country" | "city" | "device" | "referrerHost" | "browser" | "os", range: DateRange, includeDemo: boolean, limit = 8): Promise<Breakdown> {
   const col = Prisma.raw(`"${column}"`);
   const rows = await db.$queryRaw<{ label: string | null; value: bigint }[]>`
     SELECT ${col} AS label, count(*) AS value FROM ${t("Session")}
@@ -117,9 +117,10 @@ async function sessionBreakdown(column: "channel" | "country" | "device" | "refe
 }
 
 export async function getBreakdowns(range: DateRange, includeDemo: boolean) {
-  const [channels, countries, devices, referrers, pages] = await Promise.all([
+  const [channels, countries, cities, devices, referrers, pages] = await Promise.all([
     sessionBreakdown("channel", range, includeDemo),
     sessionBreakdown("country", range, includeDemo, 10),
+    sessionBreakdown("city", range, includeDemo, 10),
     sessionBreakdown("device", range, includeDemo),
     sessionBreakdown("referrerHost", range, includeDemo),
     db.$queryRaw<{ label: string; value: bigint }[]>`
@@ -127,7 +128,7 @@ export async function getBreakdowns(range: DateRange, includeDemo: boolean) {
       WHERE name = 'page_view' AND "createdAt" >= ${range.from} AND "createdAt" < ${range.to} ${demo(includeDemo)}
       GROUP BY 1 ORDER BY 2 DESC LIMIT 10`,
   ]);
-  return { channels, countries, devices, referrers: referrers.filter((r) => r.label !== "Unknown"), pages: pages.map((p) => ({ label: p.label, value: n(p.value) })) };
+  return { channels, countries, cities: cities.filter((c) => c.label !== "Unknown"), devices, referrers: referrers.filter((r) => r.label !== "Unknown"), pages: pages.map((p) => ({ label: p.label, value: n(p.value) })) };
 }
 
 export type FunnelStep = { label: string; sessions: number };
@@ -268,7 +269,7 @@ export async function getLiveSessions(includeDemo: boolean) {
     where: { lastSeenAt: { gte: since }, isBot: false, ...(includeDemo ? {} : { isDemo: false }) },
     orderBy: { lastSeenAt: "desc" },
     take: 100,
-    select: { id: true, lastPath: true, landingPath: true, device: true, browser: true, os: true, country: true, channel: true, referrerHost: true, startedAt: true, lastSeenAt: true, pageViews: true, isReturning: true },
+    select: { id: true, lastPath: true, landingPath: true, device: true, browser: true, os: true, country: true, city: true, channel: true, referrerHost: true, startedAt: true, lastSeenAt: true, pageViews: true, isReturning: true },
   });
 }
 

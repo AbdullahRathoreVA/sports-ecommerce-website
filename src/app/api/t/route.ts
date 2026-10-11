@@ -64,6 +64,14 @@ export async function POST(request: Request) {
     // Bots are counted separately and excluded from every visitor figure.
     const isBot = device === "bot";
     const country = request.headers.get("x-vercel-ip-country") ?? null;
+    // Edge-derived city (URL-encoded by Vercel), kept as "City, CC" for the location report.
+    const rawCity = request.headers.get("x-vercel-ip-city");
+    let city: string | null = null;
+    try {
+      city = rawCity ? `${decodeURIComponent(rawCity).slice(0, 60)}${country ? `, ${country}` : ""}` : null;
+    } catch {
+      city = null;
+    }
     const vid =
       parsed.data.vid && isValidId(parsed.data.vid)
         ? parsed.data.vid
@@ -107,6 +115,7 @@ export async function POST(request: Request) {
           utmMedium: utm.utm_medium ?? null,
           utmCampaign: utm.utm_campaign ?? null,
           device,
+          city,
           browser: classifyBrowser(ua),
           os: classifyOs(ua),
           country,

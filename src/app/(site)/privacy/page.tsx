@@ -24,7 +24,7 @@ export default async function PrivacyPage() {
         </li>
         <li>
           <strong>Website analytics:</strong> pages viewed and actions taken (for example &ldquo;added to cart&rdquo;), device type, browser and
-          country. We use our own first-party analytics — no third-party trackers, no advertising cookies, and we do not store your IP address.
+          country and city. We use our own first-party analytics — no third-party trackers, no advertising cookies, and we do not store your IP address.
           A random identifier is kept in your browser&apos;s local storage to count returning visits; if your browser sends Global Privacy
           Control or Do Not Track, we don&apos;t keep one.
         </li>
