@@ -5,6 +5,7 @@ import { Tracker } from "@/components/analytics/tracker";
 import { RevealObserver } from "@/components/ui/reveal";
 import { ImageWarmup } from "@/components/ui/image-warmup";
 import { TiltPointer } from "@/components/ui/tilt";
+import { PriceOffer } from "@/components/site/price-offer";
 import { CartProvider } from "@/components/cart/cart-context";
 import { AssistantLauncher } from "@/components/assistant/launcher";
 import { getSettings } from "@/lib/settings";
@@ -28,6 +29,7 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <RevealObserver />
       <ImageWarmup />
       <TiltPointer />
+      <PriceOffer />
     </CartProvider>
   );
 }

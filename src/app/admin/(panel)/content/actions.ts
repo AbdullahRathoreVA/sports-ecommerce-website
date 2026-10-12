@@ -243,3 +243,58 @@ export async function saveCategory(id: string, input: z.input<typeof categorySch
   revalidatePath("/", "layout");
   return { ok: true, message: "Saved — the site is updated." };
 }
+
+const newCategorySchema = z.object({
+  name: z.string().trim().min(2, "Give the category a name").max(60),
+  tagline: z.string().trim().max(120),
+  description: z.string().trim().max(2000),
+});
+
+const slugOf = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "category";
+
+/** A new product line (e.g. "Cricket kits"). Starts hidden until it has a photo and products. */
+export async function createCategory(input: z.input<typeof newCategorySchema>): Promise<Result & { id?: string }> {
+  const admin = await guard("manageProducts");
+  if (!admin) return { ok: false, error: "You don't have permission to add categories." };
+  const parsed = newCategorySchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
+  const d = parsed.data;
+  if (await db.category.findFirst({ where: { name: { equals: d.name, mode: "insensitive" } }, select: { id: true } })) return { ok: false, error: "A category with that name already exists." };
+  let slug = slugOf(d.name);
+  for (let i = 2; await db.category.findUnique({ where: { slug }, select: { id: true } }); i++) slug = `${slugOf(d.name)}-${i}`;
+  const last = await db.category.findFirst({ orderBy: { position: "desc" }, select: { position: true } });
+  const row = await db.category.create({
+    data: {
+      slug,
+      name: d.name,
+      tagline: d.tagline || null,
+      description: d.description || `${d.name} made to order in our factory in Sialkot — your colours, your logo.`,
+      position: (last?.position ?? 0) + 1,
+      published: false,
+    },
+  });
+  await audit(admin, "category.create", "Category", row.id, { name: d.name });
+  updateTag(CATALOG_TAG);
+  revalidatePath("/admin/content");
+  return { ok: true, id: row.id, message: "Category created. Add a photo and products, then tick “Show this category on the site”." };
+}
+
+/** Only an empty category can be deleted — products are never removed by accident. */
+export async function deleteCategory(id: string): Promise<Result> {
+  const admin = await guard("manageProducts");
+  if (!admin) return { ok: false, error: "You don't have permission to delete categories." };
+  const row = await db.category.findUnique({ where: { id }, select: { name: true, _count: { select: { products: true } } } });
+  if (!row) return { ok: false, error: "Category not found." };
+  if (row._count.products > 0) return { ok: false, error: `“${row.name}” still has ${row._count.products} product${row._count.products === 1 ? "" : "s"}. Move them to another category (Products → edit → Category) or delete them first — or just hide the category.` };
+  await db.category.delete({ where: { id } });
+  await audit(admin, "category.delete", "Category", id, { name: row.name });
+  updateTag(CATALOG_TAG);
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Category deleted." };
+}

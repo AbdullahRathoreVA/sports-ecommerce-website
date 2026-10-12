@@ -65,6 +65,7 @@ export async function emailLead(leadId: string, subject: string, body: string): 
   if (!s || !b) return { ok: false, error: "Add a subject and a message." };
   const lead = await db.lead.findUnique({ where: { id: leadId }, select: { id: true, email: true, name: true, leadNumber: true, status: true } });
   if (!lead) return { ok: false, error: "Lead not found." };
+  if (!lead.email) return { ok: false, error: "This lead has no email address yet — add one under Contact, or reply on WhatsApp / phone." };
   const r = await emailFromTeam({ to: lead.email, name: lead.name, subject: s, body: b, reference: lead.leadNumber, sender: admin.name, leadId });
   if (lead.status === "NEW") await db.lead.update({ where: { id: leadId }, data: { status: "CONTACTED" } });
   await audit(admin, "lead.email", "Lead", leadId, { subject: s, status: r.status });
@@ -106,12 +107,15 @@ export async function createOrderFromLead(leadId: string, input: z.input<typeof 
   const settings = await getSettings();
   if (!settings.commerce.paymentMethods.some((m) => m.id === d.paymentMethod)) return { ok: false, error: "Choose a payment method." };
 
+  if (!lead.customerId && !lead.email) return { ok: false, error: "Add the customer's email under Contact first — their order tracking link is sent there." };
+  const contactEmail = lead.email ?? (await db.customer.findUnique({ where: { id: lead.customerId! }, select: { email: true } }))?.email;
+  if (!contactEmail) return { ok: false, error: "Add the customer's email under Contact first." };
   const customer = lead.customerId
     ? { id: lead.customerId }
     : await db.customer.upsert({
-        where: { email: lead.email },
+        where: { email: contactEmail },
         update: {},
-        create: { email: lead.email, name: lead.name, phone: lead.phone, company: lead.company, country: d.shipCountry, source: "QUOTE" },
+        create: { email: contactEmail, name: lead.name, phone: lead.phone, company: lead.company, country: d.shipCountry, source: "QUOTE" },
         select: { id: true },
       });
   const unitCents = Math.round(d.unitPrice * 100);
@@ -132,7 +136,7 @@ export async function createOrderFromLead(leadId: string, input: z.input<typeof 
           totalCents,
           currency: settings.commerce.currency,
           contactName: lead.name,
-          contactEmail: lead.email,
+          contactEmail,
           contactPhone: lead.phone,
           company: lead.company,
           shipLine1: d.shipLine1,

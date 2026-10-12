@@ -5,19 +5,14 @@ import { requireAdminPage } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { PageHeader, Badge, LEAD_TONE, humanise, Pagination, Empty, th, td } from "@/components/admin/ui";
 import { cn, timeAgo } from "@/lib/utils";
+import { Plus, Radar, UserSearch } from "lucide-react";
+import { LEAD_SOURCES, LEAD_SOURCE_LABEL } from "@/lib/admin/lead-sources";
 
 export const metadata: Metadata = { title: "Leads & quotes" };
 
 const STAGES = ["ALL", "NEW", "CONTACTED", "QUALIFIED", "QUOTED", "NEGOTIATING", "WON", "LOST"] as const;
-const SOURCES = ["QUOTE_FORM", "PRODUCT_PAGE", "CONTACT_FORM", "AI_ASSISTANT", "DESIGN_STUDIO", "PRODUCT_FINDER"] as const;
-const SOURCE_LABEL: Record<string, string> = {
-  QUOTE_FORM: "Quote form",
-  PRODUCT_PAGE: "Product page",
-  CONTACT_FORM: "Contact form",
-  AI_ASSISTANT: "AI assistant",
-  DESIGN_STUDIO: "Design Studio",
-  PRODUCT_FINDER: "Product finder",
-};
+const SOURCES = LEAD_SOURCES;
+const SOURCE_LABEL = LEAD_SOURCE_LABEL;
 const PER_PAGE = 25;
 
 type SP = { status?: string; source?: string; q?: string; page?: string; data?: string; mine?: string };
@@ -39,6 +34,8 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
             { leadNumber: { contains: q, mode: "insensitive" } },
             { name: { contains: q, mode: "insensitive" } },
             { email: { contains: q, mode: "insensitive" } },
+            { phone: { contains: q } },
+            { city: { contains: q, mode: "insensitive" } },
             { company: { contains: q, mode: "insensitive" } },
             { productName: { contains: q, mode: "insensitive" } },
           ],
@@ -59,7 +56,17 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader title="Leads & quotes" description="Every quote request, contact message and AI-captured enquiry. Reply fast — the first supplier to respond usually wins." />
+      <PageHeader title="Leads & quotes" description="Every enquiry from the website, every lead your team adds by hand, and businesses saved from the lead finder. Reply fast — the first supplier to respond usually wins.">
+        <Link href="/admin/leads/visitors" className="inline-flex h-11 items-center gap-2 rounded-[var(--radius-control)] border hairline px-4 text-sm font-semibold hover:border-white/30">
+          <UserSearch className="h-4 w-4" aria-hidden /> Interested visitors
+        </Link>
+        <Link href="/admin/leads/finder" className="inline-flex h-11 items-center gap-2 rounded-[var(--radius-control)] border hairline px-4 text-sm font-semibold hover:border-white/30">
+          <Radar className="h-4 w-4" aria-hidden /> Lead finder
+        </Link>
+        <Link href="/admin/leads/new" className="inline-flex h-11 items-center gap-2 rounded-[var(--radius-control)] bg-accent px-4 text-sm font-semibold text-accent-ink">
+          <Plus className="h-4 w-4" aria-hidden /> Add a lead
+        </Link>
+      </PageHeader>
       <div className="scrollbar-none -mx-4 mb-3 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:px-0">
         {STAGES.map((s) => (
           <Link key={s} href={href({ status: s === "ALL" ? undefined : s, page: undefined })} className={cn("inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-medium", status === s ? "border-white bg-white text-ink" : "hairline text-muted hover:text-fg")}>
@@ -85,7 +92,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
       </form>
 
       {leads.length === 0 ? (
-        <Empty title="No leads match" body="New quote requests and enquiries appear here the moment they're submitted." />
+        <Empty title="No leads yet" body="Website enquiries appear here the moment they're submitted. Add a WhatsApp or phone enquiry with “Add a lead”, or find clubs, schools and shops with the Lead finder." />
       ) : (
         <div className="overflow-x-auto rounded-[var(--radius-card)] border hairline bg-surface">
           <table className="w-full min-w-[880px]">
@@ -110,7 +117,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
                   </td>
                   <td className={td}>
                     <span className="block font-medium">{l.company ?? l.name}</span>
-                    <span className="block text-xs text-subtle">{l.country ?? "—"} · prefers {l.preferredChannel}</span>
+                    <span className="block text-xs text-subtle">{[l.city, l.country].filter(Boolean).join(", ") || "—"} · {l.email ?? l.phone ?? l.website?.replace(/^https?:\/\//, "") ?? "no contact yet"}</span>
                   </td>
                   <td className={`${td} text-muted`}>{l.productName ?? "General"}</td>
                   <td className={`${td} text-right tabular-nums`}>{l.quantity?.toLocaleString() ?? "—"}</td>

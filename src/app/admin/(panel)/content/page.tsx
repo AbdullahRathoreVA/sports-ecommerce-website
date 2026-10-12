@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { PageHeader } from "@/components/admin/ui";
 import { SettingsForm } from "./settings-form";
-import { CategoryEditor, CertEditor, FaqEditor, PostEditor, PurgeDemo, TestimonialEditor } from "./editors";
+import { CategoryEditor, CertEditor, FaqEditor, PostEditor, PurgeDemo } from "./editors";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Content & settings" };
@@ -33,7 +33,7 @@ export default async function ContentPage({ searchParams }: { searchParams: Prom
     const rows = await db.category.findMany({ orderBy: { position: "asc" }, include: { _count: { select: { products: { where: { status: "ACTIVE" } } } } } });
     body = (
       <>
-        <p className="mb-4 text-sm text-muted">The product lines shown on the home page and in the Products menu. Change a photo, the wording or the order, or hide a line.</p>
+        <p className="mb-4 text-sm text-muted">The product lines shown on the home page and in the Products menu. Add a new line, change a photo, the wording or the order, hide a line — then add products to it.</p>
         <CategoryEditor
           items={rows.map((r) => ({ id: r.id, slug: r.slug, name: r.name, shortName: r.shortName ?? "", tagline: r.tagline ?? "", description: r.description, image: r.image ?? "", imageAlt: r.imageAlt ?? "", position: r.position, published: r.published, products: r._count.products }))}
         />
@@ -50,12 +50,11 @@ export default async function ContentPage({ searchParams }: { searchParams: Prom
       />
     );
   } else if (tab === "testimonials") {
-    const rows = await db.testimonial.findMany({ orderBy: [{ position: "asc" }, { createdAt: "asc" }] });
     body = (
-      <>
-        <p className="mb-4 text-sm text-muted">Testimonials appear on the site only when published. Add real customer quotes only — with their permission.</p>
-        <TestimonialEditor items={rows.map((r) => ({ id: r.id, author: r.author, role: r.role ?? "", company: r.company ?? "", country: r.country ?? "", quote: r.quote, position: r.position, published: r.published }))} />
-      </>
+      <p className="rounded-[var(--radius-card)] border hairline bg-surface p-6 text-sm text-muted">
+        Client reviews now have their own page with approval, stars, photos and a link to send customers:{" "}
+        <Link href="/admin/reviews" className="font-semibold text-accent hover:underline">Open Reviews →</Link>
+      </p>
     );
   } else if (tab === "certifications") {
     const rows = await db.certification.findMany({ orderBy: [{ position: "asc" }, { createdAt: "asc" }] });

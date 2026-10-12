@@ -11,9 +11,10 @@ export const metadata: Metadata = { title: "Edit product" };
 
 const strings = (v: unknown) => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : []);
 
-export default async function ProductEditPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ProductEditPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ category?: string }> }) {
   await requireAdminPage("manageProducts");
   const { id } = await params;
+  const { category: preset } = await searchParams;
   const isNew = id === "new";
   const [product, categories] = await Promise.all([
     isNew ? null : db.product.findUnique({ where: { id }, include: { images: { orderBy: { position: "asc" } }, _count: { select: { orderItems: true, leads: true } } } }),
@@ -63,7 +64,7 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
         slug: "",
         sku: "",
         subtitle: "",
-        categoryId: categories[0]?.id ?? "",
+        categoryId: categories.find((c) => c.id === preset)?.id ?? categories[0]?.id ?? "",
         summary: "",
         description: "",
         status: "DRAFT",

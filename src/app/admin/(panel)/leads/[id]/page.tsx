@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Bot, Mail, MessageCircle, Phone, Sparkles } from "lucide-react";
+import { ArrowLeft, Bot, Globe, Mail, MessageCircle, Phone, Sparkles } from "lucide-react";
 import { requireAdminPage } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { Badge, Card, LEAD_TONE, humanise } from "@/components/admin/ui";
@@ -10,6 +10,10 @@ import { CreateOrderForm, LeadControls, LeadNoteForm } from "./controls";
 import { getSettings } from "@/lib/settings";
 import { emailLead } from "../actions";
 import { countryLabel } from "@/lib/admin/insights";
+import { visitorJourney } from "@/lib/admin/journey";
+import { LEAD_SOURCE_LABEL } from "@/lib/admin/lead-sources";
+import { JourneyCard } from "@/components/admin/journey-card";
+import { DeleteLeadButton, LeadContactEditor } from "./contact-controls";
 
 export const metadata: Metadata = { title: "Lead" };
 
@@ -44,12 +48,14 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     },
   });
   if (!lead) notFound();
-  const [team, emails, conversation, settings] = await Promise.all([
+  const [team, emails, conversation, settings, journey] = await Promise.all([
     db.adminUser.findMany({ where: { active: true, role: { in: ["OWNER", "ADMIN", "SALES"] } }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
     db.emailLog.findMany({ where: { leadId: id }, orderBy: { createdAt: "desc" } }),
     db.aiConversation.findFirst({ where: { OR: [{ leadId: id }, ...(lead.sessionId ? [{ sessionId: lead.sessionId, kind: "assistant" }] : [])] }, orderBy: { updatedAt: "desc" } }),
     getSettings(),
+    visitorJourney(lead.sessionId),
   ]);
+  const meta = (lead.meta ?? {}) as { origin?: string; kind?: string; address?: string; query?: string; source?: string };
 
   const req = (lead.requirements ?? {}) as Record<string, unknown>;
   const reqRows = Object.keys(REQ_LABEL)
@@ -77,7 +83,13 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
       body: `To ${m.toAddress}${m.providerId ? ` · message id ${m.providerId}` : ""}`,
       by: null as string | null,
     })),
-    { at: lead.createdAt, kind: "created", title: `Enquiry received via ${humanise(lead.source)}`, body: null, by: null },
+    {
+      at: lead.createdAt,
+      kind: "created",
+      title: lead.source === "MANUAL" ? `Added by the team${meta.origin ? ` (${meta.origin})` : ""}` : lead.source === "LEAD_FINDER" ? "Saved from the lead finder" : `Enquiry received via ${LEAD_SOURCE_LABEL[lead.source] ?? humanise(lead.source)}`,
+      body: null,
+      by: null,
+    },
   ].sort((a, b) => b.at.getTime() - a.at.getTime());
 
   return (
@@ -88,7 +100,8 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
       <div className="mb-6 flex flex-wrap items-center gap-3">
         <h1 className="font-mono text-2xl font-medium sm:text-3xl">{lead.leadNumber}</h1>
         <Badge tone={LEAD_TONE[lead.status]}>{humanise(lead.status)}</Badge>
-        <Badge>{humanise(lead.source)}</Badge>
+        <Badge>{LEAD_SOURCE_LABEL[lead.source] ?? humanise(lead.source)}</Badge>
+        {meta.origin && <Badge tone="info">{meta.origin}</Badge>}
         {lead.isDemo && <Badge>demo</Badge>}
         <span className="text-sm text-subtle">{lead.createdAt.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</span>
       </div>
@@ -242,6 +255,8 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
             </Card>
           )}
 
+          <JourneyCard journey={journey} />
+
           <Card title="Activity & communications">
             <LeadNoteForm leadId={lead.id} />
             <ol className="mt-5 space-y-4">
@@ -276,6 +291,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               />
             </Card>
           )}
+          {lead.email ? (
           <Card title="Reply by email">
             <EmailComposer
               to={lead.email}
@@ -288,18 +304,32 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               ]}
             />
           </Card>
+          ) : (
+            <Card title="Reply">
+              <p className="text-sm text-muted">No email on this lead yet. Message them on WhatsApp or call, then add their email under Contact to send quotes and the order tracking link.</p>
+            </Card>
+          )}
           <Card title="Contact">
             <p className="font-semibold">{lead.name}</p>
             {lead.company && <p className="text-sm text-muted">{lead.company}</p>}
             <p className="text-sm text-subtle">
-              {lead.country ? countryLabel(lead.country) : "Country not given"} · prefers {lead.preferredChannel}
+              {[lead.city, lead.country ? countryLabel(lead.country) : null].filter(Boolean).join(", ") || "Location not given"} · prefers {lead.preferredChannel}
             </p>
             <ul className="mt-3 space-y-2 text-sm">
+              {lead.email && (
               <li>
                 <a href={`mailto:${lead.email}?subject=${encodeURIComponent(`Your quote request ${lead.leadNumber}`)}`} className="inline-flex items-center gap-2 text-accent hover:underline">
                   <Mail className="h-4 w-4" aria-hidden /> {lead.email}
                 </a>
               </li>
+              )}
+              {lead.website && (
+                <li>
+                  <a href={lead.website} target="_blank" rel="noopener nofollow" className="inline-flex items-center gap-2 text-muted hover:text-fg">
+                    <Globe className="h-4 w-4" aria-hidden /> {lead.website.replace(/^https?:\/\//, "")}
+                  </a>
+                </li>
+              )}
               {lead.phone && (
                 <li>
                   <a href={`tel:${lead.phone}`} className="inline-flex items-center gap-2 text-muted hover:text-fg">
@@ -316,12 +346,18 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
               )}
             </ul>
             <p className="mt-3 rounded-lg bg-white/[0.03] p-2.5 text-xs leading-relaxed text-subtle">Confirm prices, approvals and delivery terms by email, even after a call or WhatsApp chat — it&apos;s your proof if a payment is disputed.</p>
+            {meta.address && <p className="mt-2 text-xs text-subtle">{meta.address}</p>}
+            <LeadContactEditor
+              leadId={lead.id}
+              initial={{ name: lead.name, email: lead.email ?? "", phone: lead.phone ?? "", company: lead.company ?? "", country: lead.country ?? "", city: lead.city ?? "", website: lead.website ?? "" }}
+            />
             {lead.customer && (
               <Link href={`/admin/customers/${lead.customer.id}`} className="mt-3 inline-block text-xs font-semibold text-accent hover:underline">
                 Customer history · {lead.customer._count.orders} orders, {lead.customer._count.leads} enquiries →
               </Link>
             )}
           </Card>
+          <DeleteLeadButton leadId={lead.id} />
         </div>
       </div>
     </>

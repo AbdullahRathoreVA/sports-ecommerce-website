@@ -25,7 +25,8 @@ export const phoneSchema = z
   .optional()
   .or(z.literal("").transform(() => undefined));
 
-export const leadSourceSchema = z.enum(["QUOTE_FORM", "PRODUCT_PAGE", "CONTACT_FORM", "AI_ASSISTANT", "DESIGN_STUDIO", "PRODUCT_FINDER"]);
+/** Sources the public website may create. MANUAL and LEAD_FINDER are admin-only. */
+export const leadSourceSchema = z.enum(["QUOTE_FORM", "PRODUCT_PAGE", "CONTACT_FORM", "AI_ASSISTANT", "DESIGN_STUDIO", "PRODUCT_FINDER", "PRICE_OFFER"]);
 
 export const leadInputSchema = z.object({
   source: leadSourceSchema,

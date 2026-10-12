@@ -14,6 +14,7 @@ import { ShippingGlobe } from "@/components/three/globe-stage";
 import { RangeRing } from "@/components/site/range-ring";
 import { FactoryMap } from "@/components/site/factory-map";
 import { JsonLd, faqSchema } from "@/components/seo/json-ld";
+import { ReviewCard, Stars, averageRating } from "@/components/site/review-card";
 
 export const revalidate = 300;
 
@@ -50,6 +51,7 @@ function SectionLabel({ n, children }: { n: string; children: React.ReactNode })
 export default async function HomePage() {
   const [settings, categories, products, faqs, testimonials] = await Promise.all([getSettings(), getCategories(), getAllProducts(), getFaqs(), getPublishedTestimonials()]);
   const topFaqs = faqs.slice(0, 6);
+  const reviewAvg = averageRating(testimonials);
   const byCategory = new Map<string, string[]>();
   for (const p of products) byCategory.set(p.category.slug, [...(byCategory.get(p.category.slug) ?? []), p.name]);
   // Featured first, then anything with quantity price breaks.
@@ -548,26 +550,39 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ─── 06 Client stories (only real, published testimonials) ──────── */}
+      {/* ─── 06 Client reviews (only real, published reviews) ──────────── */}
       {testimonials.length > 0 && (
         <section className="py-20 lg:py-28" aria-labelledby="stories">
-          <div className="container-x grid gap-10 lg:grid-cols-[1fr_1.6fr]">
-            <div data-reveal>
-              <SectionLabel n="06">Client stories</SectionLabel>
-              <h2 id="stories" className="font-display mt-5 text-[clamp(2.2rem,5vw,3.4rem)]">
-                Trusted by
-                <span className="block text-subtle">our partners.</span>
-              </h2>
+          <div className="container-x">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <SectionLabel n="06">Client reviews</SectionLabel>
+                <h2 id="stories" className="sd-head font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
+                  In our clients&apos;
+                  <span className="block text-subtle">own words.</span>
+                </h2>
+                {reviewAvg && (
+                  <p className="mt-4 flex items-center gap-2 text-sm font-semibold">
+                    <Stars value={Math.round(reviewAvg.value)} /> {reviewAvg.value.toFixed(1)} / 5 · {reviewAvg.count} review{reviewAvg.count === 1 ? "" : "s"}
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <Link href="/reviews" className="inline-flex items-center gap-8 border-b border-fg pb-2 text-sm font-semibold hover:text-accent">
+                  All reviews <ArrowUpRight className="h-4 w-4" aria-hidden />
+                </Link>
+              </div>
             </div>
-            <ul className="space-y-10" data-reveal>
-              {testimonials.slice(0, 3).map((t) => (
-                <li key={t.id} className="border-b hairline pb-8">
-                  <blockquote className="text-[clamp(1.2rem,2.4vw,1.7rem)] leading-snug">&ldquo;{t.quote}&rdquo;</blockquote>
-                  <p className="mt-5 text-sm font-semibold">{t.author}</p>
-                  <p className="text-xs text-muted">{[t.role, t.company, t.country].filter(Boolean).join(" · ")}</p>
+            <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {testimonials.slice(0, 6).map((t) => (
+                <li key={t.id}>
+                  <ReviewCard r={t} />
                 </li>
               ))}
             </ul>
+            <p className="mt-8 text-sm text-muted">
+              Ordered from us? <Link href="/reviews/new" className="font-semibold text-accent hover:underline">Leave a review</Link>
+            </p>
           </div>
         </section>
       )}

@@ -139,6 +139,19 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
           ))}
         </div>
 
+        {customer.verified && orders.some((o) => ["SHIPPED", "DELIVERED"].includes(o.status)) && (
+          <Link
+            href={`/reviews/new?name=${encodeURIComponent(customer.name)}&email=${encodeURIComponent(customer.email)}${customer.company ? `&company=${encodeURIComponent(customer.company)}` : ""}`}
+            className="mt-8 flex items-center justify-between gap-4 rounded-[var(--radius-card)] border hairline bg-surface p-5 hover:border-accent"
+          >
+            <span>
+              <span className="block font-semibold">Happy with your order? Leave a review</span>
+              <span className="block text-sm text-muted">It takes two minutes and helps other clubs choose. Your review is marked “Verified buyer”.</span>
+            </span>
+            <ArrowUpRight className="h-5 w-5 shrink-0 text-accent" aria-hidden />
+          </Link>
+        )}
+
         <div className="mt-10 grid gap-10 xl:grid-cols-[1.35fr_1fr]">
           {/* Orders */}
           <section aria-labelledby="orders-h">

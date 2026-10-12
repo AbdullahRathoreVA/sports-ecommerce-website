@@ -44,6 +44,7 @@ model Faq {
 }
 
 /// Only real, client-supplied testimonials belong here. None are seeded.
+/// Client reviews. Added by the team, or submitted on the website / client portal (then `pending` until approved).
 model Testimonial {
   id        String   @id @default(cuid())
   author    String
@@ -51,6 +52,22 @@ model Testimonial {
   company   String?
   country   String?
   quote     String   @db.Text
+  /// 1–5 stars, when the reviewer gave a rating.
+  rating    Int?
+  /// Never shown publicly; lets the team thank or verify the reviewer.
+  email     String?
+  /// Optional photo (team in their kit, the product …) from our own uploads.
+  photo     String?
+  /// Product line the review is about, e.g. "Soccer uniforms".
+  productLine String?
+  /// "admin" | "website" | "portal"
+  source    String   @default("admin")
+  /// Matched to a real order (portal review, or confirmed by the team).
+  verified  Boolean  @default(false)
+  /// Submitted by a visitor and not yet looked at by the team.
+  pending   Boolean  @default(false)
+  featured  Boolean  @default(false)
+  customerId String?
   published Boolean  @default(false)
   position  Int      @default(0)
   createdAt DateTime @default(now())
@@ -232,6 +249,8 @@ enum CustomerSource {
   AI_ASSISTANT
   DESIGN_STUDIO
   PORTAL
+  MANUAL
+  PROSPECT
 }
 
 /// Public visitors never have accounts. A customer record is created from an
@@ -462,6 +481,12 @@ enum LeadSource {
   AI_ASSISTANT
   DESIGN_STUDIO
   PRODUCT_FINDER
+  /// Added by the team (WhatsApp, phone call, exhibition, referral …).
+  MANUAL
+  /// Saved from the admin lead finder (a real business found on OpenStreetMap / the web).
+  LEAD_FINDER
+  /// The website's "send me prices" offer.
+  PRICE_OFFER
 }
 
 /// Every quote request, contact message and AI-captured enquiry is a lead.
@@ -476,10 +501,15 @@ model Lead {
   customer   Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
   name     String
-  email    String
+  /// Optional: a lead added by hand or found by the lead finder may only have a phone or a website.
+  email    String?
   phone    String?
   company  String?
   country  String?
+  city     String?
+  website  String?
+  /// Lead finder / manual extras: { origin, osmId, kind, address, foundBy, query } — never shown publicly.
+  meta     Json?
   /// "email" | "whatsapp" | "phone"
   preferredChannel String @default("email")
 

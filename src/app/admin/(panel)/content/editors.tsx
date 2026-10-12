@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Loader2, Plus, Trash2 } from "lucide-react";
-import { deleteContent, purgeDemoData, saveCategory, saveCertification, saveFaq, savePost, saveTestimonial, type Result } from "./actions";
+import { createCategory, deleteCategory, deleteContent, purgeDemoData, saveCategory, saveCertification, saveFaq, savePost, saveTestimonial, type Result } from "./actions";
 import { ImageUploader } from "@/components/admin/uploader";
 import { inputClass } from "@/components/forms/field";
 import { cn, slugify } from "@/lib/utils";
@@ -300,6 +300,8 @@ export type CategoryRow = { id: string; slug: string; name: string; shortName: s
 function CategoryForm({ row }: { row: CategoryRow }) {
   const [f, setF] = useState(row);
   const { pending, msg, run } = useSave();
+  const del = useSave();
+  const [armed, setArmed] = useState(false);
   return (
     <form
       className="grid gap-4 sm:grid-cols-2"
@@ -341,8 +343,59 @@ function CategoryForm({ row }: { row: CategoryRow }) {
           {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />} Save
         </button>
         <a href={`/products/c/${row.slug}`} target="_blank" rel="noopener" className="text-sm text-muted underline hover:text-fg">View on site</a>
+        <a href={`/admin/products/new?category=${row.id}`} className="text-sm font-semibold text-accent hover:underline">+ Add a product to this category</a>
+        <button
+          type="button"
+          disabled={del.pending}
+          onClick={() => (armed ? del.run(() => deleteCategory(row.id)) : setArmed(true))}
+          className={cn("ml-auto inline-flex h-9 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold", armed ? "border-red-400/60 bg-red-500/10 text-red-200" : "hairline text-muted hover:text-fg")}
+        >
+          <Trash2 className="h-4 w-4" aria-hidden /> {armed ? "Tap again to delete" : "Delete category"}
+        </button>
+        {del.msg && <p className={cn("w-full text-sm", del.msg.ok ? "text-emerald-300" : "text-red-300")} role="status">{del.msg.text}</p>}
         {msg && <p className={cn("w-full text-sm", msg.ok ? "text-emerald-300" : "text-red-300")} role="status">{msg.text}</p>}
       </div>
+    </form>
+  );
+}
+
+function NewCategory({ onCreated }: { onCreated: (id: string) => void }) {
+  const [f, setF] = useState({ name: "", tagline: "", description: "" });
+  const [show, setShow] = useState(false);
+  const { pending, msg, run } = useSave();
+  if (!show)
+    return (
+      <button type="button" onClick={() => setShow(true)} className="mb-4 inline-flex h-11 items-center gap-2 rounded-[var(--radius-control)] bg-accent px-4 text-sm font-semibold text-accent-ink">
+        <Plus className="h-4 w-4" aria-hidden /> Add a category
+      </button>
+    );
+  return (
+    <form
+      className="mb-5 grid gap-3 rounded-[var(--radius-card)] border border-accent/40 bg-surface p-5 sm:grid-cols-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        run(async () => {
+          const r = await createCategory(f);
+          if (r.ok && r.id) {
+            setShow(false);
+            setF({ name: "", tagline: "", description: "" });
+            onCreated(r.id);
+          }
+          return r;
+        });
+      }}
+    >
+      <p className="text-sm font-semibold sm:col-span-2">New product line</p>
+      <In id="nc-name" label="Name"><input id="nc-name" required value={f.name} maxLength={60} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="e.g. Cricket kits" className={inputClass} /></In>
+      <In id="nc-tag" label="Tagline"><input id="nc-tag" value={f.tagline} maxLength={120} onChange={(e) => setF({ ...f, tagline: e.target.value })} placeholder="One line shown under the name" className={inputClass} /></In>
+      <In id="nc-desc" label="Description" wide><textarea id="nc-desc" rows={2} value={f.description} maxLength={2000} onChange={(e) => setF({ ...f, description: e.target.value })} className={area} /></In>
+      <div className="flex items-center gap-2 sm:col-span-2">
+        <button type="submit" disabled={pending} className="flex h-11 items-center gap-2 rounded-[var(--radius-control)] bg-accent px-5 text-sm font-semibold text-accent-ink disabled:opacity-70">
+          {pending && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />} Create category
+        </button>
+        <button type="button" onClick={() => setShow(false)} className="h-11 rounded-[var(--radius-control)] border hairline px-4 text-sm font-semibold">Cancel</button>
+      </div>
+      {msg && <p className={cn("text-sm sm:col-span-2", msg.ok ? "text-emerald-300" : "text-red-300")} role="status">{msg.text}</p>}
     </form>
   );
 }
@@ -350,6 +403,8 @@ function CategoryForm({ row }: { row: CategoryRow }) {
 export function CategoryEditor({ items }: { items: CategoryRow[] }) {
   const [open, setOpen] = useState<string | null>(null);
   return (
+    <>
+    <NewCategory onCreated={(id) => setOpen(id)} />
     <ul className="space-y-2">
       {items.map((c) => (
         <Item key={c.id} title={c.name} meta={<>{pub(c.published)} · {c.products} products · order {c.position}</>} open={open === c.id} onToggle={() => setOpen(open === c.id ? null : c.id)}>
@@ -357,5 +412,6 @@ export function CategoryEditor({ items }: { items: CategoryRow[] }) {
         </Item>
       ))}
     </ul>
+    </>
   );
 }

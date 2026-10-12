@@ -15,6 +15,7 @@ const SOURCE_TO_CUSTOMER = {
   AI_ASSISTANT: "AI_ASSISTANT",
   DESIGN_STUDIO: "DESIGN_STUDIO",
   PRODUCT_FINDER: "QUOTE",
+  PRICE_OFFER: "QUOTE",
 } as const;
 
 const SOURCE_EVENT = {
@@ -22,6 +23,7 @@ const SOURCE_EVENT = {
   PRODUCT_PAGE: "quote_submit",
   DESIGN_STUDIO: "quote_submit",
   PRODUCT_FINDER: "quote_submit",
+  PRICE_OFFER: "quote_submit",
   CONTACT_FORM: "contact_submit",
   AI_ASSISTANT: "ai_lead_created",
 } as const;

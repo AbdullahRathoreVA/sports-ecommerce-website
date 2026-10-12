@@ -11,11 +11,14 @@ const NAV_PERMISSION: Record<NavKey, Permission> = {
   analytics: "viewAnalytics",
   orders: "manageOrders",
   leads: "manageLeads",
+  chats: "manageLeads",
   customers: "viewCustomers",
   products: "manageProducts",
   photos: "manageProducts",
+  reviews: "manageContent",
   content: "manageContent",
   ai: "useAdminAi",
+  help: "viewDashboard",
   audit: "viewAudit",
   users: "manageUsers",
 };
@@ -27,14 +30,15 @@ const NAV_PERMISSION: Record<NavKey, Permission> = {
  */
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
   const admin = await requireAdminPage();
-  const [settings, newLeads, pendingOrders] = await Promise.all([
+  const [settings, newLeads, pendingOrders, pendingReviews] = await Promise.all([
     getSettings(),
     can(admin.role, "manageLeads") ? db.lead.count({ where: { status: "NEW" } }) : Promise.resolve(0),
     can(admin.role, "manageOrders") ? db.order.count({ where: { status: "PENDING" } }) : Promise.resolve(0),
+    can(admin.role, "manageContent") ? db.testimonial.count({ where: { pending: true } }) : Promise.resolve(0),
   ]);
   const allowed = (Object.keys(NAV_PERMISSION) as NavKey[]).filter((k) => can(admin.role, NAV_PERMISSION[k]));
   return (
-    <AdminShell allowed={allowed} admin={admin} brand={settings.brand.name} badges={{ leads: newLeads, orders: pendingOrders }}>
+    <AdminShell allowed={allowed} admin={admin} brand={settings.brand.name} badges={{ leads: newLeads, orders: pendingOrders, reviews: pendingReviews }}>
       {children}
     </AdminShell>
   );

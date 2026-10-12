@@ -20,11 +20,14 @@ import {
   Images,
   Users,
   X,
+  MessagesSquare,
+  Star,
+  LifeBuoy,
 } from "lucide-react";
 import { LogoMark } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 
-export type NavKey = "overview" | "live" | "analytics" | "orders" | "leads" | "customers" | "products" | "photos" | "content" | "ai" | "audit" | "users";
+export type NavKey = "overview" | "live" | "analytics" | "orders" | "leads" | "chats" | "customers" | "products" | "photos" | "reviews" | "content" | "ai" | "help" | "audit" | "users";
 
 const NAV: { key: NavKey; label: string; href: string; icon: typeof Activity }[] = [
   { key: "overview", label: "Overview", href: "/admin", icon: LayoutDashboard },
@@ -32,11 +35,14 @@ const NAV: { key: NavKey; label: string; href: string; icon: typeof Activity }[]
   { key: "analytics", label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { key: "orders", label: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { key: "leads", label: "Leads & quotes", href: "/admin/leads", icon: ClipboardList },
+  { key: "chats", label: "Chats", href: "/admin/chats", icon: MessagesSquare },
   { key: "customers", label: "Customers", href: "/admin/customers", icon: Users },
   { key: "products", label: "Products", href: "/admin/products", icon: Package },
   { key: "photos", label: "Photos", href: "/admin/photos", icon: Images },
+  { key: "reviews", label: "Reviews", href: "/admin/reviews", icon: Star },
   { key: "content", label: "Content & settings", href: "/admin/content", icon: FileText },
   { key: "ai", label: "AI analyst", href: "/admin/ai", icon: Bot },
+  { key: "help", label: "Help", href: "/admin/help", icon: LifeBuoy },
   { key: "audit", label: "Audit log", href: "/admin/audit", icon: ScrollText },
   { key: "users", label: "Admin users", href: "/admin/users", icon: ShieldCheck },
 ];

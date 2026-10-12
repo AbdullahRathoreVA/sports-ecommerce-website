@@ -473,3 +473,9 @@ body {
     }
   }
 }
+
+/* Website price offer (src/components/site/price-offer.tsx) */
+@keyframes po-in {
+  from { opacity: 0; transform: perspective(900px) translate3d(0, 24px, 0) rotateX(12deg); }
+  to { opacity: 1; transform: none; }
+}
