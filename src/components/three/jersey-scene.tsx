@@ -19,6 +19,8 @@ import * as THREE from "three";
  */
 
 export type JerseySceneProps = {
+  /** Called once shaders are compiled and the first frame is on screen. */
+  onReady?: () => void;
   textureA: HTMLCanvasElement;
   textureB?: HTMLCanvasElement | null;
   /** 0..1.1 — how far design B has been "pressed" onto the shirt. */
@@ -213,7 +215,12 @@ function PrecompileWhenLoaded({ onDone }: { onDone: () => void }) {
 
 export default function JerseyScene(props: JerseySceneProps) {
   const [ready, setReady] = useState(false);
-  const onDone = useCallback(() => setReady(true), []);
+  const onReadyProp = props.onReady;
+  const onDone = useCallback(() => {
+    setReady(true);
+    // Tell the stage after the first real frame, so the poster never fades over an empty canvas.
+    requestAnimationFrame(() => requestAnimationFrame(() => onReadyProp?.()));
+  }, [onReadyProp]);
   return (
     <Canvas
       className={props.className}

@@ -123,6 +123,11 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-rendering: optimizeLegibility;
+  /* Taps respond instantly and a quick double tap never zooms the page mid-scroll; pinch-zoom still works. */
+  touch-action: manipulation;
+  /* Nothing may ever make the page slide sideways on a phone. iOS Safari ignores this on <body> alone;
+     "clip" (unlike "hidden") keeps sticky elements working. */
+  overflow-x: clip;
   scroll-padding-top: calc(var(--header-h) + 16px);
 }
 

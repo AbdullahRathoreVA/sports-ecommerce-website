@@ -175,7 +175,7 @@ export default async function HomePage() {
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between" data-reveal>
             <div>
               <SectionLabel n="01">Product lines</SectionLabel>
-              <h2 id="cats" className="font-display mt-5 text-[clamp(2.4rem,7vw,4.4rem)]">
+              <h2 id="cats" className="font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
                 {categories.length > 1 && categories.length < 10 ? `${NUMBER_WORDS[categories.length]} product lines.` : "Our product lines."}
                 <span className="block text-subtle">One factory standard.</span>
               </h2>
@@ -269,7 +269,7 @@ export default async function HomePage() {
         <div className="container-x grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div data-reveal>
             <p className="label text-white/60">02 / Custom OEM</p>
-            <h2 id="oem" className="font-display mt-5 text-[clamp(2.4rem,7vw,4.4rem)]">
+            <h2 id="oem" className="font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
               Your brand.
               <span className="block">Your colours.</span>
               <span className="block text-accent">Our factory.</span>
@@ -337,7 +337,7 @@ export default async function HomePage() {
           <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-end" data-reveal>
             <div>
               <SectionLabel n="03">Factory direct</SectionLabel>
-              <h2 id="why" className="font-display mt-5 text-[clamp(2.4rem,7vw,4.4rem)]">
+              <h2 id="why" className="font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
                 Behind every order.
                 <span className="block text-subtle">Checked at every step.</span>
               </h2>
@@ -397,12 +397,12 @@ export default async function HomePage() {
 
       {/* ─── 04 Order tracking ──────────────────────────────────────────── */}
       <section className="on-dark bg-ink py-20 lg:py-28" aria-labelledby="track">
-        <div className="container-x grid items-center gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16">
+        <div className="container-x grid items-center gap-12 lg:grid-cols-[1fr_1.15fr] lg:gap-16 [&>*]:min-w-0">
           <div data-reveal>
             <p className="label flex items-center gap-2 text-white/60">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden /> 04 / Order tracking
             </p>
-            <h2 id="track" className="font-display mt-5 text-[clamp(2.4rem,7vw,4.4rem)]">
+            <h2 id="track" className="font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
               Your order.
               <span className="block">Always in view.</span>
               <span className="block text-white/40">Always on record.</span>
@@ -482,7 +482,7 @@ export default async function HomePage() {
         <div className="container-x grid items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
           <div data-reveal>
             <p className="label text-white/60">05 / Global shipping</p>
-            <h2 id="global" className="font-display mt-5 max-w-3xl text-[clamp(2.4rem,7vw,4.4rem)]">
+            <h2 id="global" className="font-display mt-5 max-w-3xl text-[clamp(2.05rem,8.4vw,4.4rem)]">
               Made in Sialkot.
               <span className="block">Shipped worldwide.</span>
             </h2>
@@ -511,7 +511,7 @@ export default async function HomePage() {
               ]}
               className="mx-auto w-full max-w-[560px]"
             />
-            <p className="label text-center text-[0.6rem] text-white/35">Drag to spin the globe</p>
+            <p className="label hidden text-center text-[0.6rem] text-white/35 [@media(pointer:fine)]:block">Drag to spin the globe</p>
           </div>
         </div>
         <div className="container-x mt-14">

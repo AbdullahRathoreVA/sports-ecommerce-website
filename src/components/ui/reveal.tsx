@@ -13,6 +13,8 @@ export function RevealObserver() {
   const pathname = usePathname();
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Touch screens: content is simply there (momentum scrolling outran the fade-in and showed blank sections).
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     if (!("IntersectionObserver" in window)) return;
     const vh = window.innerHeight;
     // Arm newly rendered elements that start below the fold…

@@ -139,8 +139,8 @@ export function HeroJersey({ poster, posterAlt, className }: { poster: string; p
             revision={revision}
             still={still}
             className="!h-full !w-full"
+            onReady={() => setReady(true)}
           />
-          <ReadyProbe onReady={() => setReady(true)} />
         </div>
       )}
       {mode === "3d" && ready && (
@@ -150,13 +150,4 @@ export function HeroJersey({ poster, posterAlt, className }: { poster: string; p
       )}
     </div>
   );
-}
-
-/** Flags readiness one frame after mount, so the poster cross-fades only once WebGL has drawn. */
-function ReadyProbe({ onReady }: { onReady: () => void }) {
-  useEffect(() => {
-    const id = setTimeout(onReady, 450);
-    return () => clearTimeout(id);
-  }, [onReady]);
-  return null;
 }

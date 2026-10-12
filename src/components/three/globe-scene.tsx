@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -161,7 +161,7 @@ function OriginPulse({ at }: { at: THREE.Vector3 }) {
   );
 }
 
-function Globe({ origin, destinations }: Omit<GlobeSceneProps, "active" | "className">) {
+function Globe({ origin, destinations, spin }: Omit<GlobeSceneProps, "active" | "className"> & { spin?: boolean }) {
   const from = useMemo(() => toVec(origin.lat, origin.lon), [origin]);
   const group = useRef<THREE.Group>(null);
   // Face the viewer at ~35°E: Sialkot on the right, Europe and the Gulf in view, USA routes arcing over the left edge.
@@ -170,6 +170,10 @@ function Globe({ origin, destinations }: Omit<GlobeSceneProps, "active" | "class
     // Tilt so ~35°N faces the viewer: every route is in the northern hemisphere.
     if (group.current) group.current.rotation.set(0.6, startY, 0);
   }, [startY]);
+  // Touch screens have no orbit controls (they would trap the page scroll): the globe turns by itself.
+  useFrame((_, delta) => {
+    if (spin && group.current) group.current.rotation.y += Math.min(delta, 0.1) * 0.12;
+  });
   return (
     <group ref={group}>
       <Sphere />
@@ -194,11 +198,13 @@ function FrameGate({ active }: { active: boolean }) {
 }
 
 export default function GlobeScene({ origin, destinations, active, className }: GlobeSceneProps) {
+  // On phones and tablets a finger on the globe must scroll the page, so no drag-to-orbit there.
+  const [touch] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
   return (
-    <Canvas className={className} frameloop={active ? "always" : "never"} dpr={[1, 1.6]} camera={{ position: [0, 0, 3.55], fov: 38 }} gl={{ antialias: true, alpha: true }}>
+    <Canvas className={className} style={touch ? { touchAction: "pan-y" } : undefined} frameloop={active ? "always" : "never"} dpr={[1, 1.6]} camera={{ position: [0, 0, 3.55], fov: 38 }} gl={{ antialias: true, alpha: true }}>
       <FrameGate active={active} />
-      <Globe origin={origin} destinations={destinations} />
-      <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.35} rotateSpeed={0.5} minPolarAngle={Math.PI * 0.3} maxPolarAngle={Math.PI * 0.7} />
+      <Globe origin={origin} destinations={destinations} spin={touch} />
+      {!touch && <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.35} rotateSpeed={0.5} minPolarAngle={Math.PI * 0.3} maxPolarAngle={Math.PI * 0.7} />}
     </Canvas>
   );
 }
