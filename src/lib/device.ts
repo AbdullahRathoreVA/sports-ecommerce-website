@@ -36,3 +36,30 @@ export function deviceQuality(): "high" | "low" {
   const weak = typeof nav.deviceMemory === "number" && nav.deviceMemory < 4;
   return weak ? "low" : "high";
 }
+
+type IdleWindow = Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void };
+
+/**
+ * Runs `cb` after the page has finished loading, `delay` ms have passed and the browser is idle —
+ * for preparing below-the-fold work before the visitor scrolls to it. Returns a cancel function.
+ */
+export function afterSettled(cb: () => void, delay = 1500): () => void {
+  const w = window as IdleWindow;
+  let timer = 0;
+  let idle = 0;
+  let done = false;
+  const go = () => {
+    timer = window.setTimeout(() => {
+      if (w.requestIdleCallback) idle = w.requestIdleCallback(() => !done && cb(), { timeout: 2000 });
+      else if (!done) cb();
+    }, delay);
+  };
+  if (document.readyState === "complete") go();
+  else window.addEventListener("load", go, { once: true });
+  return () => {
+    done = true;
+    window.removeEventListener("load", go);
+    clearTimeout(timer);
+    if (idle && w.cancelIdleCallback) w.cancelIdleCallback(idle);
+  };
+}

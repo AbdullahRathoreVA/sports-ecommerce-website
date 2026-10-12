@@ -311,3 +311,165 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .skeleton, .skeleton-light, .loading-bar { animation: none; }
 }
+
+/* ─── Scroll-driven 3D (Apple-style) ──────────────────────────────────────
+ * Motion is tied to the scroll position itself (CSS scroll-driven animations,
+ * run on the compositor): cards tilt up out of depth as they come in, images
+ * drift at their own speed, the hero recedes as you leave it. Because the
+ * state is computed from where you are, nothing can ever be "not loaded yet"
+ * on a fast flick. Browsers without support simply show the page as is. */
+@keyframes sd-rise {
+  from { opacity: 0.35; transform: perspective(1100px) translate3d(0, 64px, -80px) rotateX(16deg); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sd-zoom {
+  from { opacity: 0.45; transform: perspective(1200px) translate3d(0, 40px, -140px) rotateX(12deg) scale(0.9); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes sd-recede {
+  to { opacity: 0.2; transform: perspective(1200px) translate3d(0, 14%, -220px) rotateX(16deg) scale(0.9); }
+}
+@keyframes sd-parallax {
+  from { transform: translate3d(0, -8%, 0) scale(1.18); }
+  to { transform: translate3d(0, 8%, 0) scale(1.18); }
+}
+@keyframes sd-head {
+  from { opacity: 0.25; transform: translate3d(0, 0.5em, 0) skewY(3deg); }
+  to { opacity: 1; transform: none; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    [data-reveal],
+    .sd-rise {
+      animation: sd-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 300px;
+      transform-origin: 50% 100%;
+    }
+    .sd-zoom {
+      animation: sd-zoom linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 420px;
+    }
+    .sd-recede {
+      animation: sd-recede linear both;
+      animation-timeline: view();
+      animation-range: exit 0% exit 90%;
+      transform-origin: 50% 0%;
+    }
+    .sd-parallax {
+      animation: sd-parallax linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    .sd-head {
+      animation: sd-head linear both;
+      animation-timeline: view();
+      animation-range: entry 0px entry 220px;
+    }
+    /* The scroll timeline replaces the JS fade-in. */
+    [data-reveal][data-armed] { opacity: 1; transform: none; transition: none; }
+  }
+}
+
+/* Desktop: cards lift and tilt toward the pointer side on hover. */
+@media (hover: hover) and (pointer: fine) {
+  .tilt-hover {
+    transition: transform 0.5s var(--ease-out-expo), box-shadow 0.5s var(--ease-out-expo);
+    transform-style: preserve-3d;
+  }
+  .tilt-hover { position: relative; }
+  .tilt-hover:hover {
+    transform: perspective(900px) translate3d(0, -8px, 0) rotateX(var(--rx, 4deg)) rotateY(var(--ry, 0deg));
+    box-shadow: 0 28px 50px -30px rgba(0, 0, 0, 0.45);
+    transition-duration: 0.25s;
+  }
+  /* Soft glare that follows the pointer (src/components/ui/tilt.tsx sets --gx/--gy). */
+  .tilt-hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--gx, 50%) var(--gy, 0%), rgba(255, 255, 255, 0.16), transparent 55%);
+    opacity: 0;
+    transition: opacity 0.4s var(--ease-out-expo);
+  }
+  .tilt-hover:hover::after { opacity: 1; }
+}
+
+/* ─── Range ring (home): the products stand on a 3D ring that turns as you scroll ───
+ * Pure CSS 3D with real cut-out photos (no WebGL). The turn is scroll-driven on the
+ * compositor where supported; src/components/site/range-ring.tsx drives it elsewhere. */
+.ring-track {
+  --cw: clamp(160px, 50vw, 260px);
+  --ch: calc(var(--cw) * 1.32);
+  --r: calc(var(--cw) * 2.3);
+}
+.ring-runway { position: relative; }
+.ring-stage {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  perspective: 1000px;
+  perspective-origin: 50% 42%;
+}
+.ring-pivot { position: absolute; left: 50%; top: 56%; width: 0; height: 0; transform-style: preserve-3d; }
+.ring-spin { position: absolute; transform-style: preserve-3d; transform: translateZ(calc(var(--r) * -1)) rotateX(-8deg); }
+.ring-card {
+  position: absolute;
+  width: var(--cw);
+  height: var(--ch);
+  left: calc(var(--cw) / -2);
+  top: calc(var(--ch) / -2);
+  transform-style: preserve-3d;
+}
+.ring-face { position: absolute; inset: 0; display: block; -webkit-backface-visibility: hidden; backface-visibility: hidden; }
+.ring-back { transform: rotateY(180deg) scale(0.92); }
+.ring-bar { transform: scaleX(0); }
+@media (min-width: 1024px) {
+  .ring-stage { perspective: 1500px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ring-runway { height: 250svh; }
+  .ring-stage { position: sticky; top: 0; }
+}
+@keyframes ring-spin {
+  from { transform: translateZ(calc(var(--r) * -1)) rotateX(-8deg) rotateY(0deg); }
+  to { transform: translateZ(calc(var(--r) * -1)) rotateX(-8deg) rotateY(-360deg); }
+}
+@keyframes ring-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Inset 0: the page's scroll-padding (for the sticky header) would otherwise shift the turn. */
+    .ring-runway { view-timeline: --ring-t block; view-timeline-inset: 0px; }
+    .ring-spin,
+    .ring-bar {
+      animation: ring-spin linear both;
+      animation-timeline: --ring-t;
+      animation-range: contain 0% contain 100%;
+    }
+    .ring-bar { animation-name: ring-bar; }
+  }
+}
+
+/* Phone product gallery: each photo turns like the side of a cube as you swipe (scroll-driven). */
+@keyframes cube-turn {
+  0% { transform: perspective(1000px) rotateY(42deg) scale(0.88); opacity: 0.55; }
+  50% { transform: none; opacity: 1; }
+  100% { transform: perspective(1000px) rotateY(-42deg) scale(0.88); opacity: 0.55; }
+}
+@supports (animation-timeline: view(inline)) {
+  @media (prefers-reduced-motion: no-preference) {
+    .cube-slide {
+      animation: cube-turn linear both;
+      animation-timeline: view(inline);
+      animation-range: cover 0% cover 100%;
+    }
+  }
+}

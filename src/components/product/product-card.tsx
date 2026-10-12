@@ -20,7 +20,7 @@ export function ProductCard({ product, priority = false, className }: { product:
   return (
     <Link
       href={`/products/${product.slug}`}
-      className={cn("group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border hairline bg-surface transition-shadow hover:shadow-[0_18px_40px_-24px_rgba(0,0,0,0.35)]", className)}
+      className={cn("sd-rise tilt-hover group flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border hairline bg-surface", className)}
       data-track="product_click"
       data-product-id={product.id}
       data-category={product.category.slug}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -13,7 +13,7 @@ import * as THREE from "three";
  */
 
 export type Destination = { name: string; lat: number; lon: number };
-export type GlobeSceneProps = { origin: Destination; destinations: Destination[]; active: boolean; className?: string };
+export type GlobeSceneProps = { origin: Destination; destinations: Destination[]; active: boolean; className?: string; onReady?: () => void };
 
 const R = 1;
 const RED = new THREE.Color("#e11d26");
@@ -161,7 +161,7 @@ function OriginPulse({ at }: { at: THREE.Vector3 }) {
   );
 }
 
-function Globe({ origin, destinations, spin }: Omit<GlobeSceneProps, "active" | "className"> & { spin?: boolean }) {
+function Globe({ origin, destinations, spin }: Omit<GlobeSceneProps, "active" | "className" | "onReady"> & { spin?: boolean }) {
   const from = useMemo(() => toVec(origin.lat, origin.lon), [origin]);
   const group = useRef<THREE.Group>(null);
   // Face the viewer at ~35°E: Sialkot on the right, Europe and the Gulf in view, USA routes arcing over the left edge.
@@ -197,12 +197,51 @@ function FrameGate({ active }: { active: boolean }) {
   return null;
 }
 
-export default function GlobeScene({ origin, destinations, active, className }: GlobeSceneProps) {
+/** Compile every shader off the main thread before the first frame (otherwise scrolling stalls ~1 s on phones). */
+function Precompile({ onDone }: { onDone: () => void }) {
+  const { gl, scene, camera } = useThree();
+  useEffect(() => {
+    let alive = true;
+    const id = requestAnimationFrame(() => {
+      gl.compileAsync(scene, camera)
+        .catch(() => undefined)
+        .then(() => {
+          if (!alive) return;
+          // One frame now uploads every texture, so the first visible frame has nothing left to do.
+          gl.render(scene, camera);
+          onDone();
+        });
+    });
+    return () => {
+      alive = false;
+      cancelAnimationFrame(id);
+    };
+  }, [gl, scene, camera, onDone]);
+  return null;
+}
+
+export default function GlobeScene({ origin, destinations, active, className, onReady }: GlobeSceneProps) {
   // On phones and tablets a finger on the globe must scroll the page, so no drag-to-orbit there.
   const [touch] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
+  const [ready, setReady] = useState(false);
+  const onDone = useCallback(() => {
+    setReady(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => onReady?.()));
+  }, [onReady]);
   return (
-    <Canvas className={className} style={touch ? { touchAction: "pan-y" } : undefined} frameloop={active ? "always" : "never"} dpr={[1, 3]} camera={{ position: [0, 0, 3.55], fov: 38 }} gl={{ antialias: true, alpha: true }}>
-      <FrameGate active={active} />
+    <Canvas
+      className={className}
+      style={touch ? { touchAction: "pan-y" } : undefined}
+      frameloop={ready && active ? "always" : "never"}
+      dpr={[1, 3]}
+      camera={{ position: [0, 0, 3.55], fov: 38 }}
+      gl={{ antialias: true, alpha: true }}
+      onCreated={({ gl }) => {
+        gl.debug.checkShaderErrors = process.env.NODE_ENV !== "production";
+      }}
+    >
+      {!ready && <Precompile onDone={onDone} />}
+      <FrameGate active={active && ready} />
       <Globe origin={origin} destinations={destinations} spin={touch} />
       {!touch && <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.35} rotateSpeed={0.5} minPolarAngle={Math.PI * 0.3} maxPolarAngle={Math.PI * 0.7} />}
     </Canvas>

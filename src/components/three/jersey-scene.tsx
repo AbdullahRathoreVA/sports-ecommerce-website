@@ -2,7 +2,7 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { ContactShadows, Environment, Lightformer, useGLTF } from "@react-three/drei";
+import { ContactShadows, useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 /**
@@ -198,7 +198,12 @@ function Precompile({ onDone }: { onDone: () => void }) {
     const id = requestAnimationFrame(() => {
       gl.compileAsync(scene, camera)
         .catch(() => undefined)
-        .then(() => alive && onDone());
+        .then(() => {
+          if (!alive) return;
+          // One frame now uploads every texture, so the first visible frame has nothing left to do.
+          gl.render(scene, camera);
+          onDone();
+        });
     });
     return () => {
       alive = false;
@@ -237,11 +242,10 @@ export default function JerseyScene(props: JerseySceneProps) {
       <ambientLight intensity={0.35} />
       <directionalLight position={[2.2, 2.6, 3]} intensity={1.6} />
       <directionalLight position={[-3, 1.2, -2]} intensity={1.1} color="#e11d26" />
-      <Environment resolution={128}>
-        <Lightformer form="rect" intensity={2.2} position={[0, 2.5, 3]} scale={[4, 2, 1]} />
-        <Lightformer form="rect" intensity={1.2} position={[-3, 0.5, 1]} rotation-y={Math.PI / 2} scale={[3, 2, 1]} color="#dbe3ff" />
-        <Lightformer form="rect" intensity={1} position={[3, 0.5, -1]} rotation-y={-Math.PI / 2} scale={[3, 2, 1]} />
-      </Environment>
+      {/* Soft studio fill from plain lights: an environment map would need a ~1 s blocking
+          shader compile (PMREM filter) the first time it is used, freezing the page. */}
+      <hemisphereLight args={["#eef1ff", "#2b2b31", 1.5]} />
+      <directionalLight position={[0, 1.5, 4]} intensity={0.55} />
       <Jersey
         textureA={props.textureA}
         textureB={props.textureB}

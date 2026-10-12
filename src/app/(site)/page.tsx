@@ -11,6 +11,7 @@ import { formatMoney } from "@/lib/utils";
 import { PriceEstimator, type EstimatorProduct } from "@/components/catalog/price-estimator";
 import { HeroShowcase } from "@/components/three/showcase-stage";
 import { ShippingGlobe } from "@/components/three/globe-stage";
+import { RangeRing } from "@/components/site/range-ring";
 import { FactoryMap } from "@/components/site/factory-map";
 import { JsonLd, faqSchema } from "@/components/seo/json-ld";
 
@@ -124,7 +125,7 @@ export default async function HomePage() {
           </div>
 
           {/* Phones see the ball, gloves and kit first: they are the main show. */}
-          <div className="relative order-first -mx-2 lg:order-none lg:-mr-10 lg:ml-0">
+          <div className="sd-recede relative order-first -mx-2 lg:order-none lg:-mr-10 lg:ml-0">
             <div className="label hidden items-center justify-between text-white/40 sm:flex">
               <span>Alrobel / The full range</span>
               <Link href="/design-studio" className="inline-flex items-center gap-1.5 text-white/60 hover:text-accent" data-track="customizer_start" data-track-label="Hero: design yours">
@@ -175,7 +176,7 @@ export default async function HomePage() {
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between" data-reveal>
             <div>
               <SectionLabel n="01">Product lines</SectionLabel>
-              <h2 id="cats" className="font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
+              <h2 id="cats" className="sd-head font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
                 {categories.length > 1 && categories.length < 10 ? `${NUMBER_WORDS[categories.length]} product lines.` : "Our product lines."}
                 <span className="block text-subtle">One factory standard.</span>
               </h2>
@@ -188,9 +189,9 @@ export default async function HomePage() {
             {categories.map((c, i) => (
               <li key={c.slug} data-reveal style={{ "--reveal-delay": `${(i % 3) * 70}ms` } as React.CSSProperties}>
                 <Link href={`/products/c/${c.slug}`} className="group block" data-track="category_view" data-category={c.slug}>
-                  <div className="relative aspect-[4/3.3] overflow-hidden rounded-[var(--radius-card)] bg-surface-2">
+                  <div className="tilt-hover relative aspect-[4/3.3] overflow-hidden rounded-[var(--radius-card)] bg-surface-2">
                     {c.image ? (
-                      <Image src={c.image} alt={c.imageAlt ?? ""} fill sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 92vw" className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.04]" />
+                      <Image src={c.image} alt={c.imageAlt ?? ""} fill sizes="(min-width:1024px) 30vw, (min-width:640px) 45vw, 92vw" className="sd-parallax object-cover" />
                     ) : (
                       <BrandTile compact className="absolute inset-0" />
                     )}
@@ -264,12 +265,15 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ─── The range, turned in 3D as you scroll ───────────────────────── */}
+      <RangeRing />
+
       {/* ─── 02 Custom OEM ──────────────────────────────────────────────── */}
       <section className="on-dark bg-ink py-20 lg:py-28" aria-labelledby="oem">
         <div className="container-x grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div data-reveal>
             <p className="label text-white/60">02 / Custom OEM</p>
-            <h2 id="oem" className="font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
+            <h2 id="oem" className="sd-head font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
               Your brand.
               <span className="block">Your colours.</span>
               <span className="block text-accent">Our factory.</span>
@@ -291,7 +295,7 @@ export default async function HomePage() {
           </div>
 
           {/* A div, not a link: the 3D kit can be dragged to spin without navigating. */}
-          <div className="group relative rounded-lg border border-white/10 bg-ink-2 transition-colors hover:border-white/25" data-reveal>
+          <div className="sd-zoom group relative rounded-lg border border-white/10 bg-ink-2 transition-colors hover:border-white/25">
             <div className="label flex items-center justify-between border-b border-white/10 px-5 py-4 text-white/50">
               OEM / Design studio
               <span className="flex items-center gap-2 text-[0.6rem] text-white/45">
@@ -300,7 +304,7 @@ export default async function HomePage() {
             </div>
             <div className="grid-lines relative aspect-[16/11] cursor-grab overflow-hidden active:cursor-grabbing">
               <div className="pointer-events-none absolute left-1/2 top-1/2 h-3/4 w-3/4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/15 blur-3xl" aria-hidden />
-              <HeroJersey poster="/media/hero/jersey-poster.webp" posterAlt="A football kit being designed in the 3D Design Studio" className="absolute inset-0" />
+              <HeroJersey poster="/media/hero/jersey-poster-v2.webp" posterAlt="A football kit being designed in the 3D Design Studio" className="absolute inset-0" />
               <Link
                 href="/design-studio"
                 className="absolute right-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-sm bg-accent px-3 py-2 text-xs font-semibold text-white shadow-lg transition-colors hover:bg-accent-hover"
@@ -337,7 +341,7 @@ export default async function HomePage() {
           <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-end" data-reveal>
             <div>
               <SectionLabel n="03">Factory direct</SectionLabel>
-              <h2 id="why" className="font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
+              <h2 id="why" className="sd-head font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
                 Behind every order.
                 <span className="block text-subtle">Checked at every step.</span>
               </h2>
@@ -345,7 +349,7 @@ export default async function HomePage() {
             <p className="max-w-sm text-[15px] leading-relaxed text-muted">We handle design, sampling, production and shipping — so you can focus on your team or your brand.</p>
           </div>
           <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:gap-16">
-            <figure className="relative aspect-[10/7] overflow-hidden rounded-[var(--radius-card)] bg-ink" data-reveal>
+            <figure className="sd-zoom relative aspect-[10/7] overflow-hidden rounded-[var(--radius-card)] bg-ink">
               <Image src="/media/renders/gloves-red.webp" alt="Alrobel goalkeeper gloves: latex palm and branded backhand" fill sizes="(min-width:1024px) 45vw, 92vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
               <figcaption className="absolute bottom-5 left-6 text-white">
@@ -402,7 +406,7 @@ export default async function HomePage() {
             <p className="label flex items-center gap-2 text-white/60">
               <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden /> 04 / Order tracking
             </p>
-            <h2 id="track" className="font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
+            <h2 id="track" className="sd-head font-display mt-5 text-[clamp(2.05rem,8.4vw,4.4rem)]">
               Your order.
               <span className="block">Always in view.</span>
               <span className="block text-white/40">Always on record.</span>
@@ -482,7 +486,7 @@ export default async function HomePage() {
         <div className="container-x grid items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
           <div data-reveal>
             <p className="label text-white/60">05 / Global shipping</p>
-            <h2 id="global" className="font-display mt-5 max-w-3xl text-[clamp(2.05rem,8.4vw,4.4rem)]">
+            <h2 id="global" className="sd-head font-display mt-5 max-w-3xl text-[clamp(2.05rem,8.4vw,4.4rem)]">
               Made in Sialkot.
               <span className="block">Shipped worldwide.</span>
             </h2>

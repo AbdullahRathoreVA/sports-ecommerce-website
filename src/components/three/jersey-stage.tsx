@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { PRESETS, renderJersey, syncCanvasFont, type JerseyDesign } from "@/lib/jersey/design";
 import { cn } from "@/lib/utils";
-import { deviceTier } from "@/lib/device";
+import { afterSettled, deviceQuality, deviceTier } from "@/lib/device";
 
 const JerseyScene = dynamic(() => import("./jersey-scene"), { ssr: false });
 
@@ -41,20 +41,21 @@ export function HeroJersey({ poster, posterAlt, className }: { poster: string; p
     const el = wrap.current;
     if (!el) return;
     let started = false;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        setVisible(entry!.isIntersecting);
-        // Load the 3D only when the card comes near the screen, not at page load.
-        if (entry!.isIntersecting && !started) {
-          started = true;
-          const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
-          if (idle) idle(start, { timeout: 1500 });
-          else setTimeout(start, 300);
-        }
-      },
-      { rootMargin: "400px" },
-    );
+    const begin = () => {
+      if (started) return;
+      started = true;
+      const idle = (window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+      if (idle) idle(start, { timeout: 1200 });
+      else setTimeout(start, 200);
+    };
+    // Prepare well before the card is reached, so it is already live on arrival.
+    const prepare = new IntersectionObserver(([entry]) => entry!.isIntersecting && begin(), { rootMargin: "1500px 0px" });
+    // Animate only while it is near the screen.
+    const io = new IntersectionObserver(([entry]) => setVisible(entry!.isIntersecting), { rootMargin: "200px 0px" });
+    prepare.observe(el);
     io.observe(el);
+    // Capable devices also get it ready in the background once the page has settled.
+    const cancel = deviceQuality() === "high" ? afterSettled(begin, 2500) : () => undefined;
     const start = () => {
       document.fonts?.ready.then(() => {
         syncCanvasFont();
@@ -64,7 +65,11 @@ export function HeroJersey({ poster, posterAlt, className }: { poster: string; p
         setMode("3d");
       });
     };
-    return () => io.disconnect();
+    return () => {
+      cancel();
+      prepare.disconnect();
+      io.disconnect();
+    };
   }, []);
 
   // Heat-press cycle: hold, sweep the next design down the shirt, repeat.

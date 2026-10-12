@@ -3,6 +3,8 @@ import { Footer } from "@/components/site/footer";
 import { DemoBanner } from "@/components/site/demo-banner";
 import { Tracker } from "@/components/analytics/tracker";
 import { RevealObserver } from "@/components/ui/reveal";
+import { ImageWarmup } from "@/components/ui/image-warmup";
+import { TiltPointer } from "@/components/ui/tilt";
 import { CartProvider } from "@/components/cart/cart-context";
 import { AssistantLauncher } from "@/components/assistant/launcher";
 import { getSettings } from "@/lib/settings";
@@ -24,6 +26,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <AssistantLauncher brandName={settings.brand.name} whatsapp={settings.contact.whatsapp} email={settings.contact.email} />
       <Tracker />
       <RevealObserver />
+      <ImageWarmup />
+      <TiltPointer />
     </CartProvider>
   );
 }

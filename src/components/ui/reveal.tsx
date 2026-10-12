@@ -16,6 +16,8 @@ export function RevealObserver() {
     // Touch screens: content is simply there (momentum scrolling outran the fade-in and showed blank sections).
     if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
     if (!("IntersectionObserver" in window)) return;
+    // Scroll-driven CSS (globals.css, "Scroll-driven 3D") handles it where supported, on every device.
+    if (typeof CSS !== "undefined" && CSS.supports("animation-timeline: view()")) return;
     const vh = window.innerHeight;
     // Arm newly rendered elements that start below the fold…
     document.querySelectorAll<HTMLElement>("[data-reveal]:not([data-armed]):not(.is-in)").forEach((el) => {
