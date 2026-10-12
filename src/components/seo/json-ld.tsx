@@ -1,5 +1,5 @@
 import { safeJson } from "@/lib/utils";
-import { OFFICES, siteUrl, type SiteSettings } from "@/config/site";
+import { FOUNDER, OFFICES, siteUrl, type SiteSettings } from "@/config/site";
 import type { ProductDetail } from "@/lib/catalog";
 
 /** Structured data emitters. Only facts that exist are included — never placeholders. */
@@ -29,6 +29,7 @@ export function organizationSchema(s: SiteSettings) {
     description: s.brand.description,
     ...(s.contact.email && { email: s.contact.email }),
     ...((s.contact.phone || OFFICES[0]) && { telephone: s.contact.phone || OFFICES[0]!.phone }),
+    founder: { "@type": "Person", name: FOUNDER.name, jobTitle: FOUNDER.title, image: `${siteUrl}${FOUNDER.photo}` },
     ...(OFFICES.length > 0 && {
       contactPoint: OFFICES.map((o) => ({ "@type": "ContactPoint", telephone: o.phone, contactType: "sales", areaServed: "IT" })),
     }),

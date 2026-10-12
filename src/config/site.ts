@@ -177,5 +177,12 @@ export function publicPhone(settingsPhone: string): { number: string; label: str
   return o ? { number: o.phone, label: `${o.label} · ${o.country}` } : null;
 }
 
+/**
+ * KNOWN FACT (Abdullah, 2026-10-12): the company is led by Mian Sajid Abbas, shown as "Founder & CEO"
+ * (not "Director" / "Managing Director"). Photo: client's showroom shot, cleaned of third-party marks
+ * by .gstack/prep-founder.py.
+ */
+export const FOUNDER = { name: "Mian Sajid Abbas", title: "Founder & CEO", photo: "/media/team/sajid-abbas-founder-v1.webp" } as const;
+
 /** KNOWN FACT (owner via Kaif, 2026-10-11): MOQ 50 pieces per design, custom pricing per order, one sample $150. */
 export const ORDER_TERMS = { moq: 50, sampleCents: 15000, currency: "USD" } as const;

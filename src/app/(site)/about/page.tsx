@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { FOUNDER } from "@/config/site";
 import { ArrowDown, ArrowUpRight, Globe2, Handshake, MapPin, PenTool, Scissors, ShieldCheck, Shirt, Sparkles, Wand2 } from "lucide-react";
 import { getSettings } from "@/lib/settings";
 import { getPublishedCertifications } from "@/lib/catalog";
@@ -169,22 +170,25 @@ export default async function AboutPage() {
       )}
 
       {/* Leadership */}
-      <section className="bg-chalk py-16 lg:py-24">
-        <div className="container-x">
-          <div className="grid gap-4 lg:grid-cols-[1fr_2fr_1fr] lg:items-end">
-            <p className="label text-accent">People behind the product</p>
-            <h2 className="font-display text-[clamp(2.4rem,6vw,4rem)] lg:text-center">Leadership</h2>
-            <p className="text-sm text-muted lg:text-right">The people who answer for every order.</p>
+      <section className="bg-chalk py-16 lg:py-24" aria-labelledby="leadership">
+        <div className="container-x grid items-center gap-10 lg:grid-cols-[1.05fr_1fr] lg:gap-16 [&>*]:min-w-0">
+          <figure className="sd-zoom tilt-hover relative aspect-square overflow-hidden rounded-[var(--radius-card)] bg-ink">
+            <Image src={FOUNDER.photo} alt={`${FOUNDER.name}, ${FOUNDER.title} of Alrobel Sportswear, in the Alrobel showroom`} fill sizes="(min-width:1024px) 50vw, 92vw" className="object-cover" />
+          </figure>
+          <div>
+            <p className="label text-accent">Leadership</p>
+            <h2 id="leadership" className="sd-head font-display mt-5 text-[clamp(2.4rem,6vw,4rem)] leading-[0.95]">
+              {FOUNDER.name}
+              <span className="mt-2 block text-[clamp(1.2rem,2.6vw,1.6rem)] font-semibold tracking-tight text-accent">{FOUNDER.title}</span>
+            </h2>
+            <p className="mt-6 max-w-lg text-[17px] leading-relaxed text-muted">
+              Alrobel Sportswear is led by its founder and CEO, {FOUNDER.name}. Every order is made in our own factory in Sialkot, Pakistan — and the people who
+              run the company answer for every one of them.
+            </p>
+            <a href="/contact" className="mt-8 inline-flex h-12 items-center gap-2 rounded-[var(--radius-control)] bg-ink px-6 font-semibold text-white hover:bg-accent">
+              Talk to our team
+            </a>
           </div>
-          <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <li className="rounded-[var(--radius-card)] border hairline bg-surface p-3">
-              <div className="grid aspect-[4/3.4] place-items-center rounded-sm bg-surface-2">
-                <span className="grid h-32 w-32 place-items-center rounded-full border hairline text-4xl font-medium tracking-tight">SA</span>
-              </div>
-              <p className="mt-4 px-2 font-semibold">Mian Sajid Abbas</p>
-              <p className="px-2 pb-2 text-sm text-muted">Managing Director</p>
-            </li>
-          </ul>
         </div>
       </section>
 

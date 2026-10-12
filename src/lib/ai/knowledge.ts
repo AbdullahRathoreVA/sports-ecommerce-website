@@ -2,7 +2,7 @@ import "server-only";
 import { getAllProducts, getFaqs, getPosts, type ProductDetail } from "@/lib/catalog";
 import { getSettings } from "@/lib/settings";
 import { formatMoney, leadTimeLabel, moqLabel } from "@/lib/utils";
-import { OFFICES, type SiteSettings } from "@/config/site";
+import { FOUNDER, OFFICES, type SiteSettings } from "@/config/site";
 
 /**
  * The assistant's ground truth, assembled from live data on every request
@@ -89,6 +89,7 @@ export function companyFacts(s: SiteSettings) {
     description: s.brand.description,
     capabilities: FACTORY_CAPABILITIES,
     confirmedFacts: facts,
+    leadership: `${FOUNDER.name}, ${FOUNDER.title}`,
     location: [s.contact.city, s.contact.country].filter(Boolean).join(", ") || null,
     contact: {
       whatsapp: s.contact.whatsapp ? `https://wa.me/${s.contact.whatsapp}` : null,
