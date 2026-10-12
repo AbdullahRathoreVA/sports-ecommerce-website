@@ -8,6 +8,7 @@ import { detectIntents, extractQuantity, isBuyingSignal, type Intent } from "./i
 import { offTopicFallback, smallTalk } from "./smalltalk";
 import type { ProductDetail } from "@/lib/catalog";
 import { formatMoney, leadTimeLabel, moqLabel } from "@/lib/utils";
+import { publicPhone } from "@/config/site";
 
 /**
  * Product assistant. Two engines, one contract:
@@ -104,7 +105,8 @@ function groundedAnswer(k: Knowledge, messages: ChatMessage[], focus: ProductDet
   if (has("shipping")) lines.push(s.commerce.shippingNote);
   if (has("payment")) lines.push(`Payment: ${s.commerce.paymentMethods.map((m) => m.label).join(" or ")}. ${s.commerce.paymentMethods[0]?.detail ?? ""}`);
   if (has("contact")) {
-    const ways = [s.contact.whatsapp && "WhatsApp", s.contact.email && `email (${s.contact.email})`, s.contact.phone && `phone (${s.contact.phone})`].filter(Boolean);
+    const call = publicPhone(s.contact.phone);
+    const ways = [s.contact.whatsapp && "WhatsApp", s.contact.email && `email (${s.contact.email})`, call && `phone (${call.number}${s.contact.phone ? "" : `, ${call.label}`})`].filter(Boolean);
     lines.push(
       ways.length
         ? `You can reach our sales team by ${ways.join(", ")} — or I can pass your requirements to them right now.`

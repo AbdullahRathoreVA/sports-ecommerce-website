@@ -5,7 +5,7 @@ import { BrandTile } from "@/components/ui/brand-tile";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { ArrowRight, ChevronDown, Menu, MessageCircle, Search, ShoppingBag, UserRound, X, Mail } from "lucide-react";
+import { ArrowRight, ChevronDown, Menu, MessageCircle, Search, ShoppingBag, UserRound, X, Mail, Phone } from "lucide-react";
 import { useCart } from "@/components/cart/cart-context";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "@/config/site";
@@ -172,12 +172,14 @@ export function MobileMenu({
   brandName,
   whatsapp,
   email,
+  phone,
 }: {
   categories: Cat[];
   nav: NavItem[];
   brandName: string;
   whatsapp: string;
   email: string;
+  phone: string;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -287,6 +289,10 @@ export function MobileMenu({
             ) : email ? (
               <a href={`mailto:${email}`} className="flex h-12 items-center justify-center gap-2 rounded-[var(--radius-control)] border border-white/20 text-[15px] font-semibold" data-track="email_click">
                 <Mail className="h-5 w-5" aria-hidden /> Email us
+              </a>
+            ) : phone ? (
+              <a href={`tel:${phone.replace(/\s+/g, "")}`} className="flex h-12 items-center justify-center gap-2 rounded-[var(--radius-control)] border border-white/20 text-[15px] font-semibold" data-track="phone_click" data-track-label="Menu call">
+                <Phone className="h-5 w-5" aria-hidden /> Call us
               </a>
             ) : (
               <Link href="/contact" className="flex h-12 items-center justify-center rounded-[var(--radius-control)] border border-white/20 text-[15px] font-semibold">

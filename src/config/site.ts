@@ -163,11 +163,18 @@ export const footerNav: { title: string; links: NavItem[] }[] = [
 ];
 
 /**
- * Other offices (contact page only; owner asked to keep it out of the footer and not to show the
- * contact person's name, 2026-10-11). KNOWN FACT (owner via Kaif, 2026-10-11): Italy office, contact
- * Mian Muhammad Bilal, +39 344 408 0435. City confirmed as Nuoro.
+ * Other offices, shown in the footer, on Contact, in the phone menu and to the AI chat. KNOWN FACT (owner via
+ * Kaif, 2026-10-11): Italy office, Nuoro, +39 344 408 0435. The contact person's name (`person`) must NEVER be
+ * shown publicly (owner, 2026-10-11); the office and its number must be (Abdullah, 2026-10-12).
  */
 export const OFFICES = [{ label: "Italy office", country: "Nuoro, Italy", flag: "🇮🇹", person: "Mian Muhammad Bilal", phone: "+39 344 408 0435" }];
+
+/** The number to call: the factory's own number once it is set in admin, otherwise the Italy office. */
+export function publicPhone(settingsPhone: string): { number: string; label: string } | null {
+  if (settingsPhone) return { number: settingsPhone, label: "Phone" };
+  const o = OFFICES[0];
+  return o ? { number: o.phone, label: `${o.label} · ${o.country}` } : null;
+}
 
 /** KNOWN FACT (owner via Kaif, 2026-10-11): MOQ 50 pieces per design, custom pricing per order, one sample $150. */
 export const ORDER_TERMS = { moq: 50, sampleCents: 15000, currency: "USD" } as const;

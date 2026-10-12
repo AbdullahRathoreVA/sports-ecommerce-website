@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { getSettings } from "@/lib/settings";
 import { getCategories } from "@/lib/catalog";
-import { companyNav, primaryNav } from "@/config/site";
+import { companyNav, primaryNav, publicPhone } from "@/config/site";
 import { Logo } from "@/components/ui/logo";
 import { HeaderActions, MobileMenu, NavDropdown, NavLink, ProductsMenu } from "./header-client";
 
@@ -49,6 +49,7 @@ export async function Header() {
             brandName={settings.brand.name}
             whatsapp={settings.contact.whatsapp}
             email={settings.contact.email}
+            phone={publicPhone(settings.contact.phone)?.number ?? ""}
           />
         </div>
       </div>

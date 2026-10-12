@@ -2,7 +2,7 @@ import "server-only";
 import { getAllProducts, getFaqs, getPosts, type ProductDetail } from "@/lib/catalog";
 import { getSettings } from "@/lib/settings";
 import { formatMoney, leadTimeLabel, moqLabel } from "@/lib/utils";
-import type { SiteSettings } from "@/config/site";
+import { OFFICES, type SiteSettings } from "@/config/site";
 
 /**
  * The assistant's ground truth, assembled from live data on every request
@@ -47,7 +47,8 @@ export function unknownFacts(s: SiteSettings): string[] {
     "Guaranteed delivery dates — lead times are typical ranges confirmed per quote",
   ];
   if (!s.contact.whatsapp) out.push("WhatsApp number — not published yet; direct people to the quote form");
-  if (!s.contact.phone) out.push("Phone number — not published yet");
+  if (!s.contact.phone && OFFICES.length === 0) out.push("Phone number — not published yet");
+  out.push("The name of any office's contact person — never give a name, only the office and its number");
   if (!s.contact.email) out.push("Email address — not published yet; use the contact or quote form");
   return out;
 }
@@ -93,6 +94,7 @@ export function companyFacts(s: SiteSettings) {
       whatsapp: s.contact.whatsapp ? `https://wa.me/${s.contact.whatsapp}` : null,
       email: s.contact.email || null,
       phone: s.contact.phone || null,
+      offices: OFFICES.map((o) => ({ office: o.label, city: o.country, phone: o.phone })),
       responseTime: s.contact.responseTime || null,
       quoteForm: "/quote",
       contactPage: "/contact",

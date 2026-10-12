@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { OFFICES } from "@/config/site";
+import { OFFICES, publicPhone } from "@/config/site";
 import Link from "next/link";
 import { ArrowUpRight, Clock, FileText, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { PageHero } from "@/components/site/page-hero";
@@ -16,10 +16,11 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
   const [s, { product }] = await Promise.all([getSettings(), searchParams]);
   const wa = whatsappLink(s, `Hi ${s.brand.name}, I have a question.`);
   const address = [s.contact.addressLine, s.contact.city, s.contact.country].filter(Boolean).join(", ");
+  const phone = publicPhone(s.contact.phone);
   const methods = [
     wa && { icon: MessageCircle, label: "WhatsApp", value: "Chat with sales", href: wa, track: "whatsapp_click" },
     s.contact.email && { icon: Mail, label: "Email", value: s.contact.email, href: `mailto:${s.contact.email}`, track: "email_click" },
-    s.contact.phone && { icon: Phone, label: "Phone", value: s.contact.phone, href: `tel:${s.contact.phone.replace(/\s+/g, "")}`, track: "phone_click" },
+    phone && { icon: Phone, label: phone.label, value: phone.number, href: `tel:${phone.number.replace(/\s+/g, "")}`, track: "phone_click" },
   ].filter(Boolean) as { icon: typeof Mail; label: string; value: string; href: string; track: string }[];
 
   return (
@@ -72,7 +73,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
             {address && (
               <div>
                 <dt className="flex items-center gap-2 font-semibold">
-                  <MapPin className="h-4 w-4" aria-hidden /> Office address
+                  <MapPin className="h-4 w-4" aria-hidden /> Factory
                 </dt>
                 <dd className="mt-1.5 text-muted">
                   {address}
