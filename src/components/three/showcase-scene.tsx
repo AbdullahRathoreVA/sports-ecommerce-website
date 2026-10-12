@@ -39,7 +39,7 @@ export type ShowcaseSceneProps = {
   className?: string;
 };
 
-const DIR = "/media/catalog/3d/";
+const DIR = "/media/catalog/3d-v3/";
 const ASPECT: Record<string, number> = {
   "gk-a-back": 0.6073, "gk-a-palm": 0.6369, "gk-b-back": 0.678, "gk-b-palm": 0.6943,
   "jersey-red-10": 0.7543, "jersey-red": 0.8234, "moto-white-red": 0.6286, "moto-b": 0.4361,
@@ -422,7 +422,7 @@ export default function ShowcaseScene(props: ShowcaseSceneProps) {
   const quality = useMemo(() => deviceQuality(), []);
   // Render at the screen's real sharpness (phones are 2–3×): capped at 2, and 1.5 only on genuinely weak devices.
   const native = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1;
-  const top = props.still ? 2 : Math.min(native, quality === "high" ? 2 : 1.5);
+  const top = props.still ? 2 : Math.min(native, quality === "high" ? 3 : 1.5);
   const [dpr, setDpr] = useState(top);
   const [ready, setReady] = useState(false);
   const onReady = props.onReady;
@@ -447,7 +447,7 @@ export default function ShowcaseScene(props: ShowcaseSceneProps) {
     >
       <fog attach="fog" args={["#0b0c0e", 7.4, 12.5]} />
       {/* If frames get slow, step down gently — never below 1.25 (that is what made products look pixelated). */}
-      {!props.still && <PerformanceMonitor onDecline={() => setDpr(Math.max(1.25, Math.min(top, 1.5)))} onIncline={() => setDpr(top)} />}
+      {!props.still && <PerformanceMonitor onDecline={() => setDpr(Math.max(1.5, Math.min(top, 2)))} onIncline={() => setDpr(top)} />}
       <ambientLight intensity={1.05} />
       <hemisphereLight args={["#ffffff", "#2a1012", 0.55]} />
       <directionalLight position={[2.5, 4, 5]} intensity={1.4} />

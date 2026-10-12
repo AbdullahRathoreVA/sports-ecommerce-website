@@ -32,6 +32,7 @@ export function deviceQuality(): "high" | "low" {
   if (typeof window === "undefined") return "low";
   const nav = navigator as Navigator & { deviceMemory?: number };
   // Modern phones have the GPU for sharp output; only genuinely weak hardware renders softer.
-  const weak = (typeof nav.deviceMemory === "number" && nav.deviceMemory < 4) || (typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency < 4);
+  // Memory only: iPhones under-report CPU cores, which wrongly marked them as weak (blurry 3D).
+  const weak = typeof nav.deviceMemory === "number" && nav.deviceMemory < 4;
   return weak ? "low" : "high";
 }

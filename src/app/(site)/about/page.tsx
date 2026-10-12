@@ -64,7 +64,7 @@ export default async function AboutPage() {
             </div>
           </div>
           <figure className="grid-lines relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-ink-3">
-            <Image src="/media/hero/showroom-poster-v1.webp" alt="The Alrobel range in 3D around the Alrobel logo" fill priority sizes="(min-width:1024px) 50vw, 92vw" className="object-contain p-6" />
+            <Image src="/media/hero/showroom-poster-v2.webp" alt="The Alrobel range in 3D around the Alrobel logo" fill priority sizes="(min-width:1024px) 50vw, 92vw" className="object-contain p-6" />
             <figcaption className="label absolute bottom-4 left-4 flex items-center gap-2 rounded-sm bg-ink/85 px-3 py-2 text-white/80 backdrop-blur">
               <ShieldCheck className="h-4 w-4 text-accent" aria-hidden /> Sialkot · Pakistan
             </figcaption>

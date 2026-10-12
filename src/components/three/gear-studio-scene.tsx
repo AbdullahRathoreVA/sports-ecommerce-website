@@ -20,8 +20,8 @@ import { deviceQuality } from "@/lib/device";
 export type GearKind = "gloves" | "ball";
 export type GearDesign = { accent: string; panel: string; base: string; seam: string; crest: HTMLCanvasElement | null };
 
-const DIR = "/media/catalog/3d/";
-// Width/height of each glove cut-out (from public/media/catalog/3d/meta.json).
+const DIR = "/media/catalog/3d-v3/";
+// Width/height of each glove cut-out (from public/media/catalog/3d-v3/meta.json).
 const ASPECT: Record<string, number> = { "gk-a-palm": 0.6369, "gk-a-back": 0.6073 };
 
 const vertex = /* glsl */ `
@@ -137,7 +137,7 @@ export default function GearStudioScene({
 }) {
   const [ready, setReady] = useState(false);
   // The studio shows one product large: render at the screen's real sharpness (capped at 2).
-  const dpr = useMemo(() => Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, deviceQuality() === "high" ? 2 : 1.5), []);
+  const dpr = useMemo(() => Math.min(typeof window === "undefined" ? 1 : window.devicePixelRatio || 1, deviceQuality() === "high" ? 3 : 1.5), []);
   const onReady = useMemo(() => () => setReady(true), []);
   return (
     <Canvas

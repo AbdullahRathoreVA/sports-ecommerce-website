@@ -134,8 +134,8 @@ export default async function HomePage() {
             <div className="relative">
               <div className="signal-glow pointer-events-none absolute inset-[10%]" />
               <HeroShowcase
-                poster="/media/hero/showroom-poster-v1.webp"
-                stagePoster="/media/hero/showroom-stage-v1.webp"
+                poster="/media/hero/showroom-poster-v2.webp"
+                stagePoster="/media/hero/showroom-stage-v2.webp"
                 posterAlt="The Alrobel range in 3D: jerseys, goalkeeper gloves, footballs, motorbike and racing suits, leather jackets and tracksuits orbiting the Alrobel logo"
                 className="relative mx-auto aspect-[1.08] w-full"
               />

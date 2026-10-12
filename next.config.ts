@@ -7,7 +7,9 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: { "/opengraph-image": ["./assets/fonts/**"] },
   images: {
     formats: ["image/avif", "image/webp"],
-    deviceSizes: [360, 420, 640, 828, 1080, 1280, 1600, 1920],
+    deviceSizes: [360, 420, 640, 828, 1080, 1280, 1600, 1920, 2560],
+    // Next 16 allows only quality 75 by default; every photo is served at 90 instead (sharp on 3x phones and retina).
+    qualities: [90],
     imageSizes: [56, 96, 150, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },

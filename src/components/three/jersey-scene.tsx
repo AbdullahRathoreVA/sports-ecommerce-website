@@ -225,7 +225,7 @@ export default function JerseyScene(props: JerseySceneProps) {
     <Canvas
       className={props.className}
       frameloop={ready && (props.active || props.still) ? "always" : "never"}
-      dpr={[1, 1.75]}
+      dpr={[1, 3]}
       camera={{ position: [0, 0.02, 2.95], fov: 32 }}
       gl={{ antialias: true, alpha: true, powerPreference: "high-performance", preserveDrawingBuffer: !!props.still }}
       shadows={false}

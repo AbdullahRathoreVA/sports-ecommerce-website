@@ -201,7 +201,7 @@ export default function GlobeScene({ origin, destinations, active, className }: 
   // On phones and tablets a finger on the globe must scroll the page, so no drag-to-orbit there.
   const [touch] = useState(() => typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
   return (
-    <Canvas className={className} style={touch ? { touchAction: "pan-y" } : undefined} frameloop={active ? "always" : "never"} dpr={[1, 1.6]} camera={{ position: [0, 0, 3.55], fov: 38 }} gl={{ antialias: true, alpha: true }}>
+    <Canvas className={className} style={touch ? { touchAction: "pan-y" } : undefined} frameloop={active ? "always" : "never"} dpr={[1, 3]} camera={{ position: [0, 0, 3.55], fov: 38 }} gl={{ antialias: true, alpha: true }}>
       <FrameGate active={active} />
       <Globe origin={origin} destinations={destinations} spin={touch} />
       {!touch && <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.35} rotateSpeed={0.5} minPolarAngle={Math.PI * 0.3} maxPolarAngle={Math.PI * 0.7} />}
