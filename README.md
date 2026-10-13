@@ -8,7 +8,7 @@ A full-stack website for a sportswear and leather-goods **manufacturer and expor
 It also includes a private admin for the factory team: orders, leads, analytics, content and an AI analyst.
 
 > Working name: **Gridline**. The client's final brand name and domain are still to come.
-> **Live demo:** https://gridline-sports-rho.vercel.app (preview build; search engines are blocked)
+> **Live site:** https://alrobelsportswear.com
 
 ![Home page](docs/screenshots/home-desktop.png)
 

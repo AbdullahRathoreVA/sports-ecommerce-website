@@ -75,7 +75,8 @@ export const defaultSettings: SiteSettings = {
     houseLabel: "",
   },
   contact: {
-    email: "",
+    // KNOWN FACT (2026-10-13): company mailbox on Zoho, created by the owner.
+    email: "info@alrobelsportswear.com",
     phone: "",
     whatsapp: "",
     // KNOWN FACT (client business card, 2026-10-07).

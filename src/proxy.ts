@@ -47,8 +47,22 @@ const SECURITY_HEADERS: Record<string, string> = {
   "Cross-Origin-Opener-Policy": "same-origin",
 };
 
+/** The real domain, once NEXT_PUBLIC_SITE_URL points at one (not a vercel.app or local address). */
+const canonicalOrigin = (() => {
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  return /^https:\/\//.test(site) && !/vercel\.app|localhost/.test(site) ? new URL(site).origin : null;
+})();
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // The old production address forwards to the real domain, so Google and
+  // shared links see one site. Preview deployments keep their own URLs.
+  const host = request.headers.get("host") ?? "";
+  if (canonicalOrigin && process.env.VERCEL_ENV === "production" && host.endsWith(".vercel.app")) {
+    return NextResponse.redirect(new URL(pathname + request.nextUrl.search, canonicalOrigin), 308);
+  }
+
   const isAdminArea = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
 
   if (isAdminArea) {
