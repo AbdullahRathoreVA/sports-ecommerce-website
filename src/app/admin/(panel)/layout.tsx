@@ -10,6 +10,7 @@ const NAV_PERMISSION: Record<NavKey, Permission> = {
   live: "viewAnalytics",
   analytics: "viewAnalytics",
   orders: "manageOrders",
+  invoices: "manageOrders",
   leads: "manageLeads",
   chats: "manageLeads",
   customers: "viewCustomers",

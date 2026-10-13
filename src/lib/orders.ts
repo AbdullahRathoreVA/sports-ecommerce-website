@@ -4,6 +4,7 @@ import { normaliseTiers, priceLine } from "@/lib/pricing";
 import { newOrderNumber, orderToken } from "@/lib/refs";
 import { notifyTeam } from "@/lib/notify";
 import { emailOrderReceived } from "@/lib/emails";
+import { draftInvoiceForOrder } from "@/lib/invoices";
 import { recordServerEvent } from "@/lib/analytics/server";
 import { getSettings } from "@/lib/settings";
 import { formatMoney } from "@/lib/utils";
@@ -138,6 +139,8 @@ export async function createOrder(input: OrderInput) {
   const token = orderToken(order.orderNumber);
   const lines = order.items.map((i) => `- ${i.quantity} × ${i.nameSnapshot}${i.size ? ` (${i.size})` : ""}${i.isSample ? " [sample]" : ""} — ${formatMoney(i.totalCents, order.currency)}`);
   // Logged to EmailLog either way — the written record of the order.
+  // Draft invoice for the team to check (freight) and send when they confirm the order.
+  await draftInvoiceForOrder(order.id, null).catch((e) => console.error("[orders] draft invoice failed", e));
   await emailOrderReceived(order);
   void notifyTeam(
     `New order ${order.orderNumber} — ${formatMoney(order.totalCents, order.currency)}`,

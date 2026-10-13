@@ -43,6 +43,13 @@ export const siteSettingsSchema = z.object({
     shippingNote: z.string().max(400),
     sampleNote: z.string().max(400),
   }),
+  invoice: z.object({
+    bankDetails: z.string().max(800).default(""),
+    paymentTerms: z.string().min(1).max(500),
+    notes: z.string().max(1000).default(""),
+    taxId: z.string().max(60).default(""),
+    dueDays: z.number().int().min(0).max(120),
+  }),
   facts: z.object({ founded: str, teamSize: str, monthlyCapacity: str, exportMarkets: str }),
   demoMode: z.boolean(),
 });
@@ -58,6 +65,7 @@ function merge(stored: unknown): SiteSettings {
     contact: { ...defaultSettings.contact, ...s.contact },
     social: { ...defaultSettings.social, ...s.social },
     commerce: { ...defaultSettings.commerce, ...s.commerce },
+    invoice: { ...defaultSettings.invoice, ...s.invoice },
     facts: { ...defaultSettings.facts, ...s.facts },
   };
   const parsed = siteSettingsSchema.safeParse(merged);
@@ -75,7 +83,7 @@ const loadSettings = unstable_cache(
       return defaultSettings;
     }
   },
-  ["site-settings", "v4"],
+  ["site-settings", "v5"],
   { tags: [SETTINGS_TAG], revalidate: 300 },
 );
 

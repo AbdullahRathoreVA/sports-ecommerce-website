@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // PDF invoices render on the server with react-pdf (its layout engine ships as wasm).
+  serverExternalPackages: ["@react-pdf/renderer"],
   reactStrictMode: true,
   poweredByHeader: false,
   // Fonts read from disk by the link-preview image route.

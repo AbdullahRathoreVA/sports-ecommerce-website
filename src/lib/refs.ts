@@ -20,20 +20,27 @@ function datePart(d = new Date()) {
 export const newOrderNumber = () => `AL-${datePart()}-${suffix()}`;
 export const newLeadNumber = () => `RFQ-${datePart()}-${suffix()}`;
 
+function sign(purpose: string): string {
+  const secret = process.env.AUTH_SECRET ?? (process.env.NODE_ENV === "production" ? "" : "dev-secret-not-for-production");
+  if (!secret) throw new Error("AUTH_SECRET is not set — customer links cannot be signed.");
+  return createHmac("sha256", secret).update(purpose).digest("base64url").slice(0, 32);
+}
+
+function matches(expectedToken: string, token: string | undefined | null): boolean {
+  if (!token) return false;
+  const expected = Buffer.from(expectedToken);
+  const given = Buffer.from(token);
+  return expected.length === given.length && timingSafeEqual(expected, given);
+}
+
 /**
  * Signed token for the order confirmation link, so only the buyer (who
  * received the link) can view the order page — the number alone is not
  * enough.
  */
-export function orderToken(orderNumber: string): string {
-  const secret = process.env.AUTH_SECRET ?? (process.env.NODE_ENV === "production" ? "" : "dev-secret-not-for-production");
-  if (!secret) throw new Error("AUTH_SECRET is not set — order links cannot be signed.");
-  return createHmac("sha256", secret).update(`order:${orderNumber}`).digest("base64url").slice(0, 32);
-}
+export const orderToken = (orderNumber: string) => sign(`order:${orderNumber}`);
+export const verifyOrderToken = (orderNumber: string, token: string | undefined | null) => matches(orderToken(orderNumber), token);
 
-export function verifyOrderToken(orderNumber: string, token: string | undefined | null): boolean {
-  if (!token) return false;
-  const expected = Buffer.from(orderToken(orderNumber));
-  const given = Buffer.from(token);
-  return expected.length === given.length && timingSafeEqual(expected, given);
-}
+/** Same idea for invoice links (view + PDF download) sent to the customer. */
+export const invoiceToken = (invoiceNumber: string) => sign(`invoice:${invoiceNumber}`);
+export const verifyInvoiceToken = (invoiceNumber: string, token: string | undefined | null) => matches(invoiceToken(invoiceNumber), token);

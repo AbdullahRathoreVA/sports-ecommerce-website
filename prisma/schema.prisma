@@ -267,6 +267,7 @@ model Customer {
   isDemo    Boolean        @default(false)
   orders    Order[]
   leads     Lead[]
+  invoices  Invoice[]
 
   /// Client portal. Null until the customer creates an account; bcrypt only.
   passwordHash    String?
@@ -375,6 +376,7 @@ model Order {
   events      OrderEvent[]
   attachments OrderAttachment[]
   emails      EmailLog[]
+  invoices    Invoice[]
 
   /// First-party attribution, no PII.
   sessionId String?
@@ -433,6 +435,8 @@ model EmailLog {
   orderId     String?
   order       Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
   leadId      String?
+  invoiceId   String?
+  invoice     Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
   toAddress   String
   subject     String
   body        String   @db.Text
@@ -715,4 +719,100 @@ model AiConversation {
   updatedAt DateTime @updatedAt
 
   @@index([kind, createdAt])
+}
+
+/// Invoices: issued to a customer (optionally for an order). Amounts are
+/// stored, not recomputed, so a sent invoice never changes behind anyone's back.
+model Invoice {
+  id            String        @id @default(cuid())
+  /// Human-facing, sequential per year: INV-2026-0001.
+  invoiceNumber String        @unique
+  status        InvoiceStatus @default(DRAFT)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  orderId    String?
+  order      Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  poNumber  String?
+  issueDate DateTime  @default(now())
+  dueDate   DateTime?
+  currency  String    @default("USD")
+
+  // Bill-to snapshot (kept as it was when the invoice was issued).
+  billName    String
+  billCompany String?
+  billEmail   String
+  billPhone   String?
+  billAddress String? @db.Text
+
+  shipVia      String?
+  deliveryTime String?
+
+  subtotalCents Int
+  discountCents Int @default(0)
+  shippingCents Int @default(0)
+  /// Tax rate in basis points (1700 = 17%).
+  taxBasisPoints Int @default(0)
+  taxCents       Int @default(0)
+  totalCents     Int
+  paidCents      Int @default(0)
+
+  paymentTerms String  @db.Text
+  notes        String? @db.Text
+
+  sentAt    DateTime?
+  paidAt    DateTime?
+  voidedAt  DateTime?
+  createdBy String?
+  isDemo    Boolean   @default(false)
+
+  items    InvoiceItem[]
+  payments InvoicePayment[]
+  emails   EmailLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([customerId])
+  @@index([orderId])
+  @@index([status, issueDate])
+  @@index([issueDate])
+}
+
+model InvoiceItem {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  position    Int     @default(0)
+  description String
+  details     String?
+  quantity    Int
+  unitCents   Int
+  totalCents  Int
+
+  @@index([invoiceId])
+}
+
+model InvoicePayment {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amountCents Int
+  method      String
+  reference   String?
+  receivedAt  DateTime
+  note        String?
+  recordedBy  String?
+  createdAt   DateTime @default(now())
+
+  @@index([invoiceId])
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  VOID
 }

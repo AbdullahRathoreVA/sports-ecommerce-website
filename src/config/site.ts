@@ -53,6 +53,17 @@ export type SiteSettings = {
     sampleNote: string;
   };
   /** Published only once the client confirms each number. Empty = hidden. */
+  /** Printed on every invoice (admin → Content & settings → Invoices). */
+  invoice: {
+    /** Company bank account for transfers, one detail per line. NEEDS CLIENT INPUT. */
+    bankDetails: string;
+    paymentTerms: string;
+    notes: string;
+    /** Tax registration (e.g. NTN). Shown only when set. NEEDS CLIENT INPUT. */
+    taxId: string;
+    /** Days until due when an invoice is issued. */
+    dueDays: number;
+  };
   facts: {
     founded: string;
     teamSize: string;
@@ -106,6 +117,15 @@ export const defaultSettings: SiteSettings = {
     shippingNote:
       "Freight is quoted after confirmation, based on weight, destination and service (air, sea or express courier).",
     sampleNote: "Sample cost is confirmed with your quote.",
+  },
+  invoice: {
+    bankDetails: "",
+    // KNOWN FACT (Abdullah, 2026-10-13): Alrobel works on 100% advance payment.
+    paymentTerms: "100% advance payment. Production starts once full payment is received.",
+    // From the client's own invoice draft (2026-10-13).
+    notes: "All items are custom-made to your approved mockup.\nPrices exclude import duties and taxes in the destination country.",
+    taxId: "",
+    dueDays: 7,
   },
   // exportMarkets: client's own claim from their business card (2026-10-07).
   facts: { founded: "", teamSize: "", monthlyCapacity: "", exportMarkets: "20+ countries" },

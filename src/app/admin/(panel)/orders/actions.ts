@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { audit, AuthError, requireAdmin } from "@/lib/auth";
 import { emailFromTeam, emailOrderStatus } from "@/lib/emails";
+import { draftInvoiceForOrder, sendInvoiceEmail } from "@/lib/invoices";
 import { orderToken } from "@/lib/refs";
 import { siteUrl } from "@/config/site";
 
@@ -77,6 +78,16 @@ export async function updateOrder(orderId: string, input: z.input<typeof updateS
   if (d.notifyCustomer && statusChange) {
     const r = await emailOrderStatus(updated, statusChange.to);
     emailNote = r ? (r.status === "sent" ? " Customer emailed." : r.status === "skipped" ? " Email logged (sending not configured yet)." : " Email failed — see timeline.") : "";
+  }
+
+  // Confirming an order emails its invoice (PDF attached) if it hasn't gone out yet.
+  if (d.notifyCustomer && statusChange?.to === "CONFIRMED") {
+    const inv = await draftInvoiceForOrder(orderId, admin.email);
+    if (inv.status === "DRAFT") {
+      const r = await sendInvoiceEmail(inv.id);
+      emailNote += r.status === "sent" ? ` Invoice ${inv.invoiceNumber} emailed.` : ` Invoice ${inv.invoiceNumber} is ready in Invoices (email not sent).`;
+    }
+    revalidatePath("/admin/invoices");
   }
 
   revalidatePath(`/admin/orders/${orderId}`);

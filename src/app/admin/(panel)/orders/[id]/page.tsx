@@ -11,6 +11,7 @@ import { emailOrderCustomer } from "../actions";
 import { EmailComposer } from "@/components/admin/email-composer";
 import { formatMoney } from "@/lib/utils";
 import { orderToken } from "@/lib/refs";
+import { CreateInvoiceButton } from "../../invoices/create-button";
 
 export const metadata: Metadata = { title: "Order" };
 
@@ -24,6 +25,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       events: { orderBy: { createdAt: "desc" } },
       attachments: { orderBy: { createdAt: "desc" } },
       emails: { orderBy: { createdAt: "desc" } },
+      invoices: { orderBy: { createdAt: "desc" }, select: { id: true, invoiceNumber: true, status: true, totalCents: true, paidCents: true } },
       customer: { select: { id: true, _count: { select: { orders: true, leads: true } } } },
     },
   });
@@ -121,6 +123,21 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         </div>
 
         <div className="space-y-6">
+          <Card title="Invoice">
+            {order.invoices.length ? (
+              <ul className="space-y-2 text-sm">
+                {order.invoices.map((inv) => (
+                  <li key={inv.id}>
+                    <Link href={`/admin/invoices/${inv.id}`} className="font-mono font-semibold text-accent hover:underline">{inv.invoiceNumber}</Link>
+                    <span className="text-muted"> · {humanise(inv.status)} · {formatMoney(inv.totalCents, order.currency)}{inv.paidCents ? ` (paid ${formatMoney(inv.paidCents, order.currency)})` : ""}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <CreateInvoiceButton orderId={order.id} />
+            )}
+            <p className="mt-2 text-xs text-subtle">Add freight or lines on the invoice, then send it. Setting the order to Confirmed emails it automatically.</p>
+          </Card>
           <Card title="Update order">
             <OrderControls
               orderId={order.id}

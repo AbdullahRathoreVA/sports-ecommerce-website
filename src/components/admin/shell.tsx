@@ -23,17 +23,19 @@ import {
   MessagesSquare,
   Star,
   LifeBuoy,
+  Receipt,
 } from "lucide-react";
 import { LogoMark } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 
-export type NavKey = "overview" | "live" | "analytics" | "orders" | "leads" | "chats" | "customers" | "products" | "photos" | "reviews" | "content" | "ai" | "help" | "audit" | "users";
+export type NavKey = "overview" | "live" | "analytics" | "orders" | "invoices" | "leads" | "chats" | "customers" | "products" | "photos" | "reviews" | "content" | "ai" | "help" | "audit" | "users";
 
 const NAV: { key: NavKey; label: string; href: string; icon: typeof Activity }[] = [
   { key: "overview", label: "Overview", href: "/admin", icon: LayoutDashboard },
   { key: "live", label: "Live", href: "/admin/live", icon: Activity },
   { key: "analytics", label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { key: "orders", label: "Orders", href: "/admin/orders", icon: ShoppingCart },
+  { key: "invoices", label: "Invoices", href: "/admin/invoices", icon: Receipt },
   { key: "leads", label: "Leads & quotes", href: "/admin/leads", icon: ClipboardList },
   { key: "chats", label: "Chats", href: "/admin/chats", icon: MessagesSquare },
   { key: "customers", label: "Customers", href: "/admin/customers", icon: Users },

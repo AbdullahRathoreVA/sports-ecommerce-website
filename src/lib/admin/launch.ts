@@ -1,6 +1,7 @@
 import "server-only";
 import { db } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
+import { mailProvider } from "@/lib/notify";
 
 /**
  * Go-live checklist (idea from triad-thread-studio's launch gate): every item
@@ -27,7 +28,7 @@ export async function getLaunchChecklist(): Promise<LaunchItem[]> {
   return [
     { key: "domain", required: true, label: "Own domain connected", done: ownDomain, detail: site || "not set", how: "Buy alrobelsportswear.com and point it at the site (Abdullah)." },
     { key: "inbox", required: true, label: "Business email on the site", done: Boolean(settings.contact.email), how: "Create info@alrobelsportswear.com, then add it in Content → Settings." },
-    { key: "sending", required: true, label: "Emails to customers switched on", done: Boolean(process.env.RESEND_API_KEY && process.env.EMAIL_FROM), how: "Verify the domain with the email sender so quote confirmations and portal codes are delivered (Abdullah)." },
+    { key: "sending", required: true, label: "Emails to customers switched on", done: Boolean(mailProvider()), how: "Add the Zoho app password for info@ in Vercel (SMTP_PASS) so invoices, quote confirmations and portal codes are emailed (Abdullah)." },
     { key: "whatsapp", required: true, label: "WhatsApp Business number", done: Boolean(settings.contact.whatsapp), how: "Add the full number with country code in Content → Settings." },
     { key: "phone", required: true, label: "Phone number (USA / Pakistan)", done: Boolean(settings.contact.phone), how: "Add the full number in Content → Settings." },
     {

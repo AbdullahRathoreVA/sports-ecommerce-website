@@ -41,7 +41,7 @@ export function SettingsForm({ initial }: { initial: SiteSettings }) {
   const [s, setS] = useState(initial);
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const up = <G extends "brand" | "contact" | "social" | "facts" | "commerce">(g: G, patch: Partial<SiteSettings[G]>) => setS((p) => ({ ...p, [g]: { ...p[g], ...patch } }));
+  const up = <G extends "brand" | "contact" | "social" | "facts" | "commerce" | "invoice">(g: G, patch: Partial<SiteSettings[G]>) => setS((p) => ({ ...p, [g]: { ...p[g], ...patch } }));
 
   return (
     <form
@@ -114,6 +114,14 @@ export function SettingsForm({ initial }: { initial: SiteSettings }) {
         </div>
         <Text id="m-ship" label="Shipping note" value={s.commerce.shippingNote} max={400} onChange={(v) => up("commerce", { shippingNote: v })} multiline wide />
         <Text id="m-sample" label="Sample note" value={s.commerce.sampleNote} max={400} onChange={(v) => up("commerce", { sampleNote: v })} multiline wide />
+      </Group>
+
+      <Group title="Invoices" hint="Printed on every invoice PDF and in the invoice email.">
+        <Text id="i-bank" label="Bank details (account title, bank, IBAN, SWIFT — one per line)" value={s.invoice.bankDetails} max={800} onChange={(v) => up("invoice", { bankDetails: v })} multiline wide />
+        <Text id="i-terms" label="Payment terms" value={s.invoice.paymentTerms} max={500} onChange={(v) => up("invoice", { paymentTerms: v })} multiline wide />
+        <Text id="i-notes" label="Invoice notes (one per line)" value={s.invoice.notes} max={1000} onChange={(v) => up("invoice", { notes: v })} multiline wide />
+        <Text id="i-ntn" label="NTN / tax number (shown only when filled)" value={s.invoice.taxId} onChange={(v) => up("invoice", { taxId: v })} />
+        <Text id="i-due" label="Days until due" value={String(s.invoice.dueDays)} onChange={(v) => up("invoice", { dueDays: Math.max(0, Math.min(120, Number(v.replace(/\D/g, "")) || 0)) })} />
       </Group>
 
       <Group title="Company facts" hint="Shown on the homepage and About page only when filled. Use figures the factory can prove — buyers check.">

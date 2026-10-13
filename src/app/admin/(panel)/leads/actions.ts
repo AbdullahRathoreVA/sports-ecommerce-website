@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { audit, AuthError, requireAdmin } from "@/lib/auth";
 import { emailFromTeam, emailOrderReceived } from "@/lib/emails";
+import { draftInvoiceForOrder } from "@/lib/invoices";
 import { getSettings } from "@/lib/settings";
 import { newOrderNumber } from "@/lib/refs";
 
@@ -170,6 +171,8 @@ export async function createOrderFromLead(leadId: string, input: z.input<typeof 
   }
   if (!order) return { ok: false, error: "Could not create the order — please try again." };
 
+  // Invoice with the custom price, ready to check and send from Invoices.
+  await draftInvoiceForOrder(order.id, admin.email).catch((e) => console.error("[leads] draft invoice failed", e));
   await db.lead.update({ where: { id: leadId }, data: { status: "WON", customerId: customer.id } });
   await db.leadNote.create({ data: { leadId, authorEmail: admin.email, body: `Order ${order.orderNumber} created (${d.quantity} × ${d.productName}).` } });
   await audit(admin, "order.create_from_lead", "Order", order.id, { leadNumber: lead.leadNumber, totalCents });

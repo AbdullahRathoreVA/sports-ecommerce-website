@@ -10,10 +10,15 @@ import { db } from "@/lib/db";
  * evidence in refund and chargeback disputes, so the record matters as much
  * as the delivery.
  *
- * Provider: Resend (free tier: 3,000/month) once RESEND_API_KEY and a
- * verified EMAIL_FROM on the company domain are set. Records are always
- * saved BEFORE notifying, so an email outage can never lose an order or lead.
+ * Providers, first match wins:
+ *  1. SMTP — the company's own mailbox (Zoho: SMTP_HOST=smtp.zoho.com,
+ *     SMTP_USER=info@…, SMTP_PASS=an app password). Mail leaves from the
+ *     real inbox, lands in its Sent folder, and needs no extra DNS records.
+ *  2. Resend, once RESEND_API_KEY and a verified EMAIL_FROM are set.
+ * Records are always saved BEFORE notifying, so an email outage can never
+ * lose an order or lead.
  */
+import nodemailer from "nodemailer";
 
 type Mail = {
   to: string;
@@ -22,8 +27,26 @@ type Mail = {
   kind: string;
   orderId?: string | null;
   leadId?: string | null;
+  invoiceId?: string | null;
   replyTo?: string | null;
+  attachments?: { filename: string; content: Buffer; contentType?: string }[];
 };
+
+function smtpConfig() {
+  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  if (!host || !user || !pass) return null;
+  const port = Number(process.env.SMTP_PORT || 465);
+  return { host, port, secure: port === 465, auth: { user, pass } };
+}
+
+/** Which provider will send right now ("smtp" | "resend" | null) — shown in the admin. */
+export function mailProvider(): "smtp" | "resend" | null {
+  if (smtpConfig()) return "smtp";
+  if (process.env.RESEND_API_KEY && process.env.EMAIL_FROM) return "resend";
+  return null;
+}
 
 function escapeHtml(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
@@ -38,33 +61,46 @@ function html(text: string) {
 export type MailResult = { status: "sent" | "failed" | "skipped"; id?: string };
 
 export async function sendMail(mail: Mail): Promise<MailResult> {
-  const key = process.env.RESEND_API_KEY;
-  const from = process.env.EMAIL_FROM;
+  const provider = mailProvider();
   let result: MailResult = { status: "skipped" };
   let error: string | null = null;
 
-  if (key && from) {
-    try {
+  try {
+    if (provider === "smtp") {
+      const cfg = smtpConfig()!;
+      const transport = nodemailer.createTransport({ ...cfg, connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 20_000 });
+      const info = await transport.sendMail({
+        from: process.env.EMAIL_FROM || cfg.auth.user,
+        to: mail.to,
+        subject: mail.subject,
+        text: mail.text,
+        html: html(mail.text),
+        ...(mail.replyTo ? { replyTo: mail.replyTo } : {}),
+        attachments: mail.attachments?.map((a) => ({ filename: a.filename, content: a.content, contentType: a.contentType })),
+      });
+      result = { status: "sent", id: info.messageId };
+    } else if (provider === "resend") {
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
-        headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
+        headers: { authorization: `Bearer ${process.env.RESEND_API_KEY}`, "content-type": "application/json" },
         body: JSON.stringify({
-          from,
+          from: process.env.EMAIL_FROM,
           to: mail.to,
           subject: mail.subject,
           text: mail.text,
           html: html(mail.text),
           ...(mail.replyTo ? { reply_to: mail.replyTo } : {}),
+          ...(mail.attachments?.length ? { attachments: mail.attachments.map((a) => ({ filename: a.filename, content: a.content.toString("base64") })) } : {}),
         }),
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(15_000),
       });
       const data = (await res.json().catch(() => ({}))) as { id?: string; message?: string };
       result = res.ok ? { status: "sent", id: data.id } : { status: "failed" };
       if (!res.ok) error = `${res.status} ${data.message ?? ""}`.slice(0, 300);
-    } catch (e) {
-      result = { status: "failed" };
-      error = e instanceof Error ? e.message.slice(0, 300) : "unknown error";
     }
+  } catch (e) {
+    result = { status: "failed" };
+    error = e instanceof Error ? e.message.slice(0, 300) : "unknown error";
   }
 
   try {
@@ -72,11 +108,12 @@ export async function sendMail(mail: Mail): Promise<MailResult> {
       data: {
         orderId: mail.orderId ?? null,
         leadId: mail.leadId ?? null,
+        invoiceId: mail.invoiceId ?? null,
         toAddress: mail.to,
         subject: mail.subject.slice(0, 300),
         body: mail.text.slice(0, 20_000),
         status: result.status,
-        provider: key && from ? "resend" : null,
+        provider,
         providerId: result.id ?? null,
         error,
         kind: mail.kind,
