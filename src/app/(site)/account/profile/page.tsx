@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireCustomerPage } from "@/lib/customer-auth";
 import { PortalNav } from "../portal-nav";
 import { PasswordForm, ProfileForm } from "../forms";
@@ -23,7 +24,15 @@ export default async function ProfilePage() {
             <h2 className="font-display text-xl">Your details</h2>
             <p className="mt-1 text-sm text-muted">Used on your quotes, invoices and shipping labels.</p>
             <div className="mt-6">
-              <ProfileForm initial={{ name: c.name, company: c.company, phone: c.phone, country: c.country, email: c.email }} />
+              {c.verified ? (
+                <ProfileForm initial={{ name: c.name, company: c.company, phone: c.phone, country: c.country, email: c.email }} />
+              ) : (
+                // Until the email is proven, nothing stored under it (from earlier quotes or orders) is shown or editable.
+                <p className="rounded-xl bg-amber-50 p-4 text-sm text-amber-900">
+                  Verify your email first to see and edit your details.{" "}
+                  <Link href="/account/verify" className="font-semibold underline">Enter your code</Link>
+                </p>
+              )}
             </div>
           </section>
           <section className="rounded-[var(--radius-card)] bg-surface p-6 ring-1 ring-black/[0.06] sm:p-8">

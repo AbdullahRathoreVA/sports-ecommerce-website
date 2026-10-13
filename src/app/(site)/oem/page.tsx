@@ -116,7 +116,7 @@ export default async function OemPage() {
               <p className="label text-accent">Tech packs</p>
               <h2 id="techpack-h" className="font-display mt-4 text-[clamp(2.2rem,5vw,3.6rem)] leading-[0.95]">
                 Send your tech pack.
-                <span className="block text-subtle">Or we'll make one with you.</span>
+                <span className="block text-subtle">Or we&apos;ll make one with you.</span>
               </h2>
             </div>
             <p className="max-w-md text-[15px] text-muted">

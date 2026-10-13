@@ -30,7 +30,7 @@ const SESSION_TS_KEY = "gl_sid_ts";
 const VISITOR_KEY = "gl_vid";
 const IDLE_MS = 30 * 60 * 1000;
 
-let queue: Payload[] = [];
+const queue: Payload[] = [];
 let timer: ReturnType<typeof setTimeout> | null = null;
 let landing: { referrer: string | null; utm: Record<string, string> } | null = null;
 

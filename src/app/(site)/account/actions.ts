@@ -147,6 +147,8 @@ export async function forgotPassword(_prev: FormState, fd: FormData): Promise<Fo
 export async function updateProfile(_prev: FormState, fd: FormData): Promise<FormState> {
   const c = await getCurrentCustomer();
   if (!c) redirect("/account/login");
+  // An unverified session may have claimed an email that already had quotes/orders: it must not change that record.
+  if (!c.verified) return { error: "Verify your email first, then you can edit your details." };
   const parsed = z
     .object({ name: nameSchema, company: optional(120), phone: phoneSchema, country: optional(80) })
     .safeParse(Object.fromEntries(fd));

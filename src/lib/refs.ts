@@ -26,7 +26,8 @@ export const newLeadNumber = () => `RFQ-${datePart()}-${suffix()}`;
  * enough.
  */
 export function orderToken(orderNumber: string): string {
-  const secret = process.env.AUTH_SECRET ?? "dev-secret-not-for-production";
+  const secret = process.env.AUTH_SECRET ?? (process.env.NODE_ENV === "production" ? "" : "dev-secret-not-for-production");
+  if (!secret) throw new Error("AUTH_SECRET is not set — order links cannot be signed.");
   return createHmac("sha256", secret).update(`order:${orderNumber}`).digest("base64url").slice(0, 32);
 }
 

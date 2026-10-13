@@ -94,11 +94,6 @@ const easeInOutCubic = (x: number) => {
   const t = clamp01(x);
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 };
-const easeOutBack = (x: number) => {
-  const c = 1.3;
-  const t = clamp01(x);
-  return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2);
-};
 
 type Mesh3D = { geometry: THREE.BufferGeometry; materials: THREE.Material[] };
 

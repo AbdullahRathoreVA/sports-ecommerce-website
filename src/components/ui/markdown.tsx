@@ -27,7 +27,8 @@ function inline(text: string, keyBase: string, dark: boolean): ReactNode[] {
     else {
       const [, label, href] = /\[([^\]]+)\]\(([^)\s]+)\)/.exec(tok)!;
       const cls = cn("font-semibold underline underline-offset-4", dark ? "text-accent hover:text-white" : "text-accent hover:text-accent-hover");
-      if (href!.startsWith("/")) out.push(<Link key={key} href={href!} className={cls}>{label}</Link>);
+      // Internal paths only: "//evil.com" and "/\evil.com" are other sites.
+      if (/^\/(?![/\\])/.test(href!)) out.push(<Link key={key} href={href!} className={cls}>{label}</Link>);
       else if (/^https?:\/\//.test(href!)) out.push(<a key={key} href={href} rel="noopener nofollow" target="_blank" className={cls}>{label}</a>);
       else out.push(label);
     }

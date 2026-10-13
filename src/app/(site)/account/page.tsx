@@ -59,8 +59,8 @@ export default async function AccountPage({ searchParams }: { searchParams: Prom
         <div className="pointer-events-none absolute -right-32 -top-20 h-[420px] w-[420px] rounded-full bg-accent/20 blur-[110px]" aria-hidden />
         <div className="container-x relative grid gap-8 pb-10 pt-10 lg:grid-cols-[1fr_auto] lg:items-end lg:pb-14 lg:pt-14">
           <div>
-            <p className="label text-accent">Client portal{customer.company ? ` / ${customer.company}` : ""}</p>
-            <h1 className="font-display mt-4 text-[clamp(2.2rem,6vw,3.8rem)] leading-[0.95]">Hi {firstName}.</h1>
+            <p className="label text-accent">Client portal{customer.verified && customer.company ? ` / ${customer.company}` : ""}</p>
+            <h1 className="font-display mt-4 text-[clamp(2.2rem,6vw,3.8rem)] leading-[0.95]">{customer.verified ? `Hi ${firstName}.` : "Welcome."}</h1>
             <p className="mt-3 max-w-xl text-white/60">Your orders, quotes and designs with Alrobel — all in one place.</p>
             <div className="mt-7 flex flex-wrap gap-2.5">
               <Link href="/quote" className="inline-flex h-11 items-center gap-2 rounded-[var(--radius-control)] bg-accent px-5 text-sm font-semibold text-white hover:bg-accent-hover">

@@ -7,7 +7,7 @@ import { db } from "@/lib/db";
 import { Card } from "@/components/admin/ui";
 import { visitorJourney } from "@/lib/admin/journey";
 import { JourneyCard } from "@/components/admin/journey-card";
-import { contactFromChat } from "../actions";
+import { contactFromChat } from "@/lib/admin/chat-contact";
 import { ChatActions } from "./chat-actions";
 
 export const metadata: Metadata = { title: "Chat" };

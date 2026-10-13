@@ -4,6 +4,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { db } from "@/lib/db";
 import { audit, AuthError, requireAdmin } from "@/lib/auth";
 import { newLeadNumber } from "@/lib/refs";
+import { contactFromChat } from "@/lib/admin/chat-contact";
 
 type Result = { ok: true; message?: string; id?: string } | { ok: false; error: string };
 
@@ -18,14 +19,6 @@ async function guard() {
 
 type Msg = { role: string; content: string };
 
-/** Contact details the visitor typed into the chat themselves. */
-export async function contactFromChat(messages: Msg[]) {
-  const said = messages.filter((m) => m.role === "user").map((m) => m.content).join("\n");
-  const email = said.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0]?.toLowerCase() ?? null;
-  const phone = said.match(/(?:\+|00)?\d[\d\s().-]{7,}\d/)?.[0]?.replace(/\s+/g, " ").trim() ?? null;
-  return { email, phone };
-}
-
 /** Turn a chat into a lead when the visitor left an email or number in it. */
 export async function leadFromChat(chatId: string): Promise<Result> {
   const admin = await guard();
@@ -34,7 +27,7 @@ export async function leadFromChat(chatId: string): Promise<Result> {
   if (!chat) return { ok: false, error: "Chat not found." };
   if (chat.leadId) return { ok: true, id: chat.leadId, message: "Already a lead." };
   const msgs = (Array.isArray(chat.messages) ? (chat.messages as Msg[]) : []).filter((m) => m && typeof m.content === "string");
-  const { email, phone } = await contactFromChat(msgs);
+  const { email, phone } = contactFromChat(msgs);
   if (!email && !phone) return { ok: false, error: "The visitor didn't leave an email or phone number in this chat." };
   const session = chat.sessionId ? await db.session.findUnique({ where: { id: chat.sessionId }, select: { country: true, city: true } }) : null;
   const customer = email

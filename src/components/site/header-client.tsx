@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { BrandTile } from "@/components/ui/brand-tile";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { ArrowRight, ChevronDown, Menu, MessageCircle, Search, ShoppingBag, UserRound, X, Mail, Phone } from "lucide-react";
 import { useCart } from "@/components/cart/cart-context";
@@ -28,12 +29,27 @@ export function NavLink({ href, children }: { href: string; children: React.Reac
   );
 }
 
+/** Open state that resets itself when the route changes (no setState inside an effect). */
+function useOpenOnThisPage(): [boolean, (v: boolean | ((prev: boolean) => boolean)) => void] {
+  const pathname = usePathname();
+  const [openAt, setOpenAt] = useState<string | null>(null);
+  const open = openAt === pathname;
+  const setOpen = useCallback(
+    (v: boolean | ((prev: boolean) => boolean)) =>
+      setOpenAt((cur) => {
+        const next = typeof v === "function" ? v(cur === pathname) : v;
+        return next ? pathname : null;
+      }),
+    [pathname],
+  );
+  return [open, setOpen];
+}
+
 /** Simple hover/click dropdown for the "Company" menu. */
 export function NavDropdown({ label, items }: { label: string; items: NavItem[] }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useOpenOnThisPage();
   const pathname = usePathname();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => setOpen(false), [pathname]);
   const active = items.some((i) => isActive(pathname, i.href));
   return (
     <div
@@ -56,7 +72,7 @@ export function NavDropdown({ label, items }: { label: string; items: NavItem[] 
       >
         {label} <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")} aria-hidden />
       </button>
-      <div hidden={!open} className="absolute left-1/2 top-full z-50 mt-3 w-72 -translate-x-1/2 rounded-lg border border-white/10 bg-ink-2 p-2 shadow-2xl shadow-black/40">
+      <div hidden={!open} className="absolute left-1/2 top-full z-50 mt-3 w-72 -translate-x-1/2 rounded-lg border border-white/10 bg-ink-2 p-2 shadow-2xl shadow-black/40" onClick={(e) => (e.target as Element).closest("a") && setOpen(false)}>
         {items.map((i) => (
           <Link key={i.href} href={i.href} className="block rounded-md px-3 py-2.5 transition-colors hover:bg-white/[0.06]" data-track="nav_click">
             <span className="block text-sm font-semibold text-white">{i.label}</span>
@@ -69,10 +85,9 @@ export function NavDropdown({ label, items }: { label: string; items: NavItem[] 
 }
 
 export function ProductsMenu({ categories }: { categories: Cat[] }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useOpenOnThisPage();
   const pathname = usePathname();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => setOpen(false), [pathname]);
 
   const show = () => {
     if (timer.current) clearTimeout(timer.current);
@@ -100,6 +115,7 @@ export function ProductsMenu({ categories }: { categories: Cat[] }) {
         hidden={!open}
         className="absolute left-1/2 top-full z-50 mt-3 w-[min(880px,calc(100vw-80px))] -translate-x-1/2 rounded-lg border border-white/10 bg-ink-2 p-3 shadow-2xl shadow-black/50"
         onKeyDown={(e) => e.key === "Escape" && setOpen(false)}
+        onClick={(e) => (e.target as Element).closest("a") && setOpen(false)}
       >
         <div className="grid grid-cols-3 gap-2">
           {categories.map((c) => (
@@ -181,10 +197,8 @@ export function MobileMenu({
   email: string;
   phone: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const pathname = usePathname();
+  const [open, setOpen] = useOpenOnThisPage();
   const closeRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => setOpen(false), [pathname]);
 
   useEffect(() => {
     if (!open) return;
@@ -197,7 +211,7 @@ export function MobileMenu({
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
-  }, [open]);
+  }, [open, setOpen]);
 
   return (
     <>
@@ -211,13 +225,17 @@ export function MobileMenu({
       >
         <Menu className="h-6 w-6" aria-hidden />
       </button>
-      {open && (
+      {/* Rendered on <body>: the header bar uses backdrop-filter, which would otherwise make this
+          "fixed inset-0" panel only as tall as the bar (the menu list collapsed to nothing on iPhone). */}
+      {open && createPortal(
         <div
           id="mobile-menu"
           role="dialog"
           aria-modal="true"
           aria-label={`${brandName} menu`}
-          className="on-dark fixed inset-0 z-[60] flex flex-col bg-ink text-white animate-fade lg:hidden"
+          className="on-dark fixed inset-0 z-[60] flex flex-col bg-ink text-white animate-fade [animation-duration:250ms] lg:hidden"
+          // Any link closes the menu — including one to the page you're already on.
+          onClick={(e) => (e.target as Element).closest("a") && setOpen(false)}
         >
           <div className="container-x flex h-[var(--header-h)] items-center justify-between border-b border-white/10">
             <span className="text-lg font-semibold tracking-tight">{brandName}</span>
@@ -243,6 +261,8 @@ export function MobileMenu({
                     data-category={c.slug}
                   >
                     {c.image && <Image src={c.image} alt="" fill sizes="45vw" className="object-cover opacity-55" />}
+                    {/* Product photos are on white: shade the bottom so the label always reads. */}
+                    <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" aria-hidden />
                     <span className="relative text-sm font-semibold leading-tight">{c.name}</span>
                   </Link>
                 </li>
@@ -300,7 +320,8 @@ export function MobileMenu({
               </Link>
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );
