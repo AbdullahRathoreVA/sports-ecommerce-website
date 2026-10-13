@@ -28,7 +28,7 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
       <PageHero
         eyebrow="Get in touch / Alrobel Sportswear"
         title="Contact our team"
-        intro="Questions about a product, a sample or a custom run? Message us and a person from our sales team will reply."
+        intro={`Questions about a product, a sample or a custom run? Message us${s.contact.email ? ` or email us at ${s.contact.email}` : ""} and a person from our sales team will reply.`}
         meta={[
           { label: "Support", value: s.contact.responseTime ? "Fast replies" : "Sales team" },
           { label: "Channels", value: wa ? "Email & WhatsApp" : "Email & form" },
