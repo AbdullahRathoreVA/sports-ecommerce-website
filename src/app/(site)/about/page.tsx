@@ -65,7 +65,7 @@ export default async function AboutPage() {
             </div>
           </div>
           <figure className="grid-lines relative aspect-[4/3] overflow-hidden rounded-[var(--radius-card)] bg-ink-3">
-            <Image src="/media/hero/showroom-poster-v2.webp" alt="The Alrobel range in 3D around the Alrobel logo" fill priority sizes="(min-width:1024px) 50vw, 92vw" className="object-contain p-6" />
+            <Image src="/media/hero/showroom-poster-v3.webp" alt="The Alrobel range in 3D around the Alrobel logo" fill priority sizes="(min-width:1024px) 50vw, 92vw" className="object-contain p-6" />
             <figcaption className="label absolute bottom-4 left-4 flex items-center gap-2 rounded-sm bg-ink/85 px-3 py-2 text-white/80 backdrop-blur">
               <ShieldCheck className="h-4 w-4 text-accent" aria-hidden /> Sialkot · Pakistan
             </figcaption>
@@ -93,7 +93,7 @@ export default async function AboutPage() {
           </div>
           <div className="mt-10 grid overflow-hidden rounded-[var(--radius-card)] border hairline lg:grid-cols-2">
             <div className="relative min-h-[320px] bg-surface-2">
-              <Image src="/media/renders/kit-alrobel-front.webp" alt="Alrobel black and red team kit" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" />
+              <Image src="/media/catalog/v3/striped-match-kit-1.webp" alt="Alrobel red and black hooped team jersey" fill sizes="(min-width:1024px) 50vw, 100vw" className="object-cover" />
             </div>
             <div className="flex flex-col justify-between bg-chalk p-8 lg:p-12">
               <p className="label text-subtle">01 — Our foundation</p>

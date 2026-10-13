@@ -39,11 +39,12 @@ export type ShowcaseSceneProps = {
   className?: string;
 };
 
-const DIR = "/media/catalog/3d-v3/";
+const DIR = "/media/catalog/3d-v4/";
+// Width/height of each cut-out (public/media/catalog/3d-v4/meta.json, built by .gstack/prep-v4.py from the owner's 2026-10-13 photos).
 const ASPECT: Record<string, number> = {
-  "gk-a-back": 0.6073, "gk-a-palm": 0.6369, "gk-b-back": 0.678, "gk-b-palm": 0.6943,
-  "jersey-red-10": 0.7543, "jersey-red": 0.8234, "moto-white-red": 0.6286, "moto-b": 0.4361,
-  "racing-a": 0.5042, "racing-b": 0.6837, "leather-black-red": 0.8141, "tracksuit-a": 0.4922, "tracksuit-b": 0.4909,
+  "jersey-hoops": 0.9003, "leather-racer": 0.8355, "racing-red": 0.5376, "racing-silver": 0.5975, "hoodie-black": 0.8647,
+  "af-jersey-red": 0.9354, "varsity-red": 1.2041, "bag-red": 1.3355, "moto-red": 0.6544,
+  "gk-c-back": 0.5877, "gk-c-palm": 0.6022, "gk-d-back": 0.6145, "gk-d-palm": 0.6053,
 };
 
 type Def =
@@ -57,23 +58,26 @@ const BALLS = "/products/c/footballs";
 const MOTO = "/products/c/motorbike-racing-suits";
 const RACING = "/products/c/car-kart-racing-suits";
 const LEATHER = "/products/c/leather-jackets";
-const SPORT = "/products/c/sportswear";
+const HOODIES = "/products/c/hoodies";
+const BAGS = "/products/c/bags";
+const VARSITY = "/products/c/varsity-outerwear";
+const AMFOOT = "/products/c/american-football";
 
 /** Ring order: the hero jersey starts at the front; categories alternate so every turn shows variety. */
 export const SHOWCASE: (ShowcaseItem & { def: Def })[] = [
-  { key: "jersey-red-10", label: "Soccer Uniforms", href: SOCCER, def: { kind: "single", asset: "jersey-red-10", height: 1.3, depth: 0.045 } },
+  { key: "jersey-hoops", label: "Soccer Uniforms", href: SOCCER, def: { kind: "single", asset: "jersey-hoops", height: 1.2, depth: 0.045 } },
   { key: "ball-red", label: "Match Footballs", href: BALLS, def: { kind: "ball", panel: "#d9161f", base: "#ebeae6" } },
-  { key: "gk-a", label: "Goalkeeper Gloves", href: GLOVES, def: { kind: "pair", palm: "gk-a-palm", back: "gk-a-back", height: 1.05 } },
-  { key: "moto-white-red", label: "Motorbike Suits", href: MOTO, def: { kind: "single", asset: "moto-white-red", height: 1.6, depth: 0.05 } },
-  { key: "leather-black-red", label: "Leather Jackets", href: LEATHER, def: { kind: "single", asset: "leather-black-red", height: 1.25, depth: 0.05 } },
-  { key: "racing-a", label: "Racing Suits", href: RACING, def: { kind: "single", asset: "racing-a", height: 1.6, depth: 0.05 } },
-  { key: "tracksuit-a", label: "Tracksuits", href: SPORT, def: { kind: "single", asset: "tracksuit-a", height: 1.6, depth: 0.04 } },
-  { key: "jersey-red", label: "Soccer Uniforms", href: SOCCER, def: { kind: "single", asset: "jersey-red", height: 1.25, depth: 0.045 } },
-  { key: "gk-b", label: "Goalkeeper Gloves", href: GLOVES, def: { kind: "pair", palm: "gk-b-palm", back: "gk-b-back", height: 1.05 } },
+  { key: "gk-c", label: "Goalkeeper Gloves", href: GLOVES, def: { kind: "pair", palm: "gk-c-palm", back: "gk-c-back", height: 1.05 } },
+  { key: "moto-red", label: "Motorbike Suits", href: MOTO, def: { kind: "single", asset: "moto-red", height: 1.6, depth: 0.05 } },
+  { key: "leather-racer", label: "Leather Jackets", href: LEATHER, def: { kind: "single", asset: "leather-racer", height: 1.25, depth: 0.05 } },
+  { key: "racing-red", label: "Racing Suits", href: RACING, def: { kind: "single", asset: "racing-red", height: 1.6, depth: 0.05 } },
+  { key: "hoodie-black", label: "Hoodies", href: HOODIES, def: { kind: "single", asset: "hoodie-black", height: 1.2, depth: 0.045 } },
+  { key: "af-jersey-red", label: "American Football", href: AMFOOT, def: { kind: "single", asset: "af-jersey-red", height: 1.2, depth: 0.045 } },
+  { key: "gk-d", label: "Goalkeeper Gloves", href: GLOVES, def: { kind: "pair", palm: "gk-d-palm", back: "gk-d-back", height: 1.05 } },
   { key: "ball-black", label: "Match Footballs", href: BALLS, def: { kind: "ball", panel: "#121316", base: "#ebeae6" } },
-  { key: "moto-b", label: "Motorbike Suits", href: MOTO, def: { kind: "single", asset: "moto-b", height: 1.6, depth: 0.05 } },
-  { key: "racing-b", label: "Racing Suits", href: RACING, def: { kind: "single", asset: "racing-b", height: 1.6, depth: 0.05 } },
-  { key: "tracksuit-b", label: "Tracksuits", href: SPORT, def: { kind: "single", asset: "tracksuit-b", height: 1.6, depth: 0.04 } },
+  { key: "varsity-red", label: "Varsity Jackets", href: VARSITY, def: { kind: "single", asset: "varsity-red", height: 1.0, depth: 0.05 } },
+  { key: "bag-red", label: "Sports Bags", href: BAGS, def: { kind: "single", asset: "bag-red", height: 0.8, depth: 0.08 } },
+  { key: "racing-silver", label: "Racing Suits", href: RACING, def: { kind: "single", asset: "racing-silver", height: 1.6, depth: 0.05 } },
 ];
 
 const N = SHOWCASE.length;

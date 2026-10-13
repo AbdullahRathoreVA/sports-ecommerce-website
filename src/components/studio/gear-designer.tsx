@@ -137,7 +137,7 @@ export function GearDesigner({ kind, products, whatsapp, responseTime }: { kind:
           <>
             <Swatches label="Backhand & trim colour" value={design.accent} onPick={(hex) => update({ accent: hex })} />
             <Choice label="Glove cut" options={GLOVE_CUTS} value={cut} onPick={setCut} />
-            <p className="text-sm text-muted">White latex palm with a black backhand. Palm grade, closure and sizes (kids to adult) are confirmed with your quote; a sample is available before bulk.</p>
+            <p className="text-sm text-muted">Your colour goes on the latex palm and the backhand trim; the black base stays. Palm grade, closure and sizes (kids to adult) are confirmed with your quote; a sample is available before bulk.</p>
           </>
         ) : (
           <>

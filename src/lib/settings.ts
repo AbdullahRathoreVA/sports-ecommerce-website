@@ -75,7 +75,7 @@ const loadSettings = unstable_cache(
       return defaultSettings;
     }
   },
-  ["site-settings"],
+  ["site-settings", "v3"],
   { tags: [SETTINGS_TAG], revalidate: 300 },
 );
 

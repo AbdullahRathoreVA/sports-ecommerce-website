@@ -33,8 +33,8 @@ export function ProductGallery({ images, name }: { images: Img[]; name: string }
         >
           {images.map((img, i) => (
             <div key={img.url} className="snap-start-always relative aspect-[4/5] w-full shrink-0">
-              <div className="cube-slide absolute inset-0 overflow-hidden bg-surface-2">
-                <Image src={img.url} alt={img.alt} fill priority={i === 0} sizes="100vw" className="object-cover" />
+              <div className="cube-slide absolute inset-0 overflow-hidden bg-white">
+                <Image src={img.url} alt={img.alt} fill priority={i === 0} sizes="100vw" className="object-contain" />
               </div>
             </div>
           ))}
@@ -63,13 +63,13 @@ export function ProductGallery({ images, name }: { images: Img[]; name: string }
                   i === active ? "ring-accent" : "ring-transparent hover:ring-white/25",
                 )}
               >
-                <Image src={img.url} alt="" fill sizes="76px" className="object-cover" />
+                <Image src={img.url} alt="" fill sizes="76px" className="object-cover bg-white" />
               </button>
             </li>
           ))}
         </ul>
-        <div className="tilt-hover relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] bg-surface-2">
-          <Image key={images[active]!.url} src={images[active]!.url} alt={images[active]!.alt} fill priority sizes="(min-width:1280px) 640px, 50vw" className="object-cover animate-fade" />
+        <div className="tilt-hover relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)] bg-white">
+          <Image key={images[active]!.url} src={images[active]!.url} alt={images[active]!.alt} fill priority sizes="(min-width:1280px) 640px, 50vw" className="object-contain animate-fade" />
         </div>
       </div>
       {images.some((i) => i.source === "placeholder") && (

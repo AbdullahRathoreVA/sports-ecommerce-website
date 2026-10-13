@@ -11,23 +11,26 @@ const BALLS = "/products/c/footballs";
 const MOTO = "/products/c/motorbike-racing-suits";
 const RACING = "/products/c/car-kart-racing-suits";
 const LEATHER = "/products/c/leather-jackets";
-const SPORT = "/products/c/sportswear";
+const HOODIES = "/products/c/hoodies";
+const BAGS = "/products/c/bags";
+const VARSITY = "/products/c/varsity-outerwear";
+const AMFOOT = "/products/c/american-football";
 
-/** Cut-outs in public/media/ring-v1 (made by .gstack/prep-ring.py); the far side of the ring shows each product's back. */
+/** Cut-outs in public/media/ring-v2 (made by .gstack/prep-v4.py from the owner's 2026-10-13 photos); the far side of the ring shows each product's back. */
 const ITEMS = [
-  { key: "jersey-red-10", label: "Soccer uniform", href: SOCCER },
+  { key: "jersey-hoops", label: "Soccer uniform", href: SOCCER },
   { key: "ball-red", label: "Match football", href: BALLS },
-  { key: "gk-a", label: "Goalkeeper gloves", href: GLOVES },
-  { key: "moto-white-red", label: "Motorbike suit", href: MOTO },
-  { key: "leather-black-red", label: "Leather jacket", href: LEATHER },
-  { key: "racing-a", label: "Racing suit", href: RACING },
-  { key: "tracksuit-a", label: "Tracksuit", href: SPORT },
-  { key: "jersey-red", label: "Soccer uniform", href: SOCCER },
-  { key: "gk-b", label: "Goalkeeper gloves", href: GLOVES },
-  { key: "ball-black", label: "Match football", href: BALLS },
-  { key: "moto-b", label: "Motorbike suit", href: MOTO },
-  { key: "racing-b", label: "Racing suit", href: RACING },
-  { key: "tracksuit-b", label: "Tracksuit", href: SPORT },
+  { key: "gloves-red", label: "Goalkeeper gloves", href: GLOVES },
+  { key: "moto-white", label: "Motorbike suit", href: MOTO },
+  { key: "leather-racer", label: "Leather jacket", href: LEATHER },
+  { key: "racing-red", label: "Racing suit", href: RACING },
+  { key: "hoodie-black", label: "Hoodie", href: HOODIES },
+  { key: "af-jersey", label: "American football jersey", href: AMFOOT },
+  { key: "bag-black", label: "Team kit bag", href: BAGS },
+  { key: "varsity-red", label: "Varsity jacket", href: VARSITY },
+  { key: "ball-camo", label: "Training football", href: BALLS },
+  { key: "gloves-camo", label: "Goalkeeper gloves", href: GLOVES },
+  { key: "racing-white", label: "Kart racing suit", href: RACING },
 ];
 const N = ITEMS.length;
 
@@ -94,10 +97,10 @@ export function RangeRing() {
               {ITEMS.map((it, i) => (
                 <div key={it.key} className="ring-card" style={{ transform: `rotateY(${((i * 360) / N).toFixed(3)}deg) translateZ(var(--r))` }}>
                   <Link href={it.href} className="ring-face group" data-track="category_view" data-category={it.href.split("/").pop()} tabIndex={-1}>
-                    <Image src={`/media/ring-v1/${it.key}-front.webp`} alt={it.label} fill sizes="(min-width:1024px) 260px, 50vw" className="object-contain" />
+                    <Image src={`/media/ring-v2/${it.key}-front.webp`} alt={it.label} fill sizes="(min-width:1024px) 260px, 50vw" className="object-contain" />
                   </Link>
                   <div className="ring-face ring-back" aria-hidden>
-                    <Image src={`/media/ring-v1/${it.key}-back.webp`} alt="" fill sizes="(min-width:1024px) 180px, 34vw" className="object-contain" />
+                    <Image src={`/media/ring-v2/${it.key}-back.webp`} alt="" fill sizes="(min-width:1024px) 180px, 34vw" className="object-contain" />
                   </div>
                 </div>
               ))}

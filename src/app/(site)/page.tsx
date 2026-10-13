@@ -106,7 +106,7 @@ export default async function HomePage() {
               <span className="block text-accent">Our creation.</span>
             </h1>
             <p className="mt-6 max-w-lg text-pretty text-[16px] leading-relaxed text-white/65 sm:text-[17px]">
-              Footballs, goalkeeper gloves and soccer uniforms — plus motorbike suits, leather jackets and sportswear, made in our own
+              Footballs, goalkeeper gloves and soccer uniforms — plus hoodies, sports bags, varsity and leather jackets, motorbike and racing suits, made in our own
               factory in Sialkot and shipped worldwide. We make to your wishes, under your label or ours.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -137,8 +137,8 @@ export default async function HomePage() {
             <div className="relative">
               <div className="signal-glow pointer-events-none absolute inset-[10%]" />
               <HeroShowcase
-                poster="/media/hero/showroom-poster-v2.webp"
-                stagePoster="/media/hero/showroom-stage-v2.webp"
+                poster="/media/hero/showroom-poster-v3.webp"
+                stagePoster="/media/hero/showroom-stage-v3.webp"
                 posterAlt="The Alrobel range in 3D: jerseys, goalkeeper gloves, footballs, motorbike and racing suits, leather jackets and tracksuits orbiting the Alrobel logo"
                 className="relative mx-auto aspect-[1.08] w-full"
               />
@@ -352,7 +352,7 @@ export default async function HomePage() {
           </div>
           <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:gap-16">
             <figure className="sd-zoom relative aspect-[10/7] overflow-hidden rounded-[var(--radius-card)] bg-ink">
-              <Image src="/media/renders/gloves-red.webp" alt="Alrobel goalkeeper gloves: latex palm and branded backhand" fill sizes="(min-width:1024px) 45vw, 92vw" className="object-cover" />
+              <Image src="/media/catalog/v3/custom-goalkeeper-gloves-1.webp" alt="Alrobel red and black goalkeeper gloves: latex palm and branded backhand" fill sizes="(min-width:1024px) 45vw, 92vw" className="object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/75 to-transparent" />
               <figcaption className="absolute bottom-5 left-6 text-white">
                 <span className="label text-white/60">Product detail / goalkeeper gloves</span>

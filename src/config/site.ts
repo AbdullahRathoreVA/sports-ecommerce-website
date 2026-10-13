@@ -71,7 +71,7 @@ export const defaultSettings: SiteSettings = {
     tagline: "Custom sportswear manufacturer",
     description:
       // KNOWN FACT (client business card, 2026-10-07): product lines.
-      "Custom sportswear and leather manufacturer: footballs, goalkeeper gloves, soccer and American football uniforms, motorbike and racing suits, leather jackets, tracksuits and gym wear. Your logo, labels, tags and packaging, made in our own factory in Sialkot, Pakistan.",
+      "Custom sportswear and leather manufacturer: footballs, goalkeeper gloves, soccer and American football uniforms, motorbike and racing suits, leather and varsity jackets, hoodies, sports bags, tracksuits and gym wear. Your logo, labels, tags and packaging, made in our own factory in Sialkot, Pakistan.",
     houseLabel: "",
   },
   contact: {
@@ -147,6 +147,8 @@ export const footerNav: { title: string; links: NavItem[] }[] = [
       { label: "Goalkeeper gloves", href: "/products/c/goalkeeper-gloves" },
       { label: "Soccer uniforms", href: "/products/c/sublimation-teamwear" },
       { label: "Motorbike suits", href: "/products/c/motorbike-racing-suits" },
+      { label: "Hoodies", href: "/products/c/hoodies" },
+      { label: "Sports bags", href: "/products/c/bags" },
       { label: "Leather jackets", href: "/products/c/leather-jackets" },
       { label: "All products", href: "/products" },
     ],

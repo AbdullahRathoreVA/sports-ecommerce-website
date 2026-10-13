@@ -19,6 +19,10 @@ const ROOT = resolve(import.meta.dirname, "..");
 const EXCLUDE = [
   // Client product photos and tech packs (private to the client).
   "public/media/catalog",
+  // Cut-outs, 3D posters made from the client's photos, and the owner's portrait.
+  "public/media/ring-v2",
+  "public/media/hero",
+  "public/media/team",
   "public/media/factory",
   "public/media/work",
   "public/media/clips",

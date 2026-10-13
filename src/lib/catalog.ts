@@ -135,6 +135,13 @@ function toDetail(p: ProductRow): ProductDetail {
   };
 }
 
+/**
+ * Bump when the catalogue changes outside the admin (scripts): Vercel's data cache survives deploys,
+ * and a new key is the only way a deploy is guaranteed to read fresh rows.
+ * v3 = owner's 2026-10-13 photo batch (old photos retired).
+ */
+const DATA_V = "v3";
+
 const getAllProductRows = unstable_cache(
   async () => {
     if (!hasDatabase()) return [] as ProductDetail[];
@@ -145,7 +152,7 @@ const getAllProductRows = unstable_cache(
       return [] as ProductDetail[];
     }
   },
-  ["catalog-products"],
+  ["catalog-products", DATA_V],
   { tags: [CATALOG_TAG], revalidate: 600 },
 );
 
@@ -183,7 +190,7 @@ export const getCategories = unstable_cache(
       return [];
     }
   },
-  ["catalog-categories"],
+  ["catalog-categories", DATA_V],
   { tags: [CATALOG_TAG], revalidate: 600 },
 );
 
@@ -272,7 +279,7 @@ export const getFaqs = unstable_cache(
       return [];
     }
   },
-  ["content-faqs"],
+  ["content-faqs", DATA_V],
   { tags: [CONTENT_TAG], revalidate: 600 },
 );
 
@@ -289,7 +296,7 @@ export const getPosts = unstable_cache(
       return [];
     }
   },
-  ["content-posts"],
+  ["content-posts", DATA_V],
   { tags: [CONTENT_TAG], revalidate: 600 },
 );
 
@@ -303,7 +310,7 @@ export async function getPost(slug: string) {
         return null;
       }
     },
-    ["content-post", slug],
+    ["content-post", slug, DATA_V],
     { tags: [CONTENT_TAG], revalidate: 600 },
   )();
 }
@@ -321,7 +328,7 @@ export const getPublishedTestimonials = unstable_cache(
       return [];
     }
   },
-  ["content-testimonials"],
+  ["content-testimonials", DATA_V],
   { tags: [CONTENT_TAG], revalidate: 600 },
 );
 
@@ -334,6 +341,6 @@ export const getPublishedCertifications = unstable_cache(
       return [];
     }
   },
-  ["content-certifications"],
+  ["content-certifications", DATA_V],
   { tags: [CONTENT_TAG], revalidate: 600 },
 );

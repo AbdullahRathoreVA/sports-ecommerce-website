@@ -20,9 +20,9 @@ import { deviceQuality } from "@/lib/device";
 export type GearKind = "gloves" | "ball";
 export type GearDesign = { accent: string; panel: string; base: string; seam: string; crest: HTMLCanvasElement | null };
 
-const DIR = "/media/catalog/3d-v3/";
-// Width/height of each glove cut-out (from public/media/catalog/3d-v3/meta.json).
-const ASPECT: Record<string, number> = { "gk-a-palm": 0.6369, "gk-a-back": 0.6073 };
+const DIR = "/media/catalog/3d-v4/";
+// Width/height of each glove cut-out (from public/media/catalog/3d-v4/meta.json — owner photo 55, red/black pair).
+const ASPECT: Record<string, number> = { "gk-c-palm": 0.6022, "gk-c-back": 0.5877 };
 
 const vertex = /* glsl */ `
 varying vec2 vUv;
@@ -83,8 +83,8 @@ function Gloves({ accent }: { accent: string }) {
   useEffect(() => {
     target.set(accent);
   }, [target, accent]);
-  const palm = useGlove("gk-a-palm", target);
-  const back = useGlove("gk-a-back", target);
+  const palm = useGlove("gk-c-palm", target);
+  const back = useGlove("gk-c-back", target);
   if (!palm || !back) return null;
   return (
     <group scale={1.55} position={[0, -0.05, 0]}>
