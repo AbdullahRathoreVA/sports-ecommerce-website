@@ -3,6 +3,7 @@ import Image from "next/image";
 import { FOUNDER } from "@/config/site";
 import { ArrowDown, ArrowUpRight, Globe2, Handshake, MapPin, PenTool, Scissors, ShieldCheck, Shirt, Sparkles, Wand2 } from "lucide-react";
 import { getSettings } from "@/lib/settings";
+import { SocialLinks } from "@/components/site/social-links";
 import { getPublishedCertifications } from "@/lib/catalog";
 import { ButtonLink } from "@/components/ui/button";
 
@@ -188,6 +189,7 @@ export default async function AboutPage() {
             <a href="/contact" className="mt-8 inline-flex h-12 items-center gap-2 rounded-[var(--radius-control)] bg-ink px-6 font-semibold text-white hover:bg-accent">
               Talk to our team
             </a>
+            <SocialLinks social={s.social} className="mt-5" />
           </div>
         </div>
       </section>

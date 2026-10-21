@@ -1,3 +1,4 @@
+import { SocialLinks } from "@/components/site/social-links";
 import Link from "next/link";
 import { Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { getSettings, whatsappLink } from "@/lib/settings";
@@ -8,8 +9,6 @@ export async function Footer() {
   const s = await getSettings();
   const wa = whatsappLink(s);
   const address = [s.contact.addressLine, s.contact.city, s.contact.country].filter(Boolean).join(", ");
-  const socials = Object.entries(s.social).filter(([, url]) => Boolean(url));
-
   return (
     <footer className="on-dark relative overflow-hidden bg-ink text-white">
       <div className="container-x grid gap-12 py-16 lg:grid-cols-[1.3fr_2fr] lg:py-20">
@@ -61,6 +60,7 @@ export async function Footer() {
               </li>
             ))}
           </ul>
+          <SocialLinks social={s.social} tone="dark" className="mt-6" />
           {s.contact.responseTime && <p className="mt-6 text-xs text-white/45">{s.contact.responseTime}</p>}
         </div>
 
@@ -87,17 +87,6 @@ export async function Footer() {
           <p>
             © {new Date().getFullYear()} {s.brand.name}. Manufactured in our own factory.
           </p>
-          {socials.length > 0 && (
-            <ul className="flex gap-4">
-              {socials.map(([network, url]) => (
-                <li key={network}>
-                  <a href={url} rel="noopener" className="capitalize hover:text-white">
-                    {network}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
       </div>
       {/* Spacer so the mobile action bar never covers the last footer row. */}

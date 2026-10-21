@@ -1,3 +1,4 @@
+import { SocialLinks } from "@/components/site/social-links";
 import type { Metadata } from "next";
 import { OFFICES, publicPhone } from "@/config/site";
 import Link from "next/link";
@@ -69,6 +70,12 @@ export default async function ContactPage({ searchParams }: { searchParams: Prom
               </Link>
             </li>
           </ul>
+          {Object.values(s.social).some(Boolean) && (
+            <div className="mt-8">
+              <p className="text-xs text-muted">Follow us for new designs and factory updates</p>
+              <SocialLinks social={s.social} className="mt-3" />
+            </div>
+          )}
           <dl className="mt-8 grid gap-6 text-sm sm:grid-cols-2">
             {address && (
               <div>
