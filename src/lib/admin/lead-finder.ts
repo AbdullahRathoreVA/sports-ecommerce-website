@@ -184,5 +184,5 @@ export async function findOnWeb(kind: FinderKind, place: string): Promise<Candid
 /** A first message the team can send — honest, short, and specific to the kind of business. */
 export function outreachMessage(c: Pick<Candidate, "name" | "kind">) {
   const pitch = FINDER_KINDS[c.kind].pitch;
-  return `Hello ${c.name} team,\n\nI'm writing from Alrobel Sportswear — we manufacture ${pitch} in our own factory in Sialkot, Pakistan, and ship worldwide.\n\nEverything is made to order in your colours with your logo, from 50 pieces per design, and you can order a sample first ($150) to check the quality.\n\nWould you like our catalogue or a free design mockup for your next order?\n\nBest regards,\nAlrobel Sportswear\nhttps://alrobelsportswear.com`;
+  return `Hello ${c.name} team,\n\nI'm writing from Alrobel Sportswear — we manufacture ${pitch} in our own factory in Sialkot, Pakistan, and ship worldwide.\n\nEverything is made to order in your colours with your logo, from 50 pieces per design, and you can order a sample first ($100) to check the quality.\n\nWould you like our catalogue or a free design mockup for your next order?\n\nBest regards,\nAlrobel Sportswear\nhttps://alrobelsportswear.com`;
 }

@@ -140,7 +140,7 @@ function toDetail(p: ProductRow): ProductDetail {
  * and a new key is the only way a deploy is guaranteed to read fresh rows.
  * v3 = owner's 2026-10-13 photo batch (old photos retired).
  */
-const DATA_V = "v3";
+const DATA_V = "v4";
 
 const getAllProductRows = unstable_cache(
   async () => {

@@ -207,5 +207,5 @@ export function publicPhone(settingsPhone: string): { number: string; label: str
  */
 export const FOUNDER = { name: "Mian Sajid Abbas", title: "Founder & CEO", photo: "/media/team/sajid-abbas-founder-v1.webp" } as const;
 
-/** KNOWN FACT (owner via Kaif, 2026-10-11): MOQ 50 pieces per design, custom pricing per order, one sample $150. */
-export const ORDER_TERMS = { moq: 50, sampleCents: 15000, currency: "USD" } as const;
+/** KNOWN FACT (owner via Kaif, 2026-10-11; sample price changed to $100 by Abdullah, 2026-10-22): MOQ 50 pieces per design, custom pricing per order, one sample $100. */
+export const ORDER_TERMS = { moq: 50, sampleCents: 10000, currency: "USD" } as const;

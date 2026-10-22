@@ -194,7 +194,7 @@ export function GearDesigner({ kind, products, whatsapp, responseTime }: { kind:
               Request a quote for this design
             </button>
           </div>
-          <p className="mt-2 text-center text-xs text-subtle">Minimum order 50 pieces · sample $150 · final artwork confirmed before production.</p>
+          <p className="mt-2 text-center text-xs text-subtle">Minimum order 50 pieces · sample $100 · final artwork confirmed before production.</p>
         </div>
       </div>
 

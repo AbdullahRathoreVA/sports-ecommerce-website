@@ -215,10 +215,10 @@ export const HELP: HelpTopic[] = [
   {
     id: "samples",
     section: "Orders",
-    title: "Sample orders ($150)",
+    title: "Sample orders ($100)",
     summary: "Buyers can order one sample online before a bulk order (minimum 50 pieces per design).",
     body: ["Sample orders appear under Orders like any other order. Bulk pricing is always custom — there is no price list on the website."],
-    keywords: ["sample", "150", "moq", "minimum"],
+    keywords: ["sample", "100", "moq", "minimum"],
   },
 
   // ── Products & photos ──
