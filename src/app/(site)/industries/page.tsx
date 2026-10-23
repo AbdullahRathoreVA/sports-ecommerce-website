@@ -5,7 +5,7 @@ import { PageHero } from "@/components/site/page-hero";
 import { getAllProducts } from "@/lib/catalog";
 
 export const metadata: Metadata = {
-  title: "Industries We Serve — Schools, Clubs, Companies, Brands & Retailers",
+  title: "Industries: Clubs, Schools & Brands",
   description:
     "Custom sportswear and uniforms for schools and colleges, sports clubs, companies, private-label brands and retailers — made in our own factory in Sialkot.",
   alternates: { canonical: "/industries" },

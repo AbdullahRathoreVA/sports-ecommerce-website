@@ -4,8 +4,8 @@ import { getSettings } from "@/lib/settings";
 import { DesignStudio } from "@/components/studio/design-studio";
 
 export const metadata: Metadata = {
-  title: "Design Studio — Design Kits, Goalkeeper Gloves & Footballs in 3D",
-  description: "Design in 3D: a sublimated team kit (pattern, colours, sponsor, names and numbers), goalkeeper gloves in your colours, or a match football with your crest — then send it to our factory for a quote.",
+  title: "3D Design Studio: Kits, Gloves & Balls",
+  description: "Design a sublimated team kit, goalkeeper gloves or a match football in 3D with your colours, crest and numbers — then send it to our factory for a quote.",
   alternates: { canonical: "/design-studio" },
 };
 

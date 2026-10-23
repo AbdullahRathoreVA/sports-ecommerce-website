@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Exo_2, Inter, IBM_Plex_Mono } from "next/font/google";
 import { getSettings } from "@/lib/settings";
-import { siteUrl } from "@/config/site";
+import { siteUrl, SEO_DESCRIPTION } from "@/config/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -32,17 +32,22 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: new URL(siteUrl),
     title: { default: title, template: `%s · ${s.brand.name}` },
-    description: s.brand.description,
+    description: SEO_DESCRIPTION,
     applicationName: s.brand.name,
     openGraph: {
       type: "website",
       siteName: s.brand.name,
       title,
-      description: s.brand.description,
+      description: SEO_DESCRIPTION,
       url: siteUrl,
       locale: "en_US",
     },
-    twitter: { card: "summary_large_image", title, description: s.brand.description },
+    twitter: { card: "summary_large_image", title, description: SEO_DESCRIPTION },
+    // Google Search Console / Bing Webmaster ownership tokens (set in Vercel once the properties exist).
+    verification: {
+      ...(process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION } : {}),
+      ...(process.env.BING_SITE_VERIFICATION ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION } } : {}),
+    },
     alternates: { canonical: "/" },
     formatDetection: { telephone: false },
     // The review demo (placeholder brand, demo prices) stays out of search

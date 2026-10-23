@@ -9,7 +9,7 @@ import { getSettings } from "@/lib/settings";
 import { JsonLd, faqSchema } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
-  title: "Custom Orders, OEM & Private Label Sportswear",
+  title: "OEM & Private Label Sportswear",
   description:
     "Your brand, made in our Sialkot factory: custom team kits, uniforms and sportswear with your logos, colours, labels, tags and packaging. Samples before bulk.",
   alternates: { canonical: "/oem" },

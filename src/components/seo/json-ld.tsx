@@ -79,7 +79,18 @@ export function productSchema(p: ProductDetail, brand: string) {
           availability: "https://schema.org/MadeToOrder",
           url: `${siteUrl}/products/${p.slug}`,
         }
-      : undefined;
+      : p.purchaseMode !== "QUOTE" && p.samplePriceCents != null
+        ? {
+            "@type": "Offer",
+            name: "Pre-production sample (1 piece)",
+            price: (p.samplePriceCents / 100).toFixed(2),
+            priceCurrency: p.currency,
+            eligibleQuantity: { "@type": "QuantitativeValue", value: 1 },
+            availability: "https://schema.org/MadeToOrder",
+            seller: { "@id": `${siteUrl}/#organization` },
+            url: `${siteUrl}/products/${p.slug}`,
+          }
+        : undefined;
   return {
     "@context": "https://schema.org",
     "@type": "Product",

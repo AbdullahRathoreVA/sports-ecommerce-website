@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { getSettings } from "@/lib/settings";
 import { LegalPage } from "@/components/site/legal";
 
-export const metadata: Metadata = { title: "Terms of sale", alternates: { canonical: "/terms" } };
+export const metadata: Metadata = {
+  title: "Terms of sale",
+  description: "Terms of sale for Alrobel Sportswear orders: quotations, samples, payment, production, shipping, delivery and quality claims.",
+  alternates: { canonical: "/terms" },
+};
 
 export default async function TermsPage() {
   const s = await getSettings();

@@ -4,9 +4,9 @@ import { Catalog, type CatalogParams } from "@/components/product/catalog";
 import { JsonLd, breadcrumbSchema } from "@/components/seo/json-ld";
 
 export const metadata: Metadata = {
-  title: "Products — Team Kits, Uniforms, Sportswear & Gloves",
+  title: "Products: Team Kits, Uniforms & Gloves",
   description:
-    "Browse factory-direct sublimated team kits, tracksuits, hoodies, gym wear and American football gloves, made to order with your logo. Samples available; bulk pricing by quantity.",
+    "Factory-direct team kits, footballs, gloves, jackets, hoodies and racing suits, made to order with your logo. $100 samples; bulk quotes from 50 pieces.",
   alternates: { canonical: "/products" },
 };
 

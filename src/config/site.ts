@@ -132,6 +132,10 @@ export const defaultSettings: SiteSettings = {
   demoMode: true,
 };
 
+/** Search/social description (≤160 chars). The long brand description stays for on-page use. */
+export const SEO_DESCRIPTION =
+  "Custom sportswear & leather manufacturer in Sialkot, Pakistan: team kits, footballs, goalkeeper gloves, jackets & racing suits. MOQ 50, $100 samples.";
+
 export const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
 export type NavItem = { label: string; href: string; description?: string };

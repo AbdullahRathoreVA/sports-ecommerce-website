@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { getSettings } from "@/lib/settings";
 import { LegalPage } from "@/components/site/legal";
 
-export const metadata: Metadata = { title: "Privacy notice", alternates: { canonical: "/privacy" } };
+export const metadata: Metadata = {
+  title: "Privacy notice",
+  description: "How Alrobel Sportswear collects, uses and protects your data — enquiries, orders, the client portal, analytics and your rights.",
+  alternates: { canonical: "/privacy" },
+};
 
 export default async function PrivacyPage() {
   const s = await getSettings();
