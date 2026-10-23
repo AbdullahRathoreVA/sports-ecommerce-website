@@ -20,7 +20,7 @@ export async function getLaunchChecklist(): Promise<LaunchItem[]> {
     db.order.count({ where: { isDemo: true } }),
     db.lead.count({ where: { isDemo: true } }),
     db.certification.count({ where: { published: true } }),
-    db.testimonial.count({ where: { published: true } }),
+    db.testimonial.count({ where: { published: true, isDemo: false, rejected: false } }),
   ]);
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const ownDomain = /^https:\/\//.test(site) && !/vercel\.app|localhost/.test(site);

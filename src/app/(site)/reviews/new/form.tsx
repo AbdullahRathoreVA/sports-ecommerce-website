@@ -2,14 +2,18 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { CheckCircle2, ImagePlus, Loader2, Star, X } from "lucide-react";
+import { BadgeCheck, CheckCircle2, ImagePlus, Loader2, Star, X } from "lucide-react";
 import { inputClass } from "@/components/forms/field";
 import { cn } from "@/lib/utils";
+import { CONSENT_TEXT } from "@/lib/reviews/schema";
+
+export type InviteInfo = { token: string; orderNumber: string | null } | null;
 
 const LABELS = ["", "Poor", "Fair", "Good", "Very good", "Excellent"];
 
-export function ReviewForm({ productLines, initial }: { productLines: string[]; initial: { author: string; email: string; company: string } }) {
-  const [v, setV] = useState({ author: initial.author, email: initial.email, company: initial.company, role: "", country: "", productLine: "", quote: "", website: "" });
+export function ReviewForm({ productLines, initial, invite }: { productLines: string[]; initial: { author: string; email: string; company: string; productLine?: string }; invite: InviteInfo }) {
+  const [v, setV] = useState({ author: initial.author, email: initial.email, company: initial.company, role: "", country: "", productLine: initial.productLine ?? "", title: "", quote: "", website: "" });
+  const [optedOut, setOptedOut] = useState(false);
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [photo, setPhoto] = useState<string | null>(null);
@@ -46,7 +50,7 @@ export function ReviewForm({ productLines, initial }: { productLines: string[]; 
         const res = await fetch("/api/reviews", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...v, rating, photo: photo ?? "", consent }),
+          body: JSON.stringify({ ...v, rating, photo: photo ?? "", consent, ...(invite ? { invite: invite.token } : {}) }),
         }).catch(() => null);
         const body = res ? await res.json().catch(() => ({})) : {};
         if (res?.ok) setState("done");
@@ -56,15 +60,29 @@ export function ReviewForm({ productLines, initial }: { productLines: string[]; 
         }
       }}
     >
+      {invite && (
+        <p className="flex items-start gap-2 rounded-[var(--radius-card)] bg-emerald-500/10 p-4 text-sm ring-1 ring-emerald-500/30">
+          <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-500" aria-hidden />
+          <span>
+            This private link is for your order{invite.orderNumber ? ` ${invite.orderNumber}` : ""}, so your review will show as <strong>Verified buyer</strong>. Please tell us honestly how it went — good or bad.
+          </span>
+        </p>
+      )}
       <fieldset className="rounded-[var(--radius-card)] border hairline bg-surface p-6">
-        <legend className="px-1 text-sm font-semibold">Your rating</legend>
+        <legend className="px-1 text-sm font-semibold">Your rating (required)</legend>
         <div className="flex items-center gap-1" onMouseLeave={() => setHover(0)}>
           {[1, 2, 3, 4, 5].map((i) => (
-            <button key={i} type="button" onClick={() => setRating(i)} onMouseEnter={() => setHover(i)} aria-label={`${i} star${i === 1 ? "" : "s"}`} aria-pressed={rating === i} className="grid h-12 w-12 place-items-center rounded-full transition-transform hover:scale-110">
+            <label key={i} onMouseEnter={() => setHover(i)} className="grid h-12 w-12 cursor-pointer place-items-center rounded-full transition-transform hover:scale-110 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-accent">
+              <input type="radio" name="rating" value={i} checked={rating === i} onChange={() => setRating(i)} className="sr-only" required />
               <Star className={cn("h-9 w-9", i <= (hover || rating) ? "fill-[#f5b301] text-[#f5b301]" : "text-subtle")} aria-hidden />
-            </button>
+              <span className="sr-only">
+                {i} star{i === 1 ? "" : "s"} — {LABELS[i]}
+              </span>
+            </label>
           ))}
-          <span className="ml-3 text-sm font-medium text-muted">{LABELS[hover || rating]}</span>
+          <span className="ml-3 text-sm font-medium text-muted" aria-hidden>
+            {LABELS[hover || rating]}
+          </span>
         </div>
       </fieldset>
 
@@ -84,8 +102,11 @@ export function ReviewForm({ productLines, initial }: { productLines: string[]; 
           </select>
         </div>
         <div className="sm:col-span-2">
+          {field("title", "Headline (optional)", { maxLength: 100, placeholder: "e.g. Kits matched the approved sample" })}
+        </div>
+        <div className="sm:col-span-2">
           <label htmlFor="rv-quote" className="mb-1.5 block text-sm font-medium">Your review</label>
-          <textarea id="rv-quote" required rows={6} minLength={20} maxLength={1200} value={v.quote} onChange={(e) => setV({ ...v, quote: e.target.value })} placeholder="Quality, fit, print, communication, delivery time…" className={cn(inputClass, "h-auto py-3")} />
+          <textarea id="rv-quote" required rows={6} minLength={20} maxLength={1200} value={v.quote} onChange={(e) => setV({ ...v, quote: e.target.value })} placeholder="Communication, sample, sizing and fit, print and stitching, delivery — what went well, and what could be better?" className={cn(inputClass, "h-auto py-3")} />
           <p className="mt-1 text-right text-xs text-subtle">{v.quote.length} / 1200</p>
         </div>
         <div className="sm:col-span-2">
@@ -127,8 +148,9 @@ export function ReviewForm({ productLines, initial }: { productLines: string[]; 
 
       <label className="flex items-start gap-3 text-sm">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 h-4 w-4 accent-[var(--color-accent)]" required />
-        <span>I agree that Alrobel Sportswear may show my review, name, company and country on its website. My email is never shown.</span>
+        <span>{CONSENT_TEXT}</span>
       </label>
+      <p className="-mt-3 text-xs text-subtle">Shown publicly: rating, headline, review, name, company, role, country, photo. Kept private: email{invite ? " and order details" : ""}.</p>
 
       <div>
         <button type="submit" disabled={state === "sending"} className="inline-flex h-12 items-center gap-2 rounded-[var(--radius-control)] bg-accent px-7 font-semibold text-white hover:bg-accent-hover disabled:opacity-70">
@@ -136,6 +158,24 @@ export function ReviewForm({ productLines, initial }: { productLines: string[]; 
         </button>
         {err && <p className="mt-3 text-sm text-red-500" role="alert">{err}</p>}
       </div>
+      {invite && (
+        <p className="text-xs text-subtle">
+          {optedOut ? (
+            "Done — we won't send you review requests again."
+          ) : (
+            <button
+              type="button"
+              className="underline hover:text-fg"
+              onClick={async () => {
+                const r = await fetch("/api/reviews/opt-out", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ invite: invite.token }) }).catch(() => null);
+                if (r?.ok) setOptedOut(true);
+              }}
+            >
+              Don&apos;t send me review requests again
+            </button>
+          )}
+        </p>
+      )}
     </form>
   );
 }

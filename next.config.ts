@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
 
+// Demo review fixtures must never reach the live site (src/lib/reviews/demo.ts).
+if (process.env.VERCEL_ENV === "production" && process.env.REVIEWS_DEMO === "1") {
+  throw new Error("REVIEWS_DEMO=1 is set on production — refusing to build: demo reviews would appear as real customer reviews.");
+}
+
 const nextConfig: NextConfig = {
   // PDF invoices render on the server with react-pdf (its layout engine ships as wasm).
   serverExternalPackages: ["@react-pdf/renderer"],

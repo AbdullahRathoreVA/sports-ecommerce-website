@@ -35,7 +35,7 @@ export default async function PanelLayout({ children }: { children: React.ReactN
     getSettings(),
     can(admin.role, "manageLeads") ? db.lead.count({ where: { status: "NEW" } }) : Promise.resolve(0),
     can(admin.role, "manageOrders") ? db.order.count({ where: { status: "PENDING" } }) : Promise.resolve(0),
-    can(admin.role, "manageContent") ? db.testimonial.count({ where: { pending: true } }) : Promise.resolve(0),
+    can(admin.role, "manageContent") ? db.testimonial.count({ where: { pending: true, rejected: false, isDemo: false } }) : Promise.resolve(0),
   ]);
   const allowed = (Object.keys(NAV_PERMISSION) as NavKey[]).filter((k) => can(admin.role, NAV_PERMISSION[k]));
   return (

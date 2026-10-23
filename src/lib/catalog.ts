@@ -320,9 +320,9 @@ export const getPublishedTestimonials = unstable_cache(
     if (!hasDatabase()) return [];
     try {
       return await db.testimonial.findMany({
-        where: { published: true },
+        where: { published: true, isDemo: false, rejected: false, spam: false },
         orderBy: [{ featured: "desc" }, { position: "asc" }, { createdAt: "desc" }],
-        select: { id: true, author: true, role: true, company: true, country: true, quote: true, rating: true, photo: true, productLine: true, verified: true, createdAt: true },
+        select: { id: true, author: true, role: true, company: true, country: true, title: true, quote: true, rating: true, photo: true, productLine: true, verified: true, response: true, createdAt: true },
       });
     } catch {
       return [];

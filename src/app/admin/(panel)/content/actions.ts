@@ -64,34 +64,7 @@ export async function saveFaq(id: string | null, input: z.input<typeof faqSchema
   return { ok: true, message: "FAQ saved." };
 }
 
-/* ── Testimonials (real customers only) ────────────────────────────────── */
-
-const testimonialSchema = z
-  .object({
-    author: z.string().trim().min(2).max(80),
-    role: z.string().trim().max(80).optional(),
-    company: z.string().trim().max(80).optional(),
-    country: z.string().trim().max(60).optional(),
-    quote: z.string().trim().min(10).max(800),
-    position: z.number().int().min(0).max(999),
-    published: z.boolean(),
-    confirmGenuine: z.boolean(),
-  })
-  .refine((t) => !t.published || t.confirmGenuine, { message: "Confirm this is a genuine customer quote you have permission to publish", path: ["confirmGenuine"] });
-
-export async function saveTestimonial(id: string | null, input: z.input<typeof testimonialSchema>): Promise<Result> {
-  const admin = await guard();
-  if (!admin) return { ok: false, error: "Not allowed." };
-  const parsed = testimonialSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) };
-  const { confirmGenuine, ...data } = parsed.data;
-  const clean = { ...data, role: data.role || null, company: data.company || null, country: data.country || null };
-  const row = id ? await db.testimonial.update({ where: { id }, data: clean }) : await db.testimonial.create({ data: clean });
-  await audit(admin, id ? "testimonial.update" : "testimonial.create", "Testimonial", row.id, { author: data.author, published: data.published, confirmGenuine });
-  updateTag(CONTENT_TAG);
-  revalidatePath("/admin/content");
-  return { ok: true, message: "Testimonial saved." };
-}
+/* Testimonials: managed only in Admin → Reviews (consent, verification and moderation rules live there). */
 
 /* ── Certifications (verifiable only) ──────────────────────────────────── */
 

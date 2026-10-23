@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, Loader2, Plus, Trash2 } from "lucide-react";
-import { createCategory, deleteCategory, deleteContent, purgeDemoData, saveCategory, saveCertification, saveFaq, savePost, saveTestimonial, type Result } from "./actions";
+import { createCategory, deleteCategory, deleteContent, purgeDemoData, saveCategory, saveCertification, saveFaq, savePost, type Result } from "./actions";
 import { ImageUploader } from "@/components/admin/uploader";
 import { inputClass } from "@/components/forms/field";
 import { cn, slugify } from "@/lib/utils";
@@ -140,46 +140,7 @@ export function FaqEditor({ items }: { items: FaqRow[] }) {
   );
 }
 
-/* ── Testimonials ── */
-
-export type TestimonialRow = { id: string; author: string; role: string; company: string; country: string; quote: string; position: number; published: boolean };
-
-function TestimonialForm({ row, close }: { row: TestimonialRow; close: () => void }) {
-  const [f, setF] = useState(row);
-  const [genuine, setGenuine] = useState(row.published);
-  const { pending, msg, run } = useSave();
-  const id = row.id.startsWith("new") ? null : row.id;
-  return (
-    <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); run(() => saveTestimonial(id, { author: f.author, role: f.role, company: f.company, country: f.country, quote: f.quote, position: f.position, published: f.published, confirmGenuine: genuine }), id ? undefined : close); }}>
-      <In id={`ta-${row.id}`} label="Name"><input id={`ta-${row.id}`} value={f.author} maxLength={80} onChange={(e) => setF({ ...f, author: e.target.value })} className={inputClass} /></In>
-      <In id={`tr-${row.id}`} label="Role" hint="Optional"><input id={`tr-${row.id}`} value={f.role} maxLength={80} onChange={(e) => setF({ ...f, role: e.target.value })} className={inputClass} /></In>
-      <In id={`tc-${row.id}`} label="Company / club" hint="Optional"><input id={`tc-${row.id}`} value={f.company} maxLength={80} onChange={(e) => setF({ ...f, company: e.target.value })} className={inputClass} /></In>
-      <In id={`tn-${row.id}`} label="Country" hint="Optional"><input id={`tn-${row.id}`} value={f.country} maxLength={60} onChange={(e) => setF({ ...f, country: e.target.value })} className={inputClass} /></In>
-      <In id={`tq-${row.id}`} label="Quote" wide><textarea id={`tq-${row.id}`} rows={3} value={f.quote} maxLength={800} onChange={(e) => setF({ ...f, quote: e.target.value })} className={area} /></In>
-      <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={f.published} onChange={(e) => setF({ ...f, published: e.target.checked })} className="h-4 w-4 accent-[var(--color-accent)]" /> Published</label>
-      <label className="flex items-start gap-2 text-sm sm:col-span-2">
-        <input type="checkbox" checked={genuine} onChange={(e) => setGenuine(e.target.checked)} className="mt-0.5 h-4 w-4 accent-[var(--color-accent)]" />
-        <span>This is a real customer&apos;s words and they agreed to it being published. <span className="text-subtle">Invented reviews break advertising law in the US, UK and EU.</span></span>
-      </label>
-      <Actions kind="testimonial" id={id} pending={pending} msg={msg} onCancel={id ? undefined : close} />
-    </form>
-  );
-}
-
-export function TestimonialEditor({ items }: { items: TestimonialRow[] }) {
-  return (
-    <List
-      items={items}
-      addLabel="Add testimonial"
-      blank={() => ({ id: `new-${Date.now()}`, author: "", role: "", company: "", country: "", quote: "", position: items.length, published: false })}
-      title={(t) => `${t.author}${t.company ? `, ${t.company}` : ""}`}
-      meta={(t) => pub(t.published)}
-      render={(row, close) => <TestimonialForm row={row} close={close} />}
-    />
-  );
-}
-
-/* ── Certifications ── */
+/* Testimonials are managed in Admin → Reviews. */
 
 export type CertRow = { id: string; name: string; issuer: string; reference: string; validUntil: string; fileUrl: string; position: number; published: boolean };
 

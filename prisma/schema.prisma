@@ -51,6 +51,8 @@ model Testimonial {
   role      String?
   company   String?
   country   String?
+  /// Short headline the reviewer wrote (optional).
+  title     String?
   quote     String   @db.Text
   /// 1–5 stars, when the reviewer gave a rating.
   rating    Int?
@@ -60,18 +62,74 @@ model Testimonial {
   photo     String?
   /// Product line the review is about, e.g. "Soccer uniforms".
   productLine String?
-  /// "admin" | "website" | "portal"
+  /// "admin" | "website" | "invite" | "portal"
   source    String   @default("admin")
-  /// Matched to a real order (portal review, or confirmed by the team).
+  /// Matched to a real order. Only set by a used review invitation or by the team with a recorded reason.
   verified  Boolean  @default(false)
+  /// "invite" | "admin" — how the purchase was confirmed.
+  verifiedVia String?
+  /// Private: what the team checked (order number, invoice …).
+  verifiedNote String?
+  verifiedBy String?
+  verifiedAt DateTime?
+  orderId   String?
+  order     Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
   /// Submitted by a visitor and not yet looked at by the team.
   pending   Boolean  @default(false)
+  /// Turned down by the team (never shown); `spam` marks abuse/bots.
+  rejected  Boolean  @default(false)
+  spam      Boolean  @default(false)
+  rejectReason String?
   featured  Boolean  @default(false)
   customerId String?
   published Boolean  @default(false)
   position  Int      @default(0)
+  /// When the reviewer agreed to publication, and to which wording.
+  consentAt DateTime?
+  consentVersion String?
+  /// Private moderation note — never shown on the website.
+  modNote   String?  @db.Text
+  /// Public reply from the company, shown under the review.
+  response  String?  @db.Text
+  respondedAt DateTime?
+  approvedAt DateTime?
+  /// Development fixtures only — never stored in production (see src/lib/reviews/demo.ts).
+  isDemo    Boolean  @default(false)
+  invite    ReviewInvite?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([published, createdAt])
+  @@index([pending])
+}
+
+/// One-time, expiring link that lets a real buyer review a real order (verified review).
+/// Only a SHA-256 of the token is stored; the link is shown to the team once.
+model ReviewInvite {
+  id            String       @id @default(cuid())
+  tokenHash     String       @unique
+  orderId       String?
+  order         Order?       @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  customerId    String?
+  email         String
+  name          String
+  productLine   String?
+  /// "email" | "whatsapp" | "link"
+  channel       String       @default("link")
+  createdBy     String?
+  expiresAt     DateTime
+  sentAt        DateTime?
+  sendStatus    String?
+  clickedAt     DateTime?
+  usedAt        DateTime?
+  optedOutAt    DateTime?
+  reminders     Int          @default(0)
+  testimonialId String?      @unique
+  testimonial   Testimonial? @relation(fields: [testimonialId], references: [id], onDelete: SetNull)
+  createdAt     DateTime     @default(now())
+
+  @@index([orderId])
+  @@index([email])
 }
 
 /// Only certificates the client can produce. None are seeded.
@@ -268,6 +326,8 @@ model Customer {
   orders    Order[]
   leads     Lead[]
   invoices  Invoice[]
+  /// Asked not to receive review requests.
+  reviewOptOut Boolean @default(false)
 
   /// Client portal. Null until the customer creates an account; bcrypt only.
   passwordHash    String?
@@ -377,6 +437,8 @@ model Order {
   attachments OrderAttachment[]
   emails      EmailLog[]
   invoices    Invoice[]
+  reviews     Testimonial[]
+  reviewInvites ReviewInvite[]
 
   /// First-party attribution, no PII.
   sessionId String?
